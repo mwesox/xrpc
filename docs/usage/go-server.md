@@ -1,3 +1,9 @@
+---
+layout: default
+title: Go Server
+description: How to implement an xRpc server in Go
+---
+
 # Go Server
 
 This guide shows how to implement an xRpc server in Go.

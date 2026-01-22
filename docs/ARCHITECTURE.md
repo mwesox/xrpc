@@ -1,3 +1,9 @@
+---
+layout: default
+title: Architecture
+description: System architecture, building blocks, and module interactions
+---
+
 # xRpc Architecture
 
 This document describes the system architecture, building blocks, and how modules interact.

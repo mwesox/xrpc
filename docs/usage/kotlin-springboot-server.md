@@ -1,3 +1,9 @@
+---
+layout: default
+title: Kotlin Spring Boot Server
+description: How to implement an xRpc server using Kotlin and Spring Boot
+---
+
 # Kotlin Spring Boot Server
 
 This guide shows how to implement an xRpc server using Kotlin and Spring Boot.

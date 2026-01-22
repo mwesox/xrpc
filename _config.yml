@@ -1,0 +1,47 @@
+# Site settings
+title: xRpc Documentation
+description: Type-safe, cross-platform RPC framework with fantastic developer experience
+url: "https://matthiaswesolowski.github.io"
+baseurl: "/x-rpc"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Theme settings (using minima theme)
+theme: minima
+
+# Navigation
+header_pages:
+  - index.md
+  - docs/VISION.md
+  - docs/ARCHITECTURE.md
+  - docs/CONTRIBUTING.md
+
+# Exclude from processing
+exclude:
+  - README.md
+  - node_modules
+  - package.json
+  - bun.lock
+  - bunfig.toml
+  - tsconfig.json
+  - .gitignore
+  - .github
+  - packages
+  - examples
+  - tests
+  - LICENSE
+  - SECURITY.md
+  - CODE_OF_CONDUCT.md
+  - claude.md
+
+# Kramdown settings
+kramdown:
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: true

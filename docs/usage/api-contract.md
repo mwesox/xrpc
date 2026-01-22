@@ -1,3 +1,9 @@
+---
+layout: default
+title: API Contract Definition
+description: How to define your xRpc API contract using TypeScript and Zod schemas
+---
+
 # API Contract Definition
 
 This guide shows how to define your xRpc API contract using TypeScript and Zod schemas. The API contract is a **pure DSL** - it defines schemas and endpoints only, with no implementation details. Handlers are implemented separately in server files.

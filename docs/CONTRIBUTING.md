@@ -1,3 +1,9 @@
+---
+layout: default
+title: Contributing
+description: Guidelines and instructions for contributing to xRpc
+---
+
 # Contributing to xRpc
 
 Thank you for your interest in contributing to xRpc! This document provides guidelines and instructions for contributing.

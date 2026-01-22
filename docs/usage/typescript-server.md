@@ -1,3 +1,9 @@
+---
+layout: default
+title: TypeScript Express Server
+description: How to implement an xRpc server using TypeScript and Express
+---
+
 # TypeScript Express Server
 
 This guide shows how to implement an xRpc server using TypeScript and Express.

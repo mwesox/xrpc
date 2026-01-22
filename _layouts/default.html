@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: 'en' }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+    <meta name="description" content="{{ page.description | default: site.description }}">
+    <link rel="stylesheet" href="{{ '/assets/main.css' | relative_url }}">
+    <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
+    {% feed_meta %}
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="site-header">
+        <div class="container">
+          <a class="site-title" href="{{ '/' | relative_url }}">{{ site.title }}</a>
+          <nav class="site-nav">
+            {% include navigation.html %}
+          </nav>
+        </div>
+      </header>
+
+      <main class="page-content" aria-label="Content">
+        <div class="container">
+          <div class="content-wrapper">
+            <aside class="sidebar">
+              {% include navigation.html %}
+            </aside>
+            <article class="content">
+              {{ content }}
+            </article>
+          </div>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        <div class="container">
+          <p>
+            <a href="{{ site.github.repository_url }}">GitHub</a> |
+            <a href="{{ '/docs/CONTRIBUTING.html' | relative_url }}">Contributing</a> |
+            <a href="{{ '/LICENSE' | relative_url }}">License</a>
+          </p>
+          <p class="footer-text">{{ site.description }}</p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

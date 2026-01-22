@@ -1,3 +1,9 @@
+---
+layout: default
+title: Detailed Architecture
+description: Detailed technical specification for the xRpc code generation system
+---
+
 # Code Generation Architecture
 
 This document provides a detailed technical specification for the xRpc code generation system. It describes the architecture, components, algorithms, and implementation details for transforming TypeScript/Zod schemas into idiomatic code for multiple target languages.

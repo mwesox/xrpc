@@ -1,3 +1,9 @@
+---
+layout: default
+title: TypeScript Client
+description: How to use an xRpc client in TypeScript
+---
+
 # TypeScript Client
 
 This guide shows how to use an xRpc client in TypeScript.

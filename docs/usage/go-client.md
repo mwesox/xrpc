@@ -1,3 +1,9 @@
+---
+layout: default
+title: Go Client
+description: How to use an xRpc client in Go
+---
+
 # Go Client
 
 This guide shows how to use an xRpc client in Go.

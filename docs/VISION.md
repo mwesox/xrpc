@@ -1,3 +1,9 @@
+---
+layout: default
+title: Vision & Mission
+description: Project vision, principles, and goals for xRpc
+---
+
 # xRpc Vision & Mission
 
 ## Vision

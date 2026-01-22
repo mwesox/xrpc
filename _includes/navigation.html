@@ -1,0 +1,70 @@
+<nav class="nav-menu">
+  <ul>
+    <li><a href="{{ '/' | relative_url }}">Home</a></li>
+    <li><a href="{{ '/docs/VISION.html' | relative_url }}">Vision</a></li>
+    <li><a href="{{ '/docs/ARCHITECTURE.html' | relative_url }}">Architecture</a></li>
+    <li><a href="{{ '/docs/DETAILED-ARCHITECTURE.html' | relative_url }}">Detailed Architecture</a></li>
+    <li class="nav-section">Usage Guides</li>
+    <li><a href="{{ '/docs/usage/api-contract.html' | relative_url }}">API Contract</a></li>
+    <li><a href="{{ '/docs/usage/typescript-server.html' | relative_url }}">TypeScript Server</a></li>
+    <li><a href="{{ '/docs/usage/typescript-client.html' | relative_url }}">TypeScript Client</a></li>
+    <li><a href="{{ '/docs/usage/go-server.html' | relative_url }}">Go Server</a></li>
+    <li><a href="{{ '/docs/usage/go-client.html' | relative_url }}">Go Client</a></li>
+    <li><a href="{{ '/docs/usage/kotlin-springboot-server.html' | relative_url }}">Kotlin Spring Boot Server</a></li>
+    <li class="nav-section">Contributing</li>
+    <li><a href="{{ '/docs/CONTRIBUTING.html' | relative_url }}">Contributing Guide</a></li>
+  </ul>
+</nav>
+
+<style>
+.nav-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-menu li {
+  margin: 0.5em 0;
+}
+
+.nav-menu li.nav-section {
+  font-weight: bold;
+  margin-top: 1em;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.nav-menu a {
+  text-decoration: none;
+  color: #333;
+}
+
+.nav-menu a:hover {
+  color: #0066cc;
+}
+
+.content-wrapper {
+  display: flex;
+  gap: 2em;
+}
+
+.sidebar {
+  flex: 0 0 250px;
+  min-width: 200px;
+}
+
+.content {
+  flex: 1;
+  max-width: 800px;
+}
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    flex: 1;
+  }
+}
+</style>
