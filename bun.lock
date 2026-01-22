@@ -9,18 +9,6 @@
         "typescript": "^5.0.0",
       },
     },
-    "examples/go-greeting": {
-      "name": "go-greeting-example",
-      "version": "0.1.0",
-      "dependencies": {
-        "@xrpc/core": "workspace:*",
-      },
-      "devDependencies": {
-        "@types/node": "^20.0.0",
-        "typescript": "^5.0.0",
-        "zod": "^4.0.0",
-      },
-    },
     "examples/go-greeting-server": {
       "name": "go-greeting-server-example",
       "version": "0.1.0",
@@ -57,11 +45,11 @@
         "@xrpc/generator": "workspace:*",
         "@xrpc/parser": "workspace:*",
         "figlet": "^1.7.0",
+        "typescript": "^5.0.0",
         "zod": "^4.0.0",
       },
       "devDependencies": {
         "@types/node": "^20.0.0",
-        "typescript": "^5.0.0",
       },
     },
     "packages/core": {
@@ -93,18 +81,6 @@
       "name": "@xrpc/generator-core",
       "version": "0.1.0",
       "dependencies": {
-        "@xrpc/parser": "workspace:*",
-      },
-      "devDependencies": {
-        "@types/node": "^20.0.0",
-        "typescript": "^5.0.0",
-      },
-    },
-    "packages/generator-go": {
-      "name": "@xrpc/generator-go",
-      "version": "0.1.0",
-      "dependencies": {
-        "@xrpc/generator-core": "workspace:*",
         "@xrpc/parser": "workspace:*",
       },
       "devDependencies": {
@@ -190,8 +166,6 @@
 
     "@xrpc/generator-core": ["@xrpc/generator-core@workspace:packages/generator-core"],
 
-    "@xrpc/generator-go": ["@xrpc/generator-go@workspace:packages/generator-go"],
-
     "@xrpc/parser": ["@xrpc/parser@workspace:packages/parser"],
 
     "@xrpc/target-go": ["@xrpc/target-go@workspace:packages/target-go"],
@@ -203,8 +177,6 @@
     "commander": ["commander@14.0.2", "", {}, "sha512-TywoWNNRbhoD0BXs1P3ZEScW8W5iKrnbithIl0YH+uCmBd0QpPOA8yc82DS3BIE5Ma6FnBVUsJ7wVUDz4dvOWQ=="],
 
     "figlet": ["figlet@1.9.4", "", { "dependencies": { "commander": "^14.0.0" }, "bin": { "figlet": "bin/index.js" } }, "sha512-uN6QE+TrzTAHC1IWTyrc4FfGo2KH/82J8Jl1tyKB7+z5DBit/m3D++Iu5lg91qJMnQQ3vpJrj5gxcK/pk4R9tQ=="],
-
-    "go-greeting-example": ["go-greeting-example@workspace:examples/go-greeting"],
 
     "go-greeting-server-example": ["go-greeting-server-example@workspace:examples/go-greeting-server"],
 
