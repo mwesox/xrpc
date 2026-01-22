@@ -1,8 +1,8 @@
 # Site settings
 title: xRpc Documentation
 description: Type-safe, cross-platform RPC framework with fantastic developer experience
-url: "https://matthiaswesolowski.github.io"
-baseurl: "/x-rpc"
+url: "https://mwesox.github.io"
+baseurl: "/xrpc"
 
 # Build settings
 markdown: kramdown
