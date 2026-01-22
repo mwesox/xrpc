@@ -71,7 +71,13 @@ See [VISION.md](./VISION.md) for detailed architecture and design principles.
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guide](./docs/CONTRIBUTING.md) for details.
+
+Before contributing, please review our [Code of Conduct](./CODE_OF_CONDUCT.md) to keep our community approachable and respectable.
+
+## 🔒 Security
+
+For security vulnerabilities, please see our [Security Policy](./SECURITY.md) for responsible disclosure guidelines.
 
 ## 📄 License
 
