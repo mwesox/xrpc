@@ -1,0 +1,20 @@
+{
+  "name": "@xrpc/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "xrpc": "./src/index.ts"
+  },
+  "dependencies": {
+    "@xrpc/parser": "workspace:*",
+    "@xrpc/generator": "workspace:*",
+    "@bunli/core": "latest",
+    "@bunli/utils": "latest",
+    "figlet": "^1.7.0",
+    "typescript": "^5.0.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

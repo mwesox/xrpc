@@ -1,0 +1,4 @@
+[install]
+# Use isolated installs for better dependency management
+# This prevents phantom dependencies in workspaces
+auto = true

@@ -1,0 +1,17 @@
+{
+  "name": "@xrpc/target-react",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@xrpc/generator-core": "workspace:*",
+    "@xrpc/parser": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

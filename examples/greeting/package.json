@@ -1,0 +1,13 @@
+{
+  "name": "greeting-example",
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "@xrpc/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "zod": "^4.0.0"
+  }
+}
