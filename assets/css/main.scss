@@ -1141,3 +1141,184 @@ img {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+// =============================================================================
+// API DIAGRAM ANIMATION
+// =============================================================================
+
+.api-diagram {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-2xl) 0;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.api-diagram-svg {
+  width: 100%;
+  max-width: 700px;
+  height: auto;
+}
+
+// Connection line animation
+@keyframes drawLine {
+  0% { stroke-dashoffset: 200; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes drawLineReverse {
+  0% { stroke-dashoffset: -200; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.api-diagram .connection-line {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: drawLine 1.2s ease-out forwards;
+}
+
+.api-diagram .connection-line-left {
+  animation-delay: 0.3s;
+}
+
+.api-diagram .connection-line-right {
+  animation-delay: 0.5s;
+}
+
+// Pulsing glow effect for API box
+@keyframes apiGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.7));
+  }
+}
+
+.api-diagram .api-box {
+  animation: apiGlow 3s ease-in-out infinite;
+}
+
+// Technology icon boxes
+.api-diagram .tech-box {
+  opacity: 0;
+  animation: fadeInScale 0.5s ease-out forwards;
+}
+
+.api-diagram .tech-box-left {
+  animation-delay: 1s;
+}
+
+.api-diagram .tech-box-right {
+  animation-delay: 1.2s;
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Technology logos
+.tech-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+.tech-logo-react {
+  color: #61dafb;
+}
+
+.tech-logo-go {
+  color: #00add8;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+// Story flow enhancements
+.tech-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0.25em 0.6em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tech-badge-react {
+  background: rgba(97, 218, 251, 0.15);
+  color: #61dafb;
+  border: 1px solid rgba(97, 218, 251, 0.3);
+}
+
+.tech-badge-go {
+  background: rgba(0, 173, 216, 0.15);
+  color: #00add8;
+  border: 1px solid rgba(0, 173, 216, 0.3);
+}
+
+// Comparison callout
+.comparison-callout {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.comparison-callout-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.comparison-callout-item .vs {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+// API definition context text
+.api-context {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: var(--space-md);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// Mobile adjustments for diagram
+@media (max-width: 768px) {
+  .api-diagram-svg {
+    max-width: 100%;
+  }
+
+  .comparison-callout {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+}

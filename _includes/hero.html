@@ -44,6 +44,7 @@
 
   <!-- Code preview -->
   <div class="hero-code-preview">
+    <p class="api-context">Your API contract &mdash; a schema that describes your endpoints</p>
     <div class="code-preview">
       <div class="code-header">
         <div class="code-dots">
@@ -56,14 +57,28 @@
       <pre><code class="language-typescript"><span class="k">import</span> { z } <span class="k">from</span> <span class="s">'zod'</span>;
 <span class="k">import</span> { createRouter, createEndpoint, query } <span class="k">from</span> <span class="s">'@xrpc/core'</span>;
 
+<span class="c">// Define an endpoint with typed input/output</span>
 <span class="k">const</span> <span class="n">greeting</span> = <span class="nf">createEndpoint</span>({
   <span class="na">greet</span>: <span class="nf">query</span>({
-    <span class="na">input</span>: z.<span class="nf">object</span>({ <span class="na">name</span>: z.<span class="nf">string</span>().<span class="nf">min</span>(<span class="m">1</span>) }),
-    <span class="na">output</span>: z.<span class="nf">object</span>({ <span class="na">message</span>: z.<span class="nf">string</span>() }),
+    <span class="na">input</span>: z.<span class="nf">object</span>({ <span class="na">name</span>: z.<span class="nf">string</span>().<span class="nf">min</span>(<span class="m">1</span>) }),  <span class="c">// Validated at runtime</span>
+    <span class="na">output</span>: z.<span class="nf">object</span>({ <span class="na">message</span>: z.<span class="nf">string</span>() }), <span class="c">// Type-safe response</span>
   }),
 });
 
+<span class="c">// Export router - generates clients + servers</span>
 <span class="k">export const</span> <span class="n">router</span> = <span class="nf">createRouter</span>({ greeting });</code></pre>
+    </div>
+    <div class="comparison-callout">
+      <div class="comparison-callout-item">
+        <span>Like <strong>OpenAPI</strong></span>
+        <span class="vs">but</span>
+        <span>in TypeScript</span>
+      </div>
+      <div class="comparison-callout-item">
+        <span>Like <strong>tRPC</strong></span>
+        <span class="vs">but</span>
+        <span>cross-platform</span>
+      </div>
     </div>
   </div>
 </section>
