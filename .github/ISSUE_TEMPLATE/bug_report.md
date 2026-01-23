@@ -23,7 +23,7 @@ A clear and concise description of what actually happened.
 ## Environment
 - **OS**: [e.g., macOS 14.0, Ubuntu 22.04, Windows 11]
 - **Node/Bun version**: [e.g., Node 20.10.0, Bun 1.0.0]
-- **xRpc version**: [e.g., 0.1.0]
+- **xRPC version**: [e.g., 0.1.0]
 - **Target language(s)**: [e.g., TypeScript, Go, Python]
 
 ## Code Example

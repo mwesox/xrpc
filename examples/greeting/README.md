@@ -1,6 +1,6 @@
 # Greeting Example
 
-This example demonstrates a simple xRpc API with a Go server.
+This example demonstrates a simple xRPC API with a Go server.
 
 ## Setup
 

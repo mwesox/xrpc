@@ -2,7 +2,7 @@ import { BaseCodeGenerator, type GeneratorConfig, type GeneratedFiles } from '@x
 import { GoTypeGenerator } from './type-generator';
 import { GoServerGenerator } from './server-generator';
 import { GoValidationGenerator } from './validation-generator';
-import type { NormalizedContract } from '@xrpc/parser';
+import type { ContractDefinition } from '@xrpc/parser';
 
 export class GoCodeGenerator extends BaseCodeGenerator {
   private typeGenerator: GoTypeGenerator;
@@ -17,7 +17,7 @@ export class GoCodeGenerator extends BaseCodeGenerator {
     this.validationGenerator = new GoValidationGenerator(packageName);
   }
 
-  generate(contract: NormalizedContract): GeneratedFiles {
+  generate(contract: ContractDefinition): GeneratedFiles {
     return {
       types: this.typeGenerator.generateTypes(contract),
       server: this.serverGenerator.generateServer(contract),

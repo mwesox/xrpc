@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea for xRpc
+about: Suggest an idea for xRPC
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''

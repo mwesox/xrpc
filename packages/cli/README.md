@@ -1,6 +1,6 @@
-# xRpc CLI
+# xRPC CLI
 
-Command-line interface for xRpc code generation with a beautiful TUI (Terminal User Interface).
+Command-line interface for xRPC code generation with a beautiful TUI (Terminal User Interface).
 
 ## Installation
 

@@ -1,6 +1,7 @@
 import { GoBuilder } from './go-builder';
 import { GoTypeMapper } from './type-mapper';
-import type { TypeDefinition, Property, NormalizedContract } from '@xrpc/parser';
+import { toPascalCase } from '@xrpc/generator-core';
+import type { TypeDefinition, Property, ContractDefinition } from '@xrpc/parser';
 
 export class GoTypeGenerator {
   private w: GoBuilder;
@@ -13,7 +14,7 @@ export class GoTypeGenerator {
     this.packageName = packageName;
   }
 
-  generateTypes(contract: NormalizedContract): string {
+  generateTypes(contract: ContractDefinition): string {
     const w = this.w.reset();
     w.package(this.packageName)
       .import('net/http');
@@ -88,12 +89,12 @@ export class GoTypeGenerator {
   }
 
   private generateType(type: TypeDefinition): void {
-    this.w.struct(this.toPascalCase(type.name), (b) => {
+    this.w.struct(toPascalCase(type.name), (b) => {
       if (type.properties) {
         for (const prop of type.properties) {
           const goType = this.typeMapper.mapType(prop.type);
           const jsonTag = this.generateJSONTag(prop);
-          b.l(`${this.toPascalCase(prop.name)} ${goType} \`${jsonTag}\``);
+          b.l(`${toPascalCase(prop.name)} ${goType} \`${jsonTag}\``);
         }
       }
     });
@@ -106,10 +107,4 @@ export class GoTypeGenerator {
     return `json:"${prop.name},omitempty"`;
   }
 
-  private toPascalCase(str: string): string {
-    return str
-      .split(/[-_]/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join('');
-  }
 }

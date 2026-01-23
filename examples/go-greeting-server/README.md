@@ -1,6 +1,6 @@
 # Go Greeting Server Example
 
-This example demonstrates a simple xRpc API with a Go server implementation.
+This example demonstrates a simple xRPC API with a Go server implementation.
 
 ## Setup
 

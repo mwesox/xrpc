@@ -1,5 +1,5 @@
 import { ReactBuilder } from './react-builder';
-import type { NormalizedContract, Endpoint } from '@xrpc/parser';
+import type { ContractDefinition, Endpoint } from '@xrpc/parser';
 
 export class ReactClientGenerator {
   private w: ReactBuilder;
@@ -8,7 +8,7 @@ export class ReactClientGenerator {
     this.w = new ReactBuilder();
   }
 
-  generateClient(contract: NormalizedContract): string {
+  generateClient(contract: ContractDefinition): string {
     const w = this.w.reset();
 
     // Import React hooks

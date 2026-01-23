@@ -19,9 +19,9 @@ export async function showHelp(command?: string): Promise<void> {
 }
 
 function showGeneralHelp(): void {
-  console.log(formatHeader('xRpc CLI Help\n'));
+  console.log(formatHeader('xRPC CLI Help\n'));
 
-  console.log(formatDescription('xRpc is a type-safe, cross-platform RPC framework.\n'));
+  console.log(formatDescription('xRPC is a type-safe, cross-platform RPC framework.\n'));
 
   console.log(formatHeader('Commands:\n'));
 

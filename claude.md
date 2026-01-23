@@ -1,6 +1,6 @@
-# xRpc Project Overview
+# xRPC Project Overview
 
-## What is xRpc?
+## What is xRPC?
 
 Type-safe, cross-platform RPC framework that generates clients and servers from Zod schemas. Combines tRPC's developer experience with gRPC's cross-platform capabilities.
 

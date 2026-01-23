@@ -1,3 +1,4 @@
+import { toPascalCase } from '@xrpc/generator-core';
 import type { TypeReference } from '@xrpc/parser';
 
 export class GoTypeMapper {
@@ -20,7 +21,7 @@ export class GoTypeMapper {
     // Handle objects (use the name)
     if (typeRef.kind === 'object') {
       if (typeRef.name) {
-        return this.toPascalCase(typeRef.name);
+        return toPascalCase(typeRef.name);
       }
       // Inline object - generate struct inline (for POC, we'll create named types)
       return 'interface{}'; // Fallback for complex inline objects
@@ -49,10 +50,4 @@ export class GoTypeMapper {
     return mapping[type] || 'interface{}';
   }
 
-  private toPascalCase(str: string): string {
-    return str
-      .split(/[-_]/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join('');
-  }
 }

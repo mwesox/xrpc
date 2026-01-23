@@ -18,7 +18,8 @@
     "test:e2e": "bun test tests/e2e"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@types/node": "^24.0.0",
+    "knip": "^5.82.1",
     "typescript": "^5.0.0"
   }
 }

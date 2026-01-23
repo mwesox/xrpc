@@ -1,7 +1,7 @@
 import { BaseCodeGenerator, type GeneratorConfig, type GeneratedFiles } from '@xrpc/generator-core';
 import { ReactTypeGenerator } from './type-generator';
 import { ReactClientGenerator } from './client-generator';
-import type { NormalizedContract } from '@xrpc/parser';
+import type { ContractDefinition } from '@xrpc/parser';
 
 export class ReactCodeGenerator extends BaseCodeGenerator {
   private typeGenerator: ReactTypeGenerator;
@@ -22,7 +22,7 @@ export class ReactCodeGenerator extends BaseCodeGenerator {
     this.clientGenerator = new ReactClientGenerator();
   }
 
-  generate(contract: NormalizedContract): GeneratedFiles {
+  generate(contract: ContractDefinition): GeneratedFiles {
     return {
       types: this.typeGenerator.generateTypes(contract),
       client: this.clientGenerator.generateClient(contract),

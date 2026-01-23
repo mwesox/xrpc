@@ -1,4 +1,4 @@
-# xRpc Examples
+# xRPC Examples
 
 This directory contains example implementations for different target languages and frameworks.
 

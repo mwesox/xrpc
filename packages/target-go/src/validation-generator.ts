@@ -1,5 +1,6 @@
 import { GoBuilder } from './go-builder';
-import type { NormalizedContract, TypeDefinition, Property, ValidationRules, TypeReference } from '@xrpc/parser';
+import { toPascalCase } from '@xrpc/generator-core';
+import type { ContractDefinition, TypeDefinition, Property, ValidationRules, TypeReference } from '@xrpc/parser';
 
 export class GoValidationGenerator {
   private w: GoBuilder;
@@ -10,7 +11,7 @@ export class GoValidationGenerator {
     this.packageName = packageName;
   }
 
-  generateValidation(contract: NormalizedContract): string {
+  generateValidation(contract: ContractDefinition): string {
     const w = this.w.reset();
     
     // Determine which imports are needed based on validation rules in contract
@@ -75,7 +76,7 @@ export class GoValidationGenerator {
   }
 
   private generateTypeValidation(type: TypeDefinition, w: GoBuilder): void {
-    const typeName = this.toPascalCase(type.name);
+    const typeName = toPascalCase(type.name);
     const funcName = `Validate${typeName}`;
 
     w.func(`${funcName}(input ${typeName}) error`, (b) => {
@@ -95,7 +96,7 @@ export class GoValidationGenerator {
   }
 
   private generatePropertyValidation(prop: Property, prefix: string, parentType: TypeDefinition, w: GoBuilder): void {
-    const fieldName = this.toPascalCase(prop.name);
+    const fieldName = toPascalCase(prop.name);
     const fieldPath = `${prefix}.${fieldName}`;
     const fieldPathStr = prop.name;
 
@@ -173,7 +174,7 @@ export class GoValidationGenerator {
 
     // Handle nested objects - call validation function if type has a name
     if (prop.type.kind === 'object' && prop.type.name) {
-      const nestedTypeName = this.toPascalCase(prop.type.name);
+      const nestedTypeName = toPascalCase(prop.type.name);
       const nestedFuncName = `Validate${nestedTypeName}`;
       w.if(`${fieldPath} != nil`, (b) => {
         b.l(`if err := ${nestedFuncName}(${fieldPath}); err != nil {`).i()
@@ -205,7 +206,7 @@ export class GoValidationGenerator {
     // Handle arrays with element validation
     if (prop.type.kind === 'array' && prop.type.elementType) {
       if (prop.type.elementType.kind === 'object' && prop.type.elementType.name) {
-        const elementTypeName = this.toPascalCase(prop.type.elementType.name);
+        const elementTypeName = toPascalCase(prop.type.elementType.name);
         const elementFuncName = `Validate${elementTypeName}`;
         w.l(`for i, item := range ${fieldPath} {`).i()
           .l(`if err := ${elementFuncName}(item); err != nil {`).i()
@@ -422,7 +423,7 @@ export class GoValidationGenerator {
   }
 
   private hasValidationRule(
-    contract: NormalizedContract,
+    contract: ContractDefinition,
     check: (rules: ValidationRules) => boolean
   ): boolean {
     for (const type of contract.types) {

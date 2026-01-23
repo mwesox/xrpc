@@ -1,5 +1,5 @@
 import { ReactBuilder } from './react-builder';
-import type { NormalizedContract, Endpoint } from '@xrpc/parser';
+import type { ContractDefinition, Endpoint } from '@xrpc/parser';
 import { relative, dirname } from 'node:path';
 
 export class ReactTypeGenerator {
@@ -13,7 +13,7 @@ export class ReactTypeGenerator {
     this.outputDir = outputDir;
   }
 
-  generateTypes(contract: NormalizedContract): string {
+  generateTypes(contract: ContractDefinition): string {
     const w = this.w.reset();
 
     // Calculate relative path from output directory to contract file

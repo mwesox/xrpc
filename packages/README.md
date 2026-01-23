@@ -1,8 +1,8 @@
-# xRpc Packages
+# xRPC Packages
 
 ## Package Structure
 
-The xRpc monorepo is organized with individual packages for each component:
+The xRPC monorepo is organized with individual packages for each component:
 
 ### Core Packages
 

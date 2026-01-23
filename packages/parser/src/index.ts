@@ -2,8 +2,23 @@ import { resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { extractTypeInfo, generateTypeName } from './zod-extractor';
-import type { NormalizedContract, Router, EndpointGroup, Endpoint, TypeDefinition } from './contract';
+import type { ContractDefinition, Router, EndpointGroup, Endpoint, TypeDefinition } from './contract';
 import type { RouterDefinition, EndpointGroup as CoreEndpointGroup, EndpointDefinition } from '@xrpc/core';
+
+// Re-export types for convenience
+export type { ContractDefinition, Router, EndpointGroup, Endpoint, TypeDefinition, Property, ValidationRules, TypeReference, MiddlewareDefinition } from './contract';
+
+/**
+ * Type guard to check if an object has a __middleware property
+ */
+function hasMiddleware(obj: unknown): obj is { __middleware: unknown[] } {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    '__middleware' in obj &&
+    Array.isArray((obj as Record<string, unknown>).__middleware)
+  );
+}
 
 /**
  * Checks if a package.json exists near the file
@@ -25,7 +40,23 @@ function hasPackageJson(filePath: string): boolean {
   return false;
 }
 
-export async function parseContract(filePath: string): Promise<NormalizedContract> {
+/**
+ * Parses a contract file and returns a normalized contract definition.
+ * 
+ * The contract file must export a router created with `createRouter()`.
+ * This function imports the file and extracts type information from Zod schemas.
+ * 
+ * @param filePath - Path to the TypeScript file containing the router definition
+ * @returns A promise that resolves to a ContractDefinition containing all routers, endpoints, and types
+ * @throws Error if the file cannot be imported, doesn't export a router, or has invalid structure
+ * 
+ * @example
+ * ```typescript
+ * const contract = await parseContract('src/api.ts');
+ * console.log(`Found ${contract.endpoints.length} endpoints`);
+ * ```
+ */
+export async function parseContract(filePath: string): Promise<ContractDefinition> {
   // Import the actual router to get real Zod schemas
   // Resolve to absolute path for import
   const absolutePath = resolve(filePath);
@@ -62,9 +93,8 @@ export async function parseContract(filePath: string): Promise<NormalizedContrac
     throw error;
   }
   
-  const routerDef = routerModule.router as RouterDefinition;
-
-  if (!routerDef) {
+  // Check if router exists before type assertion
+  if (!routerModule.router) {
     // Check if router exists but is not exported correctly
     if ('router' in routerModule) {
       throw new Error(
@@ -102,8 +132,10 @@ export async function parseContract(filePath: string): Promise<NormalizedContrac
     );
   }
 
+  const routerDef = routerModule.router as RouterDefinition;
+
   try {
-    return buildNormalizedContract(routerDef);
+    return buildContractDefinition(routerDef);
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(
@@ -115,9 +147,9 @@ export async function parseContract(filePath: string): Promise<NormalizedContrac
   }
 }
 
-function buildNormalizedContract(
+function buildContractDefinition(
   routerDef: RouterDefinition
-): NormalizedContract {
+): ContractDefinition {
   const routers: Router[] = [];
   const endpoints: Endpoint[] = [];
   const typeMap = new Map<string, TypeDefinition>();
@@ -128,7 +160,7 @@ function buildNormalizedContract(
   }
 
   // Extract middleware if present (stored as non-enumerable property)
-  const middleware = (routerDef as any).__middleware as any[] | undefined;
+  const middleware = hasMiddleware(routerDef) ? routerDef.__middleware : undefined;
   const middlewareDefinitions = middleware?.map((_, index) => ({
     name: `middleware_${index}`,
   })) || [];

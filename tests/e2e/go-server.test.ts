@@ -48,13 +48,37 @@ describe('Go Server E2E', () => {
   let serverProcess: ReturnType<typeof Bun.spawn> | null = null;
   let serverPort: number;
   let serverUrl: string;
+  let abortController: AbortController | undefined;
+  let stdoutPromise: Promise<void> | undefined;
+  let stderrPromise: Promise<void> | undefined;
 
   afterEach(async () => {
+    // Abort any ongoing readers
+    if (abortController) {
+      abortController.abort();
+    }
+    
+    // Wait for readers to finish if they exist (with timeout)
+    if (stdoutPromise && stderrPromise) {
+      try {
+        await Promise.race([
+          Promise.allSettled([stdoutPromise, stderrPromise]),
+          new Promise((resolve) => setTimeout(resolve, 1000)), // 1 second timeout
+        ]);
+      } catch {
+        // Ignore errors
+      }
+    }
+    
     // Stop server
     if (serverProcess) {
       try {
         serverProcess.kill();
-        await serverProcess.exited;
+        // Wait for process to exit with timeout
+        await Promise.race([
+          serverProcess.exited,
+          new Promise((resolve) => setTimeout(resolve, 2000)), // 2 second timeout
+        ]);
       } catch {
         // Ignore errors
       }
@@ -69,6 +93,11 @@ describe('Go Server E2E', () => {
         // Ignore cleanup errors
       }
     }
+    
+    // Reset variables
+    abortController = undefined;
+    stdoutPromise = undefined;
+    stderrPromise = undefined;
   });
 
   test('generates Go server, starts it, and handles requests', async () => {
@@ -211,12 +240,13 @@ go 1.25
     // Log server output for debugging
     const serverOutput: string[] = [];
     const serverErrors: string[] = [];
+    abortController = new AbortController();
     
-    // Read stdout
+    // Read stdout with proper cleanup
     const stdoutReader = serverProcess.stdout.getReader();
-    (async () => {
+    stdoutPromise = (async () => {
       try {
-        while (true) {
+        while (!abortController.signal.aborted) {
           const { done, value } = await stdoutReader.read();
           if (done) break;
           const text = new TextDecoder().decode(value);
@@ -226,48 +256,65 @@ go 1.25
           }
         }
       } catch (e) {
-        // Ignore
+        // Ignore errors when aborted
+        if (!abortController.signal.aborted) {
+          throw e;
+        }
+      } finally {
+        stdoutReader.releaseLock();
       }
     })();
 
-    // Read stderr
+    // Read stderr with proper cleanup
     const stderrReader = serverProcess.stderr.getReader();
-    (async () => {
+    stderrPromise = (async () => {
       try {
-        while (true) {
+        while (!abortController.signal.aborted) {
           const { done, value } = await stderrReader.read();
           if (done) break;
           const text = new TextDecoder().decode(value);
           serverErrors.push(text);
         }
       } catch (e) {
-        // Ignore
+        // Ignore errors when aborted
+        if (!abortController.signal.aborted) {
+          throw e;
+        }
+      } finally {
+        stderrReader.releaseLock();
       }
     })();
 
     // Wait a bit for server to start
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Check if server process is still running
-    if (serverProcess.exitCode !== null) {
-      // Process exited, read all output
-      const allOutput = serverOutput.join('');
-      const allErrors = serverErrors.join('');
-      throw new Error(
-        `Server process exited with code ${serverProcess.exitCode}. Output: ${allOutput}\nErrors: ${allErrors}`
-      );
-    }
-
-    // Wait for server to be ready
     try {
+      // Check if server process is still running
+      if (serverProcess.exitCode !== null) {
+        // Process exited, read all output
+        const allOutput = serverOutput.join('');
+        const allErrors = serverErrors.join('');
+        throw new Error(
+          `Server process exited with code ${serverProcess.exitCode}. Output: ${allOutput}\nErrors: ${allErrors}`
+        );
+      }
+
+      // Wait for server to be ready
       await waitForServer(`${serverUrl}/api`);
     } catch (error) {
       // Log server output if it failed
       const allOutput = serverOutput.join('');
       const allErrors = serverErrors.join('');
-      // Kill process
+      // Abort readers and kill process
+      if (abortController) {
+        abortController.abort();
+      }
       if (serverProcess) {
         serverProcess.kill();
+      }
+      // Wait for readers to finish
+      if (stdoutPromise && stderrPromise) {
+        await Promise.allSettled([stdoutPromise, stderrPromise]);
       }
       throw new Error(
         `Server failed to start. Output: ${allOutput}\nErrors: ${allErrors}\nOriginal error: ${error}`
@@ -384,5 +431,13 @@ go 1.25
     });
 
     expect(missingMethodResponse.status).toBe(404);
+    
+    // Cleanup: abort readers before test ends
+    if (abortController) {
+      abortController.abort();
+    }
+    if (stdoutPromise && stderrPromise) {
+      await Promise.allSettled([stdoutPromise, stderrPromise]);
+    }
   }, 60000); // 60 second timeout
 });

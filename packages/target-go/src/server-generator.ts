@@ -1,5 +1,6 @@
 import { GoBuilder } from './go-builder';
-import type { NormalizedContract, Endpoint } from '@xrpc/parser';
+import { toPascalCase } from '@xrpc/generator-core';
+import type { ContractDefinition, Endpoint } from '@xrpc/parser';
 
 export class GoServerGenerator {
   private w: GoBuilder;
@@ -10,7 +11,7 @@ export class GoServerGenerator {
     this.packageName = packageName;
   }
 
-  generateServer(contract: NormalizedContract): string {
+  generateServer(contract: ContractDefinition): string {
     const w = this.w.reset();
     
     w.package(this.packageName)
@@ -116,7 +117,7 @@ export class GoServerGenerator {
           }).n();
 
           // Parse input
-          const inputTypeName = this.toPascalCase(endpoint.input.name!);
+          const inputTypeName = toPascalCase(endpoint.input.name!);
           b.var('input', inputTypeName);
           b.if('err := json.Unmarshal(request.Params, &input); err != nil', (b) => {
             b.l('http.Error(w, fmt.Sprintf("Invalid params: %v", err), http.StatusBadRequest)')
@@ -165,10 +166,4 @@ export class GoServerGenerator {
     });
   }
 
-  private toPascalCase(str: string): string {
-    return str
-      .split(/[-_]/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join('');
-  }
 }

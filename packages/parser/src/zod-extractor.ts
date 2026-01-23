@@ -2,6 +2,10 @@ import { z } from 'zod';
 import type { ZodType, ZodObject, ZodOptional, ZodString, ZodNumber, ZodBoolean, ZodArray } from 'zod';
 import type { TypeDefinition, TypeReference, Property, ValidationRules } from './contract';
 
+// Safe integer bounds for JavaScript (used when Zod .int() is applied)
+const SAFE_INTEGER_MIN = Number.MIN_SAFE_INTEGER;
+const SAFE_INTEGER_MAX = Number.MAX_SAFE_INTEGER;
+
 export function extractValidationRules(schema: ZodType): ValidationRules | undefined {
   const rules: ValidationRules = {};
   let hasRules = false;
@@ -63,19 +67,17 @@ export function extractValidationRules(schema: ZodType): ValidationRules | undef
     // We'll extract what we can, but custom min/max with .int() may not be fully extractable via JSON schema
     
     const isInteger = jsonSchema.type === 'integer';
-    const safeIntMin = -9007199254740991;
-    const safeIntMax = 9007199254740991;
     
     // Only extract min/max if they're not the default safe integer bounds (when int is used)
     if (typeof jsonSchema.minimum === 'number') {
-      if (!isInteger || jsonSchema.minimum !== safeIntMin) {
+      if (!isInteger || jsonSchema.minimum !== SAFE_INTEGER_MIN) {
         rules.min = jsonSchema.minimum;
         hasRules = true;
       }
     }
     
     if (typeof jsonSchema.maximum === 'number') {
-      if (!isInteger || jsonSchema.maximum !== safeIntMax) {
+      if (!isInteger || jsonSchema.maximum !== SAFE_INTEGER_MAX) {
         rules.max = jsonSchema.maximum;
         hasRules = true;
       }
@@ -88,11 +90,11 @@ export function extractValidationRules(schema: ZodType): ValidationRules | undef
     }
     
     // Note: positive/negative might be in exclusiveMinimum/exclusiveMaximum
-    if (jsonSchema.exclusiveMinimum === 0 || (typeof jsonSchema.minimum === 'number' && jsonSchema.minimum > 0 && (!isInteger || jsonSchema.minimum !== safeIntMin))) {
+    if (jsonSchema.exclusiveMinimum === 0 || (typeof jsonSchema.minimum === 'number' && jsonSchema.minimum > 0 && (!isInteger || jsonSchema.minimum !== SAFE_INTEGER_MIN))) {
       rules.positive = true;
       hasRules = true;
     }
-    if (jsonSchema.exclusiveMaximum === 0 || (typeof jsonSchema.maximum === 'number' && jsonSchema.maximum < 0 && (!isInteger || jsonSchema.maximum !== safeIntMax))) {
+    if (jsonSchema.exclusiveMaximum === 0 || (typeof jsonSchema.maximum === 'number' && jsonSchema.maximum < 0 && (!isInteger || jsonSchema.maximum !== SAFE_INTEGER_MAX))) {
       rules.negative = true;
       hasRules = true;
     }

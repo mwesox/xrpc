@@ -26,23 +26,23 @@ This information will help us triage your report more quickly.
 
 ## Security Best Practices
 
-When using xRpc:
+When using xRPC:
 
-- **Always validate input**: While xRpc uses Zod for validation, ensure your business logic also validates data appropriately
+- **Always validate input**: While xRPC uses Zod for validation, ensure your business logic also validates data appropriately
 - **Use HTTPS**: Always use HTTPS in production to protect data in transit
-- **Keep dependencies updated**: Regularly update xRpc and its dependencies to receive security patches
+- **Keep dependencies updated**: Regularly update xRPC and its dependencies to receive security patches
 - **Review generated code**: Review generated code for your specific use case and add additional security measures as needed
-- **Implement authentication**: xRpc provides middleware hooks for authentication - ensure you implement proper authentication and authorization
+- **Implement authentication**: xRPC provides middleware hooks for authentication - ensure you implement proper authentication and authorization
 - **Follow principle of least privilege**: Only grant necessary permissions to your services
 
 ## Security Considerations
 
-xRpc is a code generation tool and RPC framework. Security considerations include:
+xRPC is a code generation tool and RPC framework. Security considerations include:
 
 - **Input Validation**: Generated code includes Zod validation, but you should review and enhance validation for your specific use cases
 - **Authentication/Authorization**: You must implement authentication and authorization in your middleware
 - **Transport Security**: Use HTTPS/TLS in production environments
-- **Dependency Security**: Keep all dependencies (including xRpc) up to date
+- **Dependency Security**: Keep all dependencies (including xRPC) up to date
 - **Generated Code Review**: Review generated code, especially for security-sensitive applications
 
 ## Disclosure Policy

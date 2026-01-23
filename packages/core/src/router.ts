@@ -34,6 +34,22 @@ function isRouterConfig(value: RouterDefinition | RouterConfig): value is Router
   return value && typeof value === 'object' && 'middleware' in value && Array.isArray(value.middleware);
 }
 
+/**
+ * Creates an endpoint group containing one or more endpoints.
+ * 
+ * @param endpoints - An object mapping endpoint names to their definitions (query or mutation)
+ * @returns The endpoint group
+ * 
+ * @example
+ * ```typescript
+ * const greeting = createEndpoint({
+ *   greet: query({
+ *     input: z.object({ name: z.string() }),
+ *     output: z.object({ message: z.string() }),
+ *   }),
+ * });
+ * ```
+ */
 export function createEndpoint(
   endpoints: EndpointGroup
 ): EndpointGroup {

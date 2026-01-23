@@ -1,98 +1,118 @@
-# xRpc
+# xRPC
 
-> Type-safe, cross-platform RPC framework with fantastic developer experience
+**Define once. Generate everywhere. Type-safe across every boundary.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-xRpc is a modern RPC framework that enables type-safe communication across any platform and language. Built on TypeScript and Zod schemas, it combines the simplicity of tRPC with the cross-platform capabilities of gRPC, providing a developer-friendly alternative to OpenAPI.
+xRPC is a next-generation RPC framework that bridges the gap between type safety and cross-platform development. Write your API contracts in TypeScript with Zod schemas, and generate idiomatic, dependency-free code for any language.
 
-## ✨ Features
+No more hand-writing SDKs. No more API drift. No more runtime surprises.
 
-- **🌍 Cross-Platform**: Generate type-safe clients and servers for TypeScript, Python, Go, Rust, Java, Swift, Kotlin, and more
-- **📝 Schema-First**: Define your API once with Zod schemas, generate everything else
-- **🔒 Type-Safe**: End-to-end type safety from schema to runtime, across all languages
-- **🚀 Developer Experience**: Zero configuration, instant autocomplete, clear error messages
-- **🔄 Protocol Flexible**: HTTP/JSON-RPC by default, extensible to WebSocket and custom transports
-- **🎯 Idiomatic**: Generated code feels native to each target language
+## Why xRPC?
 
-## 🎯 Use Cases
+Traditional API development forces a choice: type safety within a single language (tRPC) or cross-platform reach with verbose tooling (OpenAPI, gRPC). xRPC eliminates this tradeoff.
 
-- **Monorepo Type Sharing**: Share types between frontend and backend seamlessly
-- **Microservices**: Type-safe communication between services in different languages
-- **Full-Stack Apps**: Build type-safe applications with shared API contracts
-- **Public API SDKs**: Generate idiomatic SDKs for multiple languages
-- **Cross-Platform Mobile**: Share API contracts between web, iOS, and Android
+| Capability | tRPC | gRPC | OpenAPI | xRPC |
+|------------|------|------|---------|------|
+| Type Safety | Full | Partial | None | Full |
+| Schema Language | TypeScript | Protobuf | YAML/JSON | TypeScript + Zod |
+| Cross-Platform | No | Yes | Yes | Yes |
+| Generated Code Quality | N/A | Verbose | Varies | Idiomatic |
+| Runtime Dependencies | Heavy | Heavy | Varies | Zero |
+| Learning Curve | Low | High | Medium | Low |
 
-## 🚀 Quick Start
+## Get Started
 
 ```bash
-# Install xRpc CLI
 npm install -g @xrpc/cli
-
-# Initialize a new project
-xrpc init
-
-# Define your API schema
-# src/api.ts
-import { z } from 'zod';
-import { createRouter, procedure } from '@xrpc/core';
-
-export const router = createRouter({
-  getUser: procedure
-    .input(z.object({ id: z.string() }))
-    .output(z.object({ id: z.string(), name: z.string() }))
-    .query(async ({ input }) => {
-      return { id: input.id, name: 'John Doe' };
-    }),
-});
-
-# Generate clients for all targets
-xrpc generate --targets typescript,python,go,rust
 ```
 
-## 📚 Documentation
+Define your API with Zod:
 
-- [Vision & Mission](./VISION.md) - Project vision, principles, and goals
-- [Getting Started](./docs/getting-started.md) - Installation and setup guide
-- [Schema Guide](./docs/schema-guide.md) - Defining APIs with Zod
-- [Code Generation](./docs/code-generation.md) - Generating clients and servers
-- [Runtime Guide](./docs/runtime-guide.md) - Using generated code
-- [Examples](./examples/) - Example projects and use cases
+```typescript
+import { z } from 'zod';
+import { createRouter, createEndpoint, query, mutation } from '@xrpc/core';
 
-## 🏗️ Architecture
+const users = createEndpoint({
+  get: query({
+    input: z.object({ id: z.string().uuid() }),
+    output: z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+      email: z.string().email(),
+    }),
+  }),
+  create: mutation({
+    input: z.object({
+      name: z.string().min(1).max(100),
+      email: z.string().email(),
+    }),
+    output: z.object({ id: z.string().uuid() }),
+  }),
+});
 
-xRpc follows a schema-first architecture:
+export const router = createRouter({ users });
+```
 
-1. **Define** your API with Zod schemas
-2. **Generate** type-safe clients and servers for any language
-3. **Use** generated code with full IntelliSense and type safety
+Generate code for your targets:
 
-See [VISION.md](./VISION.md) for detailed architecture and design principles.
+```bash
+xrpc generate --input src/api.ts --targets go,typescript,python
+```
 
-## 🤝 Contributing
+That's it. You now have type-safe clients and servers with full validation logic, zero runtime dependencies, and idiomatic code that feels native to each language.
 
-We welcome contributions! Please see our [Contributing Guide](./docs/CONTRIBUTING.md) for details.
+## Generated Code
 
-Before contributing, please review our [Code of Conduct](./CODE_OF_CONDUCT.md) to keep our community approachable and respectable.
+xRPC generates production-ready code that follows each language's conventions:
 
-## 🔒 Security
+**Go** — Structs, HTTP handlers, and validation using only the standard library
+**TypeScript** — Full type inference with Zod schemas
+**Python** — Pydantic models with FastAPI integration *(coming soon)*
+**Rust** — Serde structs with Axum handlers *(coming soon)*
 
-For security vulnerabilities, please see our [Security Policy](./SECURITY.md) for responsible disclosure guidelines.
+All generated code includes:
+- Request/response types derived from your Zod schemas
+- Validation logic with detailed error messages
+- HTTP routing with proper status codes
+- JSON serialization/deserialization
 
-## 📄 License
+## Design Principles
 
-MIT License - see [LICENSE](./LICENSE) file for details.
+**Zero Dependencies** — Generated code uses only standard libraries. No vendor lock-in.
 
-## 🙏 Acknowledgments
+**Idiomatic Output** — Code looks like it was written by a native developer, not a machine.
 
-xRpc is inspired by:
-- [tRPC](https://trpc.io/) - For developer experience excellence
-- [oRPC](https://orpc.dev/) - For type-safe RPC patterns
-- [gRPC](https://grpc.io/) - For cross-platform RPC concepts
-- [Zod](https://zod.dev/) - For schema validation and type inference
+**Schema as Source of Truth** — Your Zod schemas define validation, types, and documentation in one place.
+
+**Compile-Time Safety** — Catch errors before runtime, across language boundaries.
+
+## Use Cases
+
+- **Polyglot Microservices** — Type-safe contracts between services in different languages
+- **SDK Generation** — Ship idiomatic client libraries for your public API
+- **Full-Stack Apps** — Share types seamlessly between frontend and backend
+- **Mobile + Web** — Unified API contracts across iOS, Android, and web clients
+
+## Documentation
+
+- [API Contract Definition](./docs/guides/api-contract.md)
+- [Go Server](./docs/guides/go-server.md)
+- [TypeScript Server](./docs/guides/typescript-server.md)
+- [Examples](./examples/)
+
+## Contributing
+
+Contributions welcome. See [Contributing Guide](./CONTRIBUTING.md) and [Code of Conduct](./CODE_OF_CONDUCT.md).
+
+## Security
+
+Report vulnerabilities via our [Security Policy](./SECURITY.md).
+
+## License
+
+MIT
 
 ---
 
-**"Type safety shouldn't stop at language boundaries."**
-
-Made with ❤️ by the xRpc community
+*Type safety shouldn't stop at language boundaries.*

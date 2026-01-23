@@ -1,5 +1,5 @@
 import { CodeWriter } from './code-writer';
-import type { NormalizedContract } from '@xrpc/parser';
+import type { ContractDefinition } from '@xrpc/parser';
 
 export interface GeneratorConfig {
   outputDir: string;
@@ -24,7 +24,7 @@ export abstract class BaseCodeGenerator {
     this.config = config;
   }
 
-  abstract generate(contract: NormalizedContract): GeneratedFiles;
+  abstract generate(contract: ContractDefinition): GeneratedFiles;
 
   protected toPascalCase(str: string): string {
     return str

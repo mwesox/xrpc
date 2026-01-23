@@ -1,4 +1,4 @@
-export interface NormalizedContract {
+export interface ContractDefinition {
   routers: Router[];
   types: TypeDefinition[];
   endpoints: Endpoint[];

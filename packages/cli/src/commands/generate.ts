@@ -1,7 +1,7 @@
-import { parseContract } from '@xrpc/parser';
+import { parseContract, type ContractDefinition } from '@xrpc/parser';
 import { getGenerator, listTargets, type GeneratorConfig } from '@xrpc/generator';
 import { mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import {
   formatSuccess,
@@ -12,12 +12,40 @@ import {
   formatInfo,
 } from '../utils/tui';
 
+// Minimal types for prompt and spinner functions
+type PromptFunction = (message: string, options?: { default?: string }) => Promise<string>;
+type PromptSelectFunction = {
+  select: (message: string, options: { options: string[]; multiple?: boolean }) => Promise<string | string[]>;
+};
+type SpinnerInstance = {
+  start: () => void;
+  succeed: (message?: string) => void;
+  fail: (message?: string) => void;
+};
+type SpinnerFunction = (message: string) => SpinnerInstance;
+
 export interface GenerateOptions {
   input?: string;
   output?: string;
   targets?: string;
-  prompt?: any;
-  spinner?: any;
+  prompt?: PromptFunction & PromptSelectFunction;
+  spinner?: SpinnerFunction;
+}
+
+/**
+ * Validates that a path is within the project directory to prevent path traversal attacks.
+ * @param path - The path to validate
+ * @param baseDir - The base directory to validate against (defaults to current working directory)
+ * @returns The resolved absolute path if valid
+ * @throws Error if the path is outside the base directory
+ */
+function validatePath(path: string, baseDir: string = process.cwd()): string {
+  const resolved = resolve(path);
+  const base = resolve(baseDir);
+  if (!resolved.startsWith(base)) {
+    throw new Error(`Path must be within project directory: ${path}`);
+  }
+  return resolved;
 }
 
 export async function generateCommand(options: GenerateOptions = {}): Promise<void> {
@@ -29,12 +57,14 @@ export async function generateCommand(options: GenerateOptions = {}): Promise<vo
     input = await prompt('API contract file path:', {
       default: 'src/api.ts',
     });
-    // Validate file exists
-    if (!existsSync(input)) {
-      throw new Error(`File not found: ${input}`);
-    }
   } else if (!input) {
     throw new Error('Input file path is required. Use -i/--input or run in interactive mode.');
+  }
+  
+  // Validate and normalize input path
+  input = validatePath(input);
+  if (!existsSync(input)) {
+    throw new Error(`File not found: ${input}`);
   }
 
   let output = options.output;
@@ -45,6 +75,9 @@ export async function generateCommand(options: GenerateOptions = {}): Promise<vo
   } else if (!output) {
     output = 'generated';
   }
+  
+  // Validate and normalize output path
+  output = validatePath(output);
 
   let targets: string[] = [];
   if (options.targets) {
@@ -75,11 +108,11 @@ export async function generateCommand(options: GenerateOptions = {}): Promise<vo
 
   // Start generation with progress tracking
   const genSpinner = createSpinner ? createSpinner('Parsing contract...') : null;
-  if (genSpinner) genSpinner.start();
+  if (genSpinner && 'start' in genSpinner) genSpinner.start();
 
   try {
     const contract = await parseContract(input);
-    if (genSpinner) {
+    if (genSpinner && 'succeed' in genSpinner) {
       genSpinner.succeed(`Found ${contract.endpoints.length} endpoint${contract.endpoints.length !== 1 ? 's' : ''}`);
     } else {
       console.log(`Found ${contract.endpoints.length} endpoint${contract.endpoints.length !== 1 ? 's' : ''}`);
@@ -87,15 +120,15 @@ export async function generateCommand(options: GenerateOptions = {}): Promise<vo
 
     for (const target of targets) {
       const targetSpinner = createSpinner ? createSpinner(`Generating ${formatTarget(target)} code...`) : null;
-      if (targetSpinner) targetSpinner.start();
+      if (targetSpinner && 'start' in targetSpinner) targetSpinner.start();
 
       try {
         await generateForTarget(target, contract, output, input, createSpinner);
-        if (targetSpinner) {
+        if (targetSpinner && 'succeed' in targetSpinner) {
           targetSpinner.succeed(`Generated ${formatTarget(target)} code`);
         }
       } catch (error) {
-        if (targetSpinner) {
+        if (targetSpinner && 'fail' in targetSpinner) {
           targetSpinner.fail(`Failed to generate ${formatTarget(target)} code`);
         }
         console.error(formatError(error instanceof Error ? error.message : String(error)));
@@ -107,7 +140,7 @@ export async function generateCommand(options: GenerateOptions = {}): Promise<vo
     console.log(formatSuccess('Generation complete!'));
     console.log(formatInfo(`Output directory: ${formatPath(output)}`));
   } catch (error) {
-    if (genSpinner) genSpinner.fail('Generation failed');
+    if (genSpinner && 'fail' in genSpinner) genSpinner.fail('Generation failed');
     console.error(formatError(error instanceof Error ? error.message : String(error)));
     process.exit(1);
   }
@@ -115,20 +148,23 @@ export async function generateCommand(options: GenerateOptions = {}): Promise<vo
 
 async function generateForTarget(
   target: string,
-  contract: any,
+  contract: ContractDefinition,
   outputDir: string,
   inputPath: string,
-  createSpinner?: any
+  createSpinner?: unknown
 ): Promise<void> {
   const generator = getGenerator(target);
   if (!generator) {
     throw new Error(`Generator not found for target: ${target}`);
   }
 
+  // Validate output directory path
+  const validatedOutputDir = validatePath(outputDir);
+  
   // Target-specific output directory structure
   // React uses 'client' instead of 'server'
   const subDir = target === 'react' ? 'client' : 'server';
-  const targetOutputDir = join(outputDir, target, subDir);
+  const targetOutputDir = join(validatedOutputDir, target, subDir);
   await mkdir(targetOutputDir, { recursive: true });
 
   const config: GeneratorConfig = {
@@ -143,7 +179,7 @@ async function generateForTarget(
 
   // Write generated files with progress indication
   const fileSpinner = createSpinner ? createSpinner('Writing files...') : null;
-  if (fileSpinner) fileSpinner.start();
+  if (fileSpinner && 'start' in fileSpinner) fileSpinner.start();
 
   const writtenFiles: string[] = [];
 
@@ -177,7 +213,7 @@ async function generateForTarget(
     writtenFiles.push(validationPath);
   }
 
-  if (fileSpinner) {
+  if (fileSpinner && 'succeed' in fileSpinner) {
     fileSpinner.succeed(`Wrote ${writtenFiles.length} file${writtenFiles.length !== 1 ? 's' : ''}`);
   }
 
