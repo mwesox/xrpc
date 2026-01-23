@@ -1,0 +1,48 @@
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand-name">xRpc</div>
+        <p class="brand-description">
+          Type-safe, cross-platform RPC framework. Define once with Zod schemas, generate everywhere.
+        </p>
+      </div>
+
+      <div class="footer-section">
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="{{ '/docs/usage/api-contract.html' | relative_url }}">API Contract</a></li>
+          <li><a href="{{ '/docs/usage/typescript-server.html' | relative_url }}">TypeScript Server</a></li>
+          <li><a href="{{ '/docs/usage/go-server.html' | relative_url }}">Go Server</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>More Guides</h4>
+        <ul>
+          <li><a href="{{ '/docs/usage/typescript-client.html' | relative_url }}">TypeScript Client</a></li>
+          <li><a href="{{ '/docs/usage/go-client.html' | relative_url }}">Go Client</a></li>
+          <li><a href="{{ '/docs/usage/kotlin-springboot-server.html' | relative_url }}">Kotlin Server</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="https://github.com/{{ site.repository }}" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="https://github.com/{{ site.repository }}/issues" target="_blank" rel="noopener">Issues</a></li>
+          <li><a href="https://github.com/{{ site.repository }}/releases" target="_blank" rel="noopener">Releases</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="copyright">
+        &copy; {{ 'now' | date: "%Y" }} xRpc. Released under the MIT License.
+      </p>
+      <div class="footer-links">
+        <a href="https://github.com/{{ site.repository }}/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+      </div>
+    </div>
+  </div>
+</footer>

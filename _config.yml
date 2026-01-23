@@ -1,8 +1,18 @@
 # Site settings
-title: xRpc Documentation
+title: xRpc
 description: Type-safe, cross-platform RPC framework with fantastic developer experience
+tagline: "Define once. Generate everywhere."
 url: "https://mwesox.github.io"
 baseurl: "/xrpc"
+
+# Brand settings
+brand:
+  accent_primary: "#00d4ff"
+  accent_secondary: "#7c3aed"
+
+# GitHub
+github_username: mwesox
+repository: mwesox/xrpc
 
 # Build settings
 markdown: kramdown
@@ -11,19 +21,15 @@ plugins:
   - jekyll-feed
   - jekyll-sitemap
 
-# Theme settings (using minima theme)
-theme: minima
-
-# Navigation
-header_pages:
-  - index.md
-  - docs/VISION.md
-  - docs/ARCHITECTURE.md
-  - docs/CONTRIBUTING.md
+# SCSS settings
+sass:
+  style: compressed
+  sass_dir: _sass
 
 # Exclude from processing
 exclude:
   - README.md
+  - CLAUDE.md
   - node_modules
   - package.json
   - bun.lock
@@ -37,11 +43,26 @@ exclude:
   - LICENSE
   - SECURITY.md
   - CODE_OF_CONDUCT.md
-  - claude.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
 
 # Kramdown settings
 kramdown:
   syntax_highlighter: rouge
   syntax_highlighter_opts:
     block:
-      line_numbers: true
+      line_numbers: false
+    span:
+      line_numbers: false
+
+# Default layouts
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+  - scope:
+      path: "docs"
+    values:
+      layout: "default"
