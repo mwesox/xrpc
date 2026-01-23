@@ -1,12 +1,12 @@
 ---
 layout: default
 title: TypeScript Express Server
-description: How to implement an xRpc server using TypeScript and Express
+description: How to implement an xRPC server using TypeScript and Express
 ---
 
 # TypeScript Express Server
 
-This guide shows how to implement an xRpc server using TypeScript and Express.
+This guide shows how to implement an xRPC server using TypeScript and Express.
 
 ## Prerequisites
 
@@ -14,9 +14,9 @@ This guide shows how to implement an xRpc server using TypeScript and Express.
 2. Generate TypeScript Express code: `xrpc generate --targets typescript-express`
 3. Implement your handlers using the generated code
 
-**Note**: The xRpc CLI and code generation run on **Bun runtime**, but the generated TypeScript code runs on **Node.js or Bun** (your choice). The generated code is self-contained and uses Express framework APIs. No separate runtime libraries are needed.
+**Note**: The xRPC CLI and code generation run on **Bun runtime**, but the generated TypeScript code runs on **Node.js or Bun** (your choice). The generated code is self-contained and uses Express framework APIs. No separate runtime libraries are needed.
 
-**Framework-Specific Target**: xRpc generates code for framework-specific targets. The `typescript-express` target generates code tailored specifically for Express, including Express middleware integration. This is not a generic TypeScript target - it's optimized for Express framework patterns.
+**Framework-Specific Target**: xRPC generates code for framework-specific targets. The `typescript-express` target generates code tailored specifically for Express, including Express middleware integration. This is not a generic TypeScript target - it's optimized for Express framework patterns.
 
 ## Basic Server Setup
 
@@ -89,7 +89,7 @@ app.listen(3000, () => {
 
 ## Router, Endpoints, and Endpoints
 
-xRpc uses a hierarchical structure:
+xRPC uses a hierarchical structure:
 - **Router**: Primary grouping mechanism that exports all endpoints
 - **Endpoints**: Collections of related endpoints (like `greeting`, `user`, `product`)
 - **Endpoints**: Individual RPC methods (queries and mutations) within endpoints
@@ -161,7 +161,7 @@ app.use('/api', createServer(serverRouter));
 
 ## Type Safety
 
-xRpc ensures full type safety through generated types. The generated code provides a `ServerRouter` type that matches your API contract exactly.
+xRPC ensures full type safety through generated types. The generated code provides a `ServerRouter` type that matches your API contract exactly.
 
 ### Generated Types
 

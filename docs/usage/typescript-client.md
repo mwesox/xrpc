@@ -1,12 +1,12 @@
 ---
 layout: default
 title: TypeScript Client
-description: How to use an xRpc client in TypeScript
+description: How to use an xRPC client in TypeScript
 ---
 
 # TypeScript Client
 
-This guide shows how to use an xRpc client in TypeScript.
+This guide shows how to use an xRPC client in TypeScript.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This guide shows how to use an xRpc client in TypeScript.
 2. Generate TypeScript Express code: `xrpc generate --targets typescript-express`
 3. Use the generated client in your application
 
-**Note**: The xRpc CLI and code generation run on **Bun runtime**, but the generated TypeScript code runs on **Node.js or Bun** (your choice). The generated client is self-contained and uses standard HTTP libraries (fetch API). No separate runtime libraries are needed.
+**Note**: The xRPC CLI and code generation run on **Bun runtime**, but the generated TypeScript code runs on **Node.js or Bun** (your choice). The generated client is self-contained and uses standard HTTP libraries (fetch API). No separate runtime libraries are needed.
 
 **Framework-Specific Target**: The `typescript-express` target generates code tailored specifically for Express. The client code is generated alongside server code in `generated/typescript-express/`.
 

@@ -1,12 +1,12 @@
 ---
 layout: default
 title: Kotlin Spring Boot Server
-description: How to implement an xRpc server using Kotlin and Spring Boot
+description: How to implement an xRPC server using Kotlin and Spring Boot
 ---
 
 # Kotlin Spring Boot Server
 
-This guide shows how to implement an xRpc server using Kotlin and Spring Boot.
+This guide shows how to implement an xRPC server using Kotlin and Spring Boot.
 
 ## Prerequisites
 
@@ -14,9 +14,9 @@ This guide shows how to implement an xRpc server using Kotlin and Spring Boot.
 2. Generate Kotlin Spring Boot code: `xrpc generate --targets kotlin-spring-boot`
 3. Implement your handlers using the generated code
 
-**Note**: The xRpc CLI and code generation run on **Bun runtime**, but the generated Kotlin code runs on the **JVM**. The generated code is self-contained and uses Spring Boot framework APIs. No separate runtime libraries are needed.
+**Note**: The xRPC CLI and code generation run on **Bun runtime**, but the generated Kotlin code runs on the **JVM**. The generated code is self-contained and uses Spring Boot framework APIs. No separate runtime libraries are needed.
 
-**Framework-Specific Target**: xRpc generates code for framework-specific targets. The `kotlin-spring-boot` target generates code tailored specifically for Spring Boot, including Spring `@RestController` integration. This is not a generic Kotlin target - it's optimized for Spring Boot framework patterns.
+**Framework-Specific Target**: xRPC generates code for framework-specific targets. The `kotlin-spring-boot` target generates code tailored specifically for Spring Boot, including Spring `@RestController` integration. This is not a generic Kotlin target - it's optimized for Spring Boot framework patterns.
 
 ## Basic Server Setup
 
@@ -100,7 +100,7 @@ fun main(args: Array<String>) {
 
 ## Router, Endpoints, and Endpoints
 
-xRpc uses a hierarchical structure:
+xRPC uses a hierarchical structure:
 - **Router**: Primary grouping mechanism that exports all endpoints
 - **Endpoints**: Collections of related endpoints (like `greeting`, `user`, `product`)
 - **Endpoints**: Individual RPC methods (queries and mutations) within endpoints
@@ -175,7 +175,7 @@ class AppHandlers : XrpcHandlers {
 
 ## Type Safety
 
-xRpc ensures full type safety through generated types. The generated code provides an `XrpcHandlers` interface that matches your API contract exactly.
+xRPC ensures full type safety through generated types. The generated code provides an `XrpcHandlers` interface that matches your API contract exactly.
 
 ### Generated Types
 

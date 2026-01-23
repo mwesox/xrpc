@@ -1,16 +1,16 @@
 ---
 layout: default
 title: API Contract Definition
-description: How to define your xRpc API contract using TypeScript and Zod schemas
+description: How to define your xRPC API contract using TypeScript and Zod schemas
 ---
 
 # API Contract Definition
 
-This guide shows how to define your xRpc API contract using TypeScript and Zod schemas. The API contract is a **pure DSL** - it defines schemas and endpoints only, with no implementation details. Handlers are implemented separately in server files.
+This guide shows how to define your xRPC API contract using TypeScript and Zod schemas. The API contract is a **pure DSL** - it defines schemas and endpoints only, with no implementation details. Handlers are implemented separately in server files.
 
 ## Core Concepts
 
-An xRpc API contract uses a hierarchical structure:
+An xRPC API contract uses a hierarchical structure:
 
 - **Router**: Primary grouping mechanism that exports all endpoints (single export per contract)
 - **Endpoints**: Collections of related endpoints (like protobuf services)
@@ -153,4 +153,4 @@ After defining your contract, generate code for your target frameworks:
 xrpc generate --targets go,typescript-express,kotlin-spring-boot
 ```
 
-**Note**: The xRpc CLI and code generation run on **Bun runtime**. The generated code is self-contained and runs on native runtimes for each target language (Go runtime, Node.js/Bun, etc.).
+**Note**: The xRPC CLI and code generation run on **Bun runtime**. The generated code is self-contained and runs on native runtimes for each target language (Go runtime, Node.js/Bun, etc.).

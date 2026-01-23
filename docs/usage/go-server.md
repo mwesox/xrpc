@@ -1,12 +1,12 @@
 ---
 layout: default
 title: Go Server
-description: How to implement an xRpc server in Go
+description: How to implement an xRPC server in Go
 ---
 
 # Go Server
 
-This guide shows how to implement an xRpc server in Go.
+This guide shows how to implement an xRPC server in Go.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This guide shows how to implement an xRpc server in Go.
 2. Generate Go code: `xrpc generate --targets go`
 3. Implement your handlers using the generated code
 
-**Note**: The xRpc CLI and code generation run on **Bun runtime**, but the generated Go code runs on the **Go runtime**. The generated code is self-contained and uses Go's standard `net/http` package. It implements the `http.Handler` interface, making it compatible with any Go HTTP framework (Gin, Echo, standard library, etc.).
+**Note**: The xRPC CLI and code generation run on **Bun runtime**, but the generated Go code runs on the **Go runtime**. The generated code is self-contained and uses Go's standard `net/http` package. It implements the `http.Handler` interface, making it compatible with any Go HTTP framework (Gin, Echo, standard library, etc.).
 
 ## Generated Code Structure
 
@@ -93,12 +93,12 @@ func setGreetingHandler(ctx *server.Context, input server.SetGreetingInput) (*se
 func main() {
     r := gin.Default()
     
-    // Create xRpc router and register handlers
+    // Create xRPC router and register handlers
     xrpcRouter := server.NewRouter()
     xrpcRouter.Query("greet", greetHandler)
     xrpcRouter.Mutation("setGreeting", setGreetingHandler)
     
-    // Mount xRpc handler in your Gin server
+    // Mount xRPC handler in your Gin server
     r.POST("/api", gin.WrapH(xrpcRouter))
     
     // Your other Gin routes work as normal
@@ -110,10 +110,10 @@ func main() {
 }
 ```
 
-You can also add Gin middleware to the xRpc endpoint:
+You can also add Gin middleware to the xRPC endpoint:
 
 ```go
-// Add middleware to xRpc endpoint
+// Add middleware to xRPC endpoint
 api := r.Group("/api")
 api.Use(authMiddleware(), loggingMiddleware())
 api.POST("", gin.WrapH(xrpcRouter))
@@ -168,7 +168,7 @@ func handlerName(ctx *server.Context, input InputType) (*OutputType, error)
 
 ## Middleware Support
 
-xRpc supports middleware for authentication, logging, cookie parsing, and other cross-cutting concerns. Middleware executes before handlers and can extend the context with typed data.
+xRPC supports middleware for authentication, logging, cookie parsing, and other cross-cutting concerns. Middleware executes before handlers and can extend the context with typed data.
 
 ### Defining Middleware in Contract
 

@@ -1,12 +1,12 @@
 ---
 layout: default
 title: Go Client
-description: How to use an xRpc client in Go
+description: How to use an xRPC client in Go
 ---
 
 # Go Client
 
-This guide shows how to use an xRpc client in Go.
+This guide shows how to use an xRPC client in Go.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This guide shows how to use an xRpc client in Go.
 2. Generate Go code: `xrpc generate --targets go`
 3. Use the generated client in your application
 
-**Note**: The xRpc CLI and code generation run on **Bun runtime**, but the generated Go code runs on the **Go runtime**. The generated client is self-contained and uses Go's standard HTTP libraries (`net/http`). No separate runtime libraries are needed.
+**Note**: The xRPC CLI and code generation run on **Bun runtime**, but the generated Go code runs on the **Go runtime**. The generated client is self-contained and uses Go's standard HTTP libraries (`net/http`). No separate runtime libraries are needed.
 
 ## Generated Code Structure
 

@@ -1,16 +1,12 @@
 ---
 layout: default
 title: Contributing
-description: Guidelines and instructions for contributing to xRpc
+description: Guidelines and instructions for contributing to xRPC
 ---
 
-# Contributing to xRpc
+# Contributing to xRPC
 
-Thank you for your interest in contributing to xRpc! This document provides guidelines and instructions for contributing.
-
-## 🎯 Our Vision
-
-Before contributing, please read our [Vision & Mission](./VISION.md) document to understand the project's goals and principles.
+Thank you for your interest in contributing to xRPC! This document provides guidelines and instructions for contributing.
 
 ## 🤝 How to Contribute
 
@@ -168,7 +164,7 @@ When contributing, remember:
 
 ## 🙏 Thank You
 
-Your contributions make xRpc better for everyone. Thank you for taking the time to contribute!
+Your contributions make xRPC better for everyone. Thank you for taking the time to contribute!
 
 ---
 
