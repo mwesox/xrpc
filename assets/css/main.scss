@@ -329,10 +329,9 @@ img {
   text-decoration: none;
 
   .logo-icon {
-    width: 36px;
-    height: 36px;
+    height: 32px;
+    width: auto;
     object-fit: contain;
-    border-radius: 0;
   }
 
   &:hover {
