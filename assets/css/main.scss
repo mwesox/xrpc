@@ -329,15 +329,10 @@ img {
   text-decoration: none;
 
   .logo-icon {
-    width: 32px;
-    height: 32px;
-    background: var(--accent-gradient);
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    color: var(--bg-primary);
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border-radius: 0;
   }
 
   &:hover {
