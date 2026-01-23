@@ -6,28 +6,27 @@ description: Cross-cutting concerns with xRPC middleware
 
 # Middleware
 
-Middleware in xRPC allows you to handle cross-cutting concerns like authentication, logging, request ID injection, and cookie parsing. Middleware executes before your handlers and can extend the request context with typed data.
+Middleware in xRPC intercepts requests before they reach your handlers, allowing you to handle authentication, logging, request ID injection, and other cross-cutting concerns. Middleware can extend the request context with typed data.
 
-## What is Middleware?
+## Is Middleware Required?
 
-Middleware functions intercept requests before they reach your handlers. They can:
+**No.** xRPC middleware is optional. Your framework's native middleware works perfectly fine.
 
-- **Authenticate** requests and attach user information to the context
-- **Log** requests and responses for debugging and monitoring
-- **Parse cookies** and session data
-- **Inject request IDs** for distributed tracing
-- **Short-circuit** requests that fail validation
+| Use framework middleware (Express, Gin, etc.) for: | Use xRPC middleware when you need: |
+|---------------------------------------------------|-----------------------------------|
+| CORS, compression, rate limiting | **Typed context** passed to handlers |
+| Standard request logging | Contract-defined context schema |
+| Static file serving | Cross-language type generation |
 
-Each middleware receives the current context and can either pass it along (optionally modified) or short-circuit the request with an error or custom response.
+If you just need standard middleware features, use what your framework provides. xRPC middleware is specifically for when you want typed context data that's validated against your contract schema.
 
 ## Defining Middleware in Contract
 
-You can define middleware directly in your API contract. This ensures type safety across all generated targets:
+Define middleware in your contract to get type-safe context across all generated targets:
 
 ```typescript
-// api.ts
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, middleware } from '@xrpc/core';
+import { middleware } from '@xrpc/core';
 
 // Define what your middleware adds to context
 const authMiddleware = middleware({
@@ -38,253 +37,20 @@ const authMiddleware = middleware({
   }),
 });
 
-const loggingMiddleware = middleware({
-  name: 'logging',
-  context: z.object({
-    requestId: z.string(),
-  }),
-});
-
-const user = createEndpoint({
-  getProfile: query({
-    input: z.object({ id: z.string().uuid() }),
-    output: z.object({
-      id: z.string(),
-      name: z.string(),
-      email: z.string().email(),
-    }),
-  }),
-});
-
 export const api = createRouter({
-  middleware: [authMiddleware, loggingMiddleware],
-  user,
+  middleware: [authMiddleware],
+  // ... endpoints
 });
 ```
 
-The middleware definition specifies the shape of data it adds to the context. Generated code in each target language will provide type-safe access to this data.
+## TypeScript Implementation
 
-## TypeScript Express Middleware
-
-### Implementation
-
-In TypeScript/Express, implement middleware as functions that modify the context:
+Implement middleware as functions that validate and extend the context:
 
 ```typescript
-import { createMiddleware } from './generated/server';
+import { createMiddleware, createHandler } from './generated/server';
 
-// Authentication middleware
-export const authMiddleware = createMiddleware('auth', async (req, ctx) => {
-  const token = req.headers.authorization?.replace('Bearer ', '');
-
-  if (!token) {
-    throw new Error('Missing authorization header');
-  }
-
-  const payload = await verifyJWT(token);
-
-  return {
-    ...ctx,
-    userId: payload.sub,
-    role: payload.role,
-  };
-});
-
-// Logging middleware
-export const loggingMiddleware = createMiddleware('logging', async (req, ctx) => {
-  const requestId = req.headers['x-request-id'] || crypto.randomUUID();
-
-  console.log(`[${requestId}] ${req.method} ${req.url}`);
-
-  return {
-    ...ctx,
-    requestId,
-  };
-});
-```
-
-### Using Context in Handlers
-
-Handlers receive the enriched context with full type safety:
-
-```typescript
-import { createHandler } from './generated/server';
-
-export const getProfile = createHandler('user.getProfile', async (input, ctx) => {
-  // ctx.userId and ctx.role are fully typed
-  console.log(`User ${ctx.userId} requesting profile ${input.id}`);
-
-  // Check authorization
-  if (ctx.role !== 'admin' && ctx.userId !== input.id) {
-    throw new Error('Not authorized to view this profile');
-  }
-
-  const user = await db.users.findById(input.id);
-  return user;
-});
-```
-
-### Error Handling
-
-Middleware can throw errors to short-circuit the request:
-
-```typescript
-export const authMiddleware = createMiddleware('auth', async (req, ctx) => {
-  const token = req.headers.authorization?.replace('Bearer ', '');
-
-  if (!token) {
-    // This stops the request and returns an error response
-    throw new UnauthorizedError('Missing authorization header');
-  }
-
-  try {
-    const payload = await verifyJWT(token);
-    return { ...ctx, userId: payload.sub, role: payload.role };
-  } catch (err) {
-    throw new UnauthorizedError('Invalid token');
-  }
-});
-```
-
-## Go Middleware
-
-Go middleware follows the same pattern with Go-specific conventions:
-
-### Implementation
-
-```go
-package main
-
-import (
-    "fmt"
-    "net/http"
-    "github.com/yourorg/xrpc-go/server"
-)
-
-// Authentication middleware
-func authMiddleware(ctx *server.Context) *server.MiddlewareResult {
-    token := ctx.Request.Header.Get("Authorization")
-    if token == "" {
-        return server.NewMiddlewareError(fmt.Errorf("unauthorized"))
-    }
-
-    // Strip "Bearer " prefix
-    if len(token) > 7 && token[:7] == "Bearer " {
-        token = token[7:]
-    }
-
-    userId, role, err := validateToken(token)
-    if err != nil {
-        return server.NewMiddlewareError(fmt.Errorf("invalid token: %w", err))
-    }
-
-    // Extend context with user data
-    ctx.Data["userId"] = userId
-    ctx.Data["role"] = role
-    return server.NewMiddlewareResult(ctx)
-}
-
-// Logging middleware with request ID
-func loggingMiddleware(ctx *server.Context) *server.MiddlewareResult {
-    requestId := ctx.Request.Header.Get("X-Request-ID")
-    if requestId == "" {
-        requestId = generateUUID()
-    }
-
-    ctx.Data["requestId"] = requestId
-    log.Printf("[%s] %s %s", requestId, ctx.Request.Method, ctx.Request.URL.Path)
-
-    return server.NewMiddlewareResult(ctx)
-}
-```
-
-### Context Helpers
-
-The generated code includes type-safe helper functions for accessing context data:
-
-```go
-func getProfileHandler(ctx *server.Context, input server.GetProfileInput) (*server.GetProfileOutput, error) {
-    // Type-safe context access
-    userId, ok := server.GetUserId(ctx)
-    if !ok {
-        return nil, fmt.Errorf("user ID not in context")
-    }
-
-    role, _ := server.GetRole(ctx)
-    requestId, _ := server.GetRequestId(ctx)
-
-    log.Printf("[%s] User %s (role: %s) requesting profile %s",
-        requestId, userId, role, input.Id)
-
-    // Authorization check
-    if role != "admin" && userId != input.Id {
-        return nil, fmt.Errorf("not authorized")
-    }
-
-    user, err := db.FindUser(input.Id)
-    if err != nil {
-        return nil, err
-    }
-
-    return &server.GetProfileOutput{
-        Id:    user.ID,
-        Name:  user.Name,
-        Email: user.Email,
-    }, nil
-}
-```
-
-### Short-Circuiting
-
-Middleware can stop request processing by returning an error or custom response:
-
-```go
-func authMiddleware(ctx *server.Context) *server.MiddlewareResult {
-    token := ctx.Request.Header.Get("Authorization")
-
-    // Return error - sends 401 response
-    if token == "" {
-        return server.NewMiddlewareError(fmt.Errorf("unauthorized"))
-    }
-
-    // Or return a custom response
-    if isRateLimited(ctx.Request) {
-        return server.NewMiddlewareResponse(
-            http.StatusTooManyRequests,
-            map[string]string{"error": "rate limited"},
-        )
-    }
-
-    ctx.Data["userId"] = extractUserId(token)
-    return server.NewMiddlewareResult(ctx)
-}
-```
-
-### Registering Middleware
-
-Register middleware with `router.Use()`. Middleware executes in registration order:
-
-```go
-func main() {
-    router := server.NewRouter()
-
-    // Middleware executes in order: logging -> auth
-    router.Use(loggingMiddleware)
-    router.Use(authMiddleware)
-
-    router.Query("user.getProfile", getProfileHandler)
-
-    http.Handle("/api", router)
-    http.ListenAndServe(":8080", nil)
-}
-```
-
-## Common Patterns
-
-### Authentication
-
-```typescript
-// TypeScript
+// Middleware: validate token and add typed user data to context
 export const authMiddleware = createMiddleware('auth', async (req, ctx) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) throw new UnauthorizedError('Missing token');
@@ -292,103 +58,76 @@ export const authMiddleware = createMiddleware('auth', async (req, ctx) => {
   const payload = await verifyJWT(token);
   return { ...ctx, userId: payload.sub, role: payload.role };
 });
+
+// Handler: receives fully typed context
+export const getProfile = createHandler('user.getProfile', async (input, ctx) => {
+  // ctx.userId and ctx.role are typed from contract
+  if (ctx.role !== 'admin' && ctx.userId !== input.id) {
+    throw new Error('Not authorized');
+  }
+  return await db.users.findById(input.id);
+});
 ```
 
+Throwing an error in middleware short-circuits the request and returns an error response.
+
+## Go Implementation
+
+Go middleware follows the same pattern using `ctx.Data` for context storage:
+
 ```go
-// Go
+// Middleware: validate token and store user data in context
 func authMiddleware(ctx *server.Context) *server.MiddlewareResult {
-    token := extractBearerToken(ctx.Request)
+    token := ctx.Request.Header.Get("Authorization")
     if token == "" {
-        return server.NewMiddlewareError(fmt.Errorf("missing token"))
+        return server.NewMiddlewareError(fmt.Errorf("unauthorized"))
     }
 
-    payload, err := verifyJWT(token)
+    userId, role, err := validateToken(strings.TrimPrefix(token, "Bearer "))
     if err != nil {
         return server.NewMiddlewareError(err)
     }
 
-    ctx.Data["userId"] = payload.Sub
-    ctx.Data["role"] = payload.Role
+    ctx.Data["userId"] = userId
+    ctx.Data["role"] = role
     return server.NewMiddlewareResult(ctx)
 }
-```
 
-### Request ID Injection
+// Handler: use generated helpers to access typed context
+func getProfileHandler(ctx *server.Context, input server.GetProfileInput) (*server.GetProfileOutput, error) {
+    userId, _ := server.GetUserId(ctx)  // Type-safe helper
+    role, _ := server.GetRole(ctx)
 
-```typescript
-// TypeScript
-export const requestIdMiddleware = createMiddleware('requestId', async (req, ctx) => {
-  const requestId = req.headers['x-request-id'] || crypto.randomUUID();
-  return { ...ctx, requestId };
-});
-```
-
-```go
-// Go
-func requestIdMiddleware(ctx *server.Context) *server.MiddlewareResult {
-    requestId := ctx.Request.Header.Get("X-Request-ID")
-    if requestId == "" {
-        requestId = uuid.New().String()
+    if role != "admin" && userId != input.Id {
+        return nil, fmt.Errorf("not authorized")
     }
-    ctx.Data["requestId"] = requestId
-    return server.NewMiddlewareResult(ctx)
+    return db.FindUser(input.Id)
 }
 ```
 
-### Cookie Parsing
+Return `server.NewMiddlewareError()` to short-circuit with an error, or `server.NewMiddlewareResponse()` for a custom HTTP response.
 
-```typescript
-// TypeScript
-export const cookieMiddleware = createMiddleware('cookies', async (req, ctx) => {
-  const cookies = parseCookies(req.headers.cookie || '');
-  return { ...ctx, sessionId: cookies.sessionId };
-});
-```
+## Context Helpers
 
-```go
-// Go
-func cookieMiddleware(ctx *server.Context) *server.MiddlewareResult {
-    cookie, err := ctx.Request.Cookie("sessionId")
-    if err == nil {
-        ctx.Data["sessionId"] = cookie.Value
-    }
-    return server.NewMiddlewareResult(ctx)
-}
-```
+xRPC generates type-safe helpers for accessing context data:
 
-### Logging
+| Language | Store context | Retrieve context |
+|----------|--------------|------------------|
+| **TypeScript** | `return { ...ctx, userId }` | `ctx.userId` (directly typed) |
+| **Go** | `ctx.Data["userId"] = value` | `server.GetUserId(ctx)` (generated helper) |
 
-```typescript
-// TypeScript
-export const loggingMiddleware = createMiddleware('logging', async (req, ctx) => {
-  const start = Date.now();
-  console.log(`[${ctx.requestId}] --> ${req.method} ${req.url}`);
-
-  // Note: For response logging, use Express middleware wrapping
-  return ctx;
-});
-```
-
-```go
-// Go
-func loggingMiddleware(ctx *server.Context) *server.MiddlewareResult {
-    requestId := ctx.Data["requestId"]
-    log.Printf("[%s] --> %s %s", requestId, ctx.Request.Method, ctx.Request.URL.Path)
-    return server.NewMiddlewareResult(ctx)
-}
-```
+Go helpers return `(value, ok)` to handle missing context gracefully. TypeScript context is directly typed from your contract schema.
 
 ## Middleware Order
 
-Middleware executes in the order it's registered. Consider this order for common patterns:
+Middleware executes in registration order. Recommended ordering:
 
-1. **Request ID** - Generate/extract request ID first for logging
-2. **Logging** - Log incoming requests
-3. **Authentication** - Validate tokens and extract user info
-4. **Authorization** - Check permissions (can be per-handler instead)
+1. **Request ID** - Generate/extract ID first for tracing
+2. **Logging** - Log incoming requests with ID
+3. **Authentication** - Validate tokens, extract user info
+4. **Authorization** - Check permissions (or handle per-handler)
 
 ```go
-router := server.NewRouter()
 router.Use(requestIdMiddleware)  // 1st
 router.Use(loggingMiddleware)    // 2nd
 router.Use(authMiddleware)       // 3rd
