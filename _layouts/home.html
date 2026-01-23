@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: 'en' }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Dark theme meta -->
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="color-scheme" content="dark">
+
+    <title>{{ site.title }} - {{ site.tagline }}</title>
+    <meta name="description" content="{{ site.description }}">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ site.title }}">
+    <meta property="og:description" content="{{ site.description }}">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+
+    <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
+    {% feed_meta %}
+  </head>
+  <body>
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="wrapper">
+      {% include header.html %}
+
+      <main id="main-content" class="page-content home-page" aria-label="Content">
+        {% include hero.html %}
+
+        <!-- Problem Statement -->
+        <section class="problem-section">
+          <div class="container">
+            <div class="problem-content">
+              <h2>Type safety shouldn't stop at language boundaries</h2>
+              <p class="problem-text">
+                You've got a TypeScript backend. A Go microservice. A mobile app in Kotlin.
+                Every time you change an endpoint, you're updating types in three places.
+                One typo, and you're debugging production at 2am.
+              </p>
+              <p class="problem-solution">
+                <strong>What if you could define your API once and have type-safe code generated for every language?</strong>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section">
+          <div class="container">
+            <div class="section-header">
+              <h2>Built for teams who ship fast</h2>
+              <p>The simplicity of tRPC meets true cross-platform capability.</p>
+            </div>
+
+            <div class="features-grid">
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                </div>
+                <h3>One schema, every language</h3>
+                <p>Write your API contract in TypeScript with Zod. Generate perfectly typed clients and servers for Go, Kotlin, Python, and more.</p>
+              </div>
+
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                </div>
+                <h3>Catch bugs at compile time</h3>
+                <p>Type mismatches become compiler errors, not runtime crashes. Sleep better knowing your types are always in sync.</p>
+              </div>
+
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                </div>
+                <h3>Zero configuration</h3>
+                <p>No YAML files. No code annotations. No build plugins. Just run the CLI and get production-ready code.</p>
+              </div>
+
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"/>
+                    <polyline points="8 6 2 12 8 18"/>
+                  </svg>
+                </div>
+                <h3>Code that feels native</h3>
+                <p>Generated code follows each language's conventions. Go code looks like Go. Kotlin code looks like Kotlin. No weird wrappers.</p>
+              </div>
+
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                    <line x1="12" y1="22.08" x2="12" y2="12"/>
+                  </svg>
+                </div>
+                <h3>No runtime dependencies</h3>
+                <p>Generated code is self-contained. Standard library only. Ship it to production without adding bloat to your stack.</p>
+              </div>
+
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                  </svg>
+                </div>
+                <h3>Built-in validation</h3>
+                <p>Your Zod constraints become runtime validation in every language. min, max, email, uuid - it all just works.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- React + Go Story -->
+        <section class="comparison-section">
+          <div class="container">
+            <div class="section-header">
+              <h2>React frontend. Go backend. One source of truth.</h2>
+              <p>Define your API contract once. Generate a type-safe Go server and React client that just work together.</p>
+            </div>
+
+            <div class="story-flow">
+              <!-- Step 1: Define -->
+              <div class="story-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                  <div class="panel-header">
+                    <span class="panel-badge badge-primary">Define</span>
+                    <span class="panel-title">Your API Contract</span>
+                  </div>
+                  <div class="code-preview">
+                    <div class="code-header">
+                      <div class="code-dots"><span></span><span></span><span></span></div>
+                      <span class="code-title">api.ts</span>
+                    </div>
+                    <pre><code><span class="k">const</span> <span class="n">user</span> = <span class="nf">createEndpoint</span>({
+  <span class="na">getUser</span>: <span class="nf">query</span>({
+    <span class="na">input</span>: z.<span class="nf">object</span>({
+      <span class="na">id</span>: z.<span class="nf">string</span>().<span class="nf">uuid</span>()
+    }),
+    <span class="na">output</span>: z.<span class="nf">object</span>({
+      <span class="na">id</span>: z.<span class="nf">string</span>(),
+      <span class="na">name</span>: z.<span class="nf">string</span>().<span class="nf">min</span>(<span class="m">1</span>),
+      <span class="na">email</span>: z.<span class="nf">string</span>().<span class="nf">email</span>()
+    })
+  })
+});</code></pre>
+                  </div>
+                </div>
+              </div>
+
+              <div class="story-arrow">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <polyline points="19 12 12 19 5 12"/>
+                </svg>
+              </div>
+
+              <!-- Step 2: Generate -->
+              <div class="story-step generate-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                  <div class="panel-header">
+                    <span class="panel-badge badge-secondary">Generate</span>
+                    <span class="panel-title">Server & Client</span>
+                  </div>
+                  <div class="generate-panels">
+                    <div class="code-preview">
+                      <div class="code-header">
+                        <div class="code-dots"><span></span><span></span><span></span></div>
+                        <span class="code-title">Go Server</span>
+                      </div>
+                      <pre><code><span class="k">type</span> <span class="n">GetUserInput</span> <span class="k">struct</span> {
+  <span class="n">ID</span> <span class="k">string</span> <span class="s">`json:"id"`</span>
+}
+
+<span class="k">func</span> (<span class="n">h</span> *<span class="n">Handler</span>) <span class="nf">GetUser</span>(
+  <span class="n">input</span> <span class="n">GetUserInput</span>,
+) (*<span class="n">GetUserOutput</span>, <span class="k">error</span>) {
+  <span class="c">// Your logic here</span>
+}</code></pre>
+                    </div>
+                    <div class="code-preview">
+                      <div class="code-header">
+                        <div class="code-dots"><span></span><span></span><span></span></div>
+                        <span class="code-title">React Client</span>
+                      </div>
+                      <pre><code><span class="k">import</span> { useUserGetUser } <span class="k">from</span> <span class="s">'./client'</span>;
+
+<span class="k">function</span> <span class="nf">Profile</span>({ <span class="n">userId</span> }) {
+  <span class="k">const</span> { <span class="n">data</span>, <span class="n">isLoading</span> } =
+    <span class="nf">useUserGetUser</span>({ <span class="na">id</span>: <span class="n">userId</span> });
+
+  <span class="k">return</span> &lt;<span class="n">h1</span>&gt;{<span class="n">data</span>.<span class="n">name</span>}&lt;/<span class="n">h1</span>&gt;;
+}</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="story-arrow">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <polyline points="19 12 12 19 5 12"/>
+                </svg>
+              </div>
+
+              <!-- Step 3: Ship -->
+              <div class="story-step ship-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                  <div class="panel-header">
+                    <span class="panel-badge badge-success">Ship</span>
+                    <span class="panel-title">With Confidence</span>
+                  </div>
+                  <div class="ship-benefits">
+                    <div class="benefit-item">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>Change the schema, both sides update</span>
+                    </div>
+                    <div class="benefit-item">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>TypeScript catches mismatches at build time</span>
+                    </div>
+                    <div class="benefit-item">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>Go validates requests automatically</span>
+                    </div>
+                    <div class="benefit-item">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>Zero runtime type drift. Ever.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Start Section -->
+        <section class="quickstart-section">
+          <div class="container">
+            <h2>Get started in seconds</h2>
+            <p class="quickstart-subtitle">Generate a Go backend and React frontend from a single schema.</p>
+
+            <div class="quickstart-steps">
+              <div class="code-preview">
+                <div class="code-header">
+                  <div class="code-dots"><span></span><span></span><span></span></div>
+                  <span class="code-title">Terminal</span>
+                </div>
+                <pre><code><span class="c"># Install the CLI</span>
+npm install -g @xrpc/cli
+
+<span class="c"># Generate Go server + React client from your schema</span>
+xrpc generate --targets go,react --input src/api.ts
+
+<span class="nb">Generated 8 files in 0.3s</span>
+<span class="c">#   go/types.go, go/router.go, go/validation.go</span>
+<span class="c">#   react/client.ts, react/hooks.ts, react/types.ts</span></code></pre>
+              </div>
+            </div>
+
+            <div class="quickstart-cta">
+              <a href="{{ '/docs/usage/api-contract.html' | relative_url }}" class="btn btn-primary btn-lg">
+                Read the Guide
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Targets -->
+        <section class="targets-section">
+          <div class="container">
+            <div class="section-header">
+              <h2>Targets</h2>
+              <p>xRPC generates idiomatic code for multiple platforms from your Zod schema.<br>Each target produces self-contained, dependency-free code.</p>
+            </div>
+
+            <div class="targets-grid">
+              <a href="{{ '/docs/usage/typescript-server.html' | relative_url }}" class="glass-card target-card">
+                <div class="target-icon">TS</div>
+                <div class="target-content">
+                  <div class="target-header">
+                    <span class="target-name">TypeScript</span>
+                    <span class="badge badge-primary">Server & Client</span>
+                  </div>
+                  <p class="target-description">Full-stack type safety. Generate Express/Node servers and fetch-based clients with complete type inference.</p>
+                </div>
+              </a>
+
+              <a href="{{ '/docs/usage/go-server.html' | relative_url }}" class="glass-card target-card">
+                <div class="target-icon">Go</div>
+                <div class="target-content">
+                  <div class="target-header">
+                    <span class="target-name">Go</span>
+                    <span class="badge badge-primary">Server & Client</span>
+                  </div>
+                  <p class="target-description">Idiomatic Go with net/http handlers, struct validation, and JSON marshaling. Zero external dependencies.</p>
+                </div>
+              </a>
+
+              <a href="{{ '/docs/usage/kotlin-springboot-server.html' | relative_url }}" class="glass-card target-card">
+                <div class="target-icon">Kt</div>
+                <div class="target-content">
+                  <div class="target-header">
+                    <span class="target-name">Kotlin</span>
+                    <span class="badge badge-secondary">Spring Boot</span>
+                  </div>
+                  <p class="target-description">Spring Boot integration with data classes, validation annotations, and controller generation.</p>
+                </div>
+              </a>
+
+              <div class="glass-card target-card coming-soon">
+                <div class="target-icon">Py</div>
+                <div class="target-content">
+                  <div class="target-header">
+                    <span class="target-name">Python</span>
+                    <span class="badge badge-secondary">Coming Soon</span>
+                  </div>
+                  <p class="target-description">FastAPI servers and httpx clients with Pydantic models.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+          <div class="container">
+            <div class="cta-content">
+              <h2>Ready to ditch the type mismatches?</h2>
+              <p>Join developers building type-safe APIs across languages.</p>
+              <div class="cta-buttons">
+                <a href="{{ '/docs/usage/api-contract.html' | relative_url }}" class="btn btn-primary btn-lg">
+                  Start Building
+                </a>
+                <a href="https://github.com/{{ site.repository }}" class="btn btn-secondary btn-lg" target="_blank" rel="noopener">
+                  Star on GitHub
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {% include footer.html %}
+    </div>
+
+    <!-- Mobile menu script -->
+    <script>
+      (function() {
+        var toggle = document.querySelector('.mobile-menu-toggle');
+        var nav = document.querySelector('.mobile-nav');
+
+        if (toggle && nav) {
+          toggle.addEventListener('click', function() {
+            nav.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', nav.classList.contains('open'));
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
+
+<style>
+/* Home page specific styles */
+.home-page {
+  padding-top: var(--header-height);
+  padding-bottom: 0;
+}
+
+.home-page .features-section,
+.home-page .targets-section,
+.home-page .comparison-section {
+  padding: var(--space-3xl) 0;
+}
+
+/* Problem section */
+.problem-section {
+  padding: var(--space-3xl) 0;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.problem-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.problem-content h2 {
+  font-size: 1.75rem;
+  margin-top: 0;
+  margin-bottom: var(--space-lg);
+}
+
+.problem-text {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-lg);
+}
+
+.problem-solution {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  margin-bottom: 0;
+}
+
+.problem-solution strong {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Story flow section */
+.comparison-section {
+  background: var(--bg-primary);
+}
+
+.story-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.story-step {
+  display: flex;
+  gap: var(--space-lg);
+  width: 100%;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  background: var(--accent-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--bg-primary);
+}
+
+.step-content {
+  flex: 1;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.panel-badge {
+  font-size: 0.7rem;
+}
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.story-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 20px;
+  animation: pulseDown 2s ease-in-out infinite;
+}
+
+@keyframes pulseDown {
+  0%, 100% { opacity: 0.5; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(5px); }
+}
+
+.generate-panels {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+.generate-panels .code-preview pre {
+  font-size: 0.75rem;
+}
+
+.ship-benefits {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.benefit-item svg {
+  min-width: 20px;
+}
+
+.step-content .code-preview pre {
+  font-size: 0.8rem;
+}
+
+/* Quick start */
+.quickstart-section {
+  padding: var(--space-3xl) 0;
+  text-align: center;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.quickstart-section h2 {
+  margin-top: 0;
+}
+
+.quickstart-subtitle {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xl);
+}
+
+.quickstart-section .container {
+  max-width: 700px;
+}
+
+.quickstart-section .code-preview {
+  text-align: left;
+  margin-bottom: var(--space-xl);
+}
+
+.quickstart-section .nb {
+  color: var(--success);
+}
+
+.quickstart-cta {
+  margin-top: var(--space-xl);
+}
+
+/* Targets grid */
+.targets-section {
+  padding: var(--space-3xl) 0;
+}
+
+.targets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.target-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-lg);
+  padding: var(--space-xl);
+  text-decoration: none;
+}
+
+.target-card:hover {
+  transform: translateY(-4px);
+}
+
+.target-icon {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+}
+
+.target-content {
+  flex: 1;
+}
+
+.target-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.target-name {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.target-description {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.target-card.coming-soon {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.target-card.coming-soon:hover {
+  transform: none;
+}
+
+/* CTA section */
+.cta-section {
+  padding: var(--space-3xl) 0 calc(var(--space-3xl) * 1.5);
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+    var(--bg-primary);
+}
+
+.cta-content {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.cta-content h2 {
+  font-size: 2rem;
+  margin-top: 0;
+  margin-bottom: var(--space-md);
+}
+
+.cta-content p {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-xl);
+}
+
+.cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .generate-panels {
+    grid-template-columns: 1fr;
+  }
+
+  .story-step {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .step-number {
+    margin-bottom: var(--space-sm);
+  }
+
+  .story-arrow {
+    margin-left: 0;
+    align-self: center;
+  }
+
+  .targets-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+  }
+
+  .cta-buttons .btn {
+    width: 100%;
+  }
+}
+
+/* Syntax highlighting for code blocks */
+.code-preview .k { color: #c792ea; }
+.code-preview .s { color: #c3e88d; }
+.code-preview .n, .code-preview .na { color: #82aaff; }
+.code-preview .nf { color: #82aaff; }
+.code-preview .m { color: #f78c6c; }
+.code-preview .c { color: #5a5a70; font-style: italic; }
+.code-preview .nb { color: #10b981; }
+</style>
