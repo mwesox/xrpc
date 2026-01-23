@@ -186,7 +186,7 @@ const greeting = createEndpoint({
   }),
 });
 
-export const router = createRouter({
+export const api = createRouter({
   middleware: [
     async (req, ctx) => {
       // Extract auth token

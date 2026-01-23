@@ -13,11 +13,11 @@ This guide shows how to define your xRPC API contract using TypeScript and Zod s
 An xRPC API contract uses a hierarchical structure:
 
 - **Router**: Primary grouping mechanism that exports all endpoints (single export per contract)
-- **Endpoints**: Collections of related endpoints (like protobuf services)
-- **Endpoints**: Individual RPC methods (queries and mutations) with input/output schemas
+- **Endpoints**: Named API namespaces (like `greeting`, `user`, `product`)
+- **Queries & Mutations**: Individual RPC methods within an endpoint
 - **Types**: Shared data schemas defined with Zod (like protobuf messages)
 
-The hierarchy is: **Router → Endpoints → Endpoints**
+The hierarchy is: **Router → Endpoints → Queries/Mutations**
 
 ## Simple Example
 
@@ -29,14 +29,14 @@ import { createRouter, createEndpoint, query, mutation } from '@xrpc/core';
 const GreetingInput = z.object({ name: z.string() });
 const GreetingOutput = z.object({ message: z.string() });
 
-// Endpoint: Collection of related endpoints
+// Endpoint: Named API namespace
 const greeting = createEndpoint({
-  // Endpoint: Individual RPC method (query)
+  // Query: Read operation
   greet: query({
     input: GreetingInput,
     output: GreetingOutput,
   }),
-  // Endpoint: Individual RPC method (mutation)
+  // Mutation: Write operation
   setGreeting: mutation({
     input: z.object({ name: z.string(), greeting: z.string() }),
     output: GreetingOutput,
@@ -44,7 +44,7 @@ const greeting = createEndpoint({
 });
 
 // Router: Primary grouping mechanism (single export)
-export const router = createRouter({
+export const api = createRouter({
   greeting,  // Endpoint
 });
 ```
@@ -80,7 +80,7 @@ const product = createEndpoint({
 });
 
 // Router: Primary grouping mechanism (single export)
-export const router = createRouter({
+export const api = createRouter({
   user,      // Endpoint
   product,   // Endpoint
 });
@@ -94,7 +94,7 @@ For simple cases, define types inline:
 import { z } from 'zod';
 import { createRouter, createEndpoint, query, mutation } from '@xrpc/core';
 
-export const router = createRouter({
+export const api = createRouter({
   user: createEndpoint({
     getUser: query({
       input: z.object({ id: z.string() }),
@@ -121,7 +121,7 @@ const UserId = z.string();
 const User = z.object({ id: UserId, name: z.string(), email: z.string() });
 const UserUpdate = z.object({ name: z.string().optional(), email: z.string().optional() });
 
-export const router = createRouter({
+export const api = createRouter({
   user: createEndpoint({
     getUser: query({
       input: z.object({ id: UserId }),
@@ -137,7 +137,7 @@ export const router = createRouter({
 
 ## Query vs Mutation
 
-Endpoints can be either queries or mutations:
+Each method within an endpoint is either a query or mutation:
 
 - **Query**: Read operations that don't modify state
 - **Mutation**: Write operations that modify state

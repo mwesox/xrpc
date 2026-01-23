@@ -56,7 +56,7 @@ const user = createEndpoint({
   }),
 });
 
-export const router = createRouter({
+export const api = createRouter({
   middleware: [authMiddleware, loggingMiddleware],
   user,
 });

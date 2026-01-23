@@ -27,7 +27,7 @@ First, define your API contract (see `api-contract.md` for contract definition):
 import { z } from 'zod';
 import { createRouter, createEndpoint, query, mutation } from '@xrpc/core';
 
-export const router = createRouter({
+export const api = createRouter({
   greeting: createEndpoint({
     greet: query({
       input: z.object({ name: z.string() }),
@@ -40,7 +40,7 @@ export const router = createRouter({
   }),
 });
 
-export type Router = typeof router;
+export type Api = typeof api;
 ```
 
 Then, generate code and implement your server with handlers:
@@ -98,12 +98,12 @@ fun main(args: Array<String>) {
 }
 ```
 
-## Router, Endpoints, and Endpoints
+## Router, Endpoints, and Queries/Mutations
 
 xRPC uses a hierarchical structure:
 - **Router**: Primary grouping mechanism that exports all endpoints
-- **Endpoints**: Collections of related endpoints (like `greeting`, `user`, `product`)
-- **Endpoints**: Individual RPC methods (queries and mutations) within endpoints
+- **Endpoints**: Named API namespaces (like `greeting`, `user`, `product`)
+- **Queries & Mutations**: Individual RPC methods within an endpoint
 
 ## Multiple Endpoints
 
@@ -111,7 +111,7 @@ When working with multiple endpoints in your router:
 
 ```typescript
 // contract.ts
-export const router = createRouter({
+export const api = createRouter({
   user: createEndpoint({
     getUser: query({ ... }),
     updateUser: mutation({ ... }),
@@ -122,7 +122,7 @@ export const router = createRouter({
   }),
 });
 
-export type Router = typeof router;
+export type Api = typeof api;
 ```
 
 Implement handlers for all endpoints:
@@ -217,7 +217,7 @@ interface XrpcHandlers {
 
 By implementing `XrpcHandlers`, Kotlin ensures:
 
-- **Structure matches contract**: All endpoints and endpoints must be implemented
+- **Structure matches contract**: All endpoints and their queries/mutations must be implemented
 - **Input types are correct**: Handler input types match Zod schemas
 - **Output types are correct**: Handler return types match Zod schemas
 - **Autocomplete**: Full IntelliSense support for handler methods
@@ -236,15 +236,15 @@ class MyHandlers : XrpcHandlers {
         return GreetOutput()  // Compile error
     }
     // ❌ Error: 'greetingSetGreeting' must be overridden
-    // Kotlin enforces all endpoints must be implemented
+    // Kotlin enforces all queries/mutations must be implemented
 }
 ```
 
 ### Benefits
 
 - **Compile-time safety**: Catch errors before running code
-- **Refactoring support**: Rename endpoints/endpoints with confidence
-- **Autocomplete**: IDE suggests available endpoints and endpoints
+- **Refactoring support**: Rename endpoints and methods with confidence
+- **Autocomplete**: IDE suggests available endpoints and their methods
 - **Documentation**: Types serve as inline documentation
 
 ## Handler Function
@@ -412,15 +412,15 @@ interface XrpcHandlers {
 
 ## Handler Naming Convention
 
-Handler method names follow the pattern: `{endpoint}{Endpoint}`
+Handler method names follow the pattern: `{endpoint}{Method}`
 
 - Endpoint name is camelCase (e.g., `greeting` → `greeting`)
-- Endpoint name is PascalCase (e.g., `greet` → `Greet`)
+- Method name is PascalCase (e.g., `greet` → `Greet`)
 - Combined: `greetingGreet`, `greetingSetGreeting`
 
 For nested endpoints or multiple words, the pattern remains consistent:
-- `user` endpoint, `getUser` endpoint → `userGetUser`
-- `product` endpoint, `listProducts` endpoint → `productListProducts`
+- `user` endpoint, `getUser` method → `userGetUser`
+- `product` endpoint, `listProducts` method → `productListProducts`
 
 ## Error Handling
 

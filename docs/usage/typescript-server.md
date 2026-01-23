@@ -27,7 +27,7 @@ First, define your API contract (see `api-contract.md` for contract definition):
 import { z } from 'zod';
 import { createRouter, createEndpoint, query, mutation } from '@xrpc/core';
 
-export const router = createRouter({
+export const api = createRouter({
   greeting: createEndpoint({
     greet: query({
       input: z.object({ name: z.string() }),
@@ -40,7 +40,7 @@ export const router = createRouter({
   }),
 });
 
-export type Router = typeof router;
+export type Api = typeof api;
 ```
 
 Then, generate code and implement your server with handlers:
@@ -87,12 +87,12 @@ app.listen(3000, () => {
 });
 ```
 
-## Router, Endpoints, and Endpoints
+## Router, Endpoints, and Queries/Mutations
 
 xRPC uses a hierarchical structure:
 - **Router**: Primary grouping mechanism that exports all endpoints
-- **Endpoints**: Collections of related endpoints (like `greeting`, `user`, `product`)
-- **Endpoints**: Individual RPC methods (queries and mutations) within endpoints
+- **Endpoints**: Named API namespaces (like `greeting`, `user`, `product`)
+- **Queries & Mutations**: Individual RPC methods within an endpoint
 
 ## Multiple Endpoints
 
@@ -100,7 +100,7 @@ When working with multiple endpoints in your router:
 
 ```typescript
 // contract.ts
-export const router = createRouter({
+export const api = createRouter({
   user: createEndpoint({
     getUser: query({ ... }),
     updateUser: mutation({ ... }),
@@ -111,7 +111,7 @@ export const router = createRouter({
   }),
 });
 
-export type Router = typeof router;
+export type Api = typeof api;
 ```
 
 Implement handlers for all endpoints:
@@ -121,7 +121,7 @@ Implement handlers for all endpoints:
 import { createServer } from './generated/typescript-express/server';  // Generated code
 import type { ServerRouter } from './generated/typescript-express/types';  // Generated types
 
-// Type-safe: TypeScript ensures all endpoints (user, product) and their endpoints are implemented
+// Type-safe: TypeScript ensures all endpoints (user, product) and their queries/mutations are implemented
 const serverRouter: ServerRouter = {
   user: {
     getUser: {
@@ -190,7 +190,7 @@ export type SetGreetingOutput = { message: string };
 
 By typing `serverRouter` with `ServerRouter`, TypeScript ensures:
 
-- **Structure matches contract**: All endpoints and endpoints must be implemented
+- **Structure matches contract**: All endpoints and their queries/mutations must be implemented
 - **Input types are correct**: Handler input types match Zod schemas
 - **Output types are correct**: Handler return types match Zod schemas
 - **Autocomplete**: Full IntelliSense support for handler structure
@@ -210,7 +210,7 @@ const serverRouter: ServerRouter = {
       }),
     },
     // ❌ Error: Property 'setGreeting' is missing
-    // TypeScript enforces all endpoints must be implemented
+    // TypeScript enforces all queries/mutations must be implemented
   },
 };
 ```
@@ -218,8 +218,8 @@ const serverRouter: ServerRouter = {
 ### Benefits
 
 - **Compile-time safety**: Catch errors before running code
-- **Refactoring support**: Rename endpoints/endpoints with confidence
-- **Autocomplete**: IDE suggests available endpoints and endpoints
+- **Refactoring support**: Rename endpoints and methods with confidence
+- **Autocomplete**: IDE suggests available endpoints and their methods
 - **Documentation**: Types serve as inline documentation
 
 ## Handler Function
