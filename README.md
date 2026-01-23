@@ -27,7 +27,7 @@ Traditional API development forces a choice: type safety within a single languag
 npm install -g @xrpc/cli
 ```
 
-Define your API with Zod:
+Define your API with the xRPC DSL:
 
 ```typescript
 import { z } from 'zod';
