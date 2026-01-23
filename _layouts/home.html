@@ -55,77 +55,6 @@
           </div>
         </section>
 
-        <!-- Animated API Diagram -->
-        <section class="diagram-section">
-          <div class="container">
-            <div class="section-header">
-              <h2>One schema. Every platform.</h2>
-              <p>Your TypeScript + Zod definition generates type-safe code for any target.</p>
-            </div>
-
-            <div class="api-diagram">
-              <svg class="api-diagram-svg" viewBox="0 0 700 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- React box (left) -->
-                <g class="tech-box tech-box-left">
-                  <rect x="20" y="60" width="140" height="80" rx="12" fill="#12121a" stroke="#61dafb" stroke-width="2"/>
-                  <text x="90" y="95" text-anchor="middle" fill="#61dafb" font-family="var(--font-mono)" font-size="14" font-weight="600">React</text>
-                  <text x="90" y="115" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="11">Client + Hooks</text>
-                  <!-- React atom icon -->
-                  <circle cx="90" cy="70" r="4" fill="none" stroke="#61dafb" stroke-width="1"/>
-                  <ellipse cx="90" cy="70" rx="12" ry="5" fill="none" stroke="#61dafb" stroke-width="1" transform="rotate(0 90 70)"/>
-                  <ellipse cx="90" cy="70" rx="12" ry="5" fill="none" stroke="#61dafb" stroke-width="1" transform="rotate(60 90 70)"/>
-                  <ellipse cx="90" cy="70" rx="12" ry="5" fill="none" stroke="#61dafb" stroke-width="1" transform="rotate(-60 90 70)"/>
-                </g>
-
-                <!-- Connection line left -->
-                <path class="connection-line connection-line-left" d="M160 100 L280 100" stroke="url(#gradient-left)" stroke-width="2" stroke-linecap="round"/>
-
-                <!-- API.ts box (center) -->
-                <g class="api-box">
-                  <rect x="280" y="50" width="140" height="100" rx="12" fill="#12121a" stroke="url(#gradient-center)" stroke-width="2"/>
-                  <text x="350" y="90" text-anchor="middle" fill="#00d4ff" font-family="var(--font-mono)" font-size="16" font-weight="700">api.ts</text>
-                  <text x="350" y="112" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="11">Zod Schema</text>
-                  <text x="350" y="130" text-anchor="middle" fill="#5a5a70" font-family="var(--font-sans)" font-size="10">Single source of truth</text>
-                </g>
-
-                <!-- Connection line right -->
-                <path class="connection-line connection-line-right" d="M420 100 L540 100" stroke="url(#gradient-right)" stroke-width="2" stroke-linecap="round"/>
-
-                <!-- Go box (right) -->
-                <g class="tech-box tech-box-right">
-                  <rect x="540" y="60" width="140" height="80" rx="12" fill="#12121a" stroke="#00add8" stroke-width="2"/>
-                  <text x="610" y="95" text-anchor="middle" fill="#00add8" font-family="var(--font-mono)" font-size="14" font-weight="600">Go</text>
-                  <text x="610" y="115" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="11">Server + Types</text>
-                  <!-- Go text logo -->
-                  <text x="610" y="75" text-anchor="middle" fill="#00add8" font-family="var(--font-mono)" font-size="12" font-weight="700">{ }</text>
-                </g>
-
-                <!-- Gradients -->
-                <defs>
-                  <linearGradient id="gradient-left" x1="160" y1="100" x2="280" y2="100" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#61dafb"/>
-                    <stop offset="1" stop-color="#00d4ff"/>
-                  </linearGradient>
-                  <linearGradient id="gradient-right" x1="420" y1="100" x2="540" y2="100" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#00d4ff"/>
-                    <stop offset="1" stop-color="#00add8"/>
-                  </linearGradient>
-                  <linearGradient id="gradient-center" x1="280" y1="50" x2="420" y2="150" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#00d4ff"/>
-                    <stop offset="1" stop-color="#7c3aed"/>
-                  </linearGradient>
-                </defs>
-
-                <!-- Arrow heads -->
-                <polygon class="connection-line connection-line-left" points="275,95 285,100 275,105" fill="#00d4ff"/>
-                <polygon class="connection-line connection-line-right" points="535,95 545,100 535,105" fill="#00add8"/>
-              </svg>
-            </div>
-
-            <p class="diagram-caption">One schema definition generates type-safe code for every platform</p>
-          </div>
-        </section>
-
         <!-- Features Section -->
         <section class="features-section">
           <div class="container">
@@ -239,6 +168,18 @@
     })
   })
 });</code></pre>
+                  </div>
+                  <div class="comparison-callout">
+                    <div class="comparison-callout-item">
+                      <span>Like <strong>OpenAPI</strong></span>
+                      <span class="vs">but</span>
+                      <span>in TypeScript</span>
+                    </div>
+                    <div class="comparison-callout-item">
+                      <span>Like <strong>tRPC</strong></span>
+                      <span class="vs">but</span>
+                      <span>cross-platform</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -537,33 +478,35 @@ xrpc generate --targets go,react --input src/api.ts
   background-clip: text;
 }
 
-/* Diagram section */
-.diagram-section {
-  padding: var(--space-3xl) 0;
-  background: var(--bg-primary);
-}
-
-.diagram-section .section-header {
-  text-align: center;
-  margin-bottom: var(--space-xl);
-}
-
-.diagram-section .section-header h2 {
-  font-size: 1.875rem;
-  margin: 0 0 var(--space-sm);
-}
-
-.diagram-section .section-header p {
-  color: var(--text-secondary);
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.diagram-caption {
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 0.9rem;
+/* Comparison callout */
+.comparison-callout {
+  display: flex;
+  gap: var(--space-lg);
   margin-top: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.comparison-callout-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.comparison-callout-item strong {
+  color: var(--accent-primary);
+}
+
+.comparison-callout-item .vs {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 0 var(--space-xs);
 }
 
 /* Code title with tech badge */

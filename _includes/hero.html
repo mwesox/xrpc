@@ -42,72 +42,214 @@
     </div>
   </div>
 
-  <!-- Code preview -->
-  <div class="hero-code-preview">
-    <p class="api-context">Your API contract &mdash; a schema that describes your endpoints</p>
-    <div class="code-preview">
-      <div class="code-header">
-        <div class="code-dots">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <span class="code-title">api.ts</span>
-      </div>
-      <pre><code class="language-typescript"><span class="k">import</span> { z } <span class="k">from</span> <span class="s">'zod'</span>;
-<span class="k">import</span> { createRouter, createEndpoint, query } <span class="k">from</span> <span class="s">'@xrpc/core'</span>;
+  <!-- Hub-and-spoke API Diagram -->
+  <div class="hero-diagram">
+    <div class="api-diagram">
+      <svg class="api-diagram-svg" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Gradients -->
+        <defs>
+          <linearGradient id="hero-gradient-center" x1="220" y1="145" x2="380" y2="255" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#00d4ff"/>
+            <stop offset="1" stop-color="#7c3aed"/>
+          </linearGradient>
+          <linearGradient id="hero-gradient-react" x1="300" y1="145" x2="300" y2="30" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#00d4ff"/>
+            <stop offset="1" stop-color="#61dafb"/>
+          </linearGradient>
+          <linearGradient id="hero-gradient-go" x1="220" y1="200" x2="80" y2="200" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#00d4ff"/>
+            <stop offset="1" stop-color="#00add8"/>
+          </linearGradient>
+          <linearGradient id="hero-gradient-ts" x1="380" y1="200" x2="520" y2="200" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#00d4ff"/>
+            <stop offset="1" stop-color="#3178c6"/>
+          </linearGradient>
+          <linearGradient id="hero-gradient-kotlin" x1="300" y1="255" x2="300" y2="370" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#00d4ff"/>
+            <stop offset="1" stop-color="#7f52ff"/>
+          </linearGradient>
+        </defs>
 
-<span class="c">// Define an endpoint with typed input/output</span>
-<span class="k">const</span> <span class="n">greeting</span> = <span class="nf">createEndpoint</span>({
-  <span class="na">greet</span>: <span class="nf">query</span>({
-    <span class="na">input</span>: z.<span class="nf">object</span>({ <span class="na">name</span>: z.<span class="nf">string</span>().<span class="nf">min</span>(<span class="m">1</span>) }),  <span class="c">// Validated at runtime</span>
-    <span class="na">output</span>: z.<span class="nf">object</span>({ <span class="na">message</span>: z.<span class="nf">string</span>() }), <span class="c">// Type-safe response</span>
-  }),
-});
+        <!-- Connection lines (animated) -->
+        <!-- To React (top) -->
+        <path class="connection-line connection-line-react" d="M300 145 L300 85" stroke="url(#hero-gradient-react)" stroke-width="2" stroke-linecap="round"/>
+        <polygon class="connection-line connection-line-react" points="295,90 300,80 305,90" fill="#61dafb"/>
 
-<span class="c">// Export router - generates clients + servers</span>
-<span class="k">export const</span> <span class="n">router</span> = <span class="nf">createRouter</span>({ greeting });</code></pre>
+        <!-- To Go (left) -->
+        <path class="connection-line connection-line-go" d="M220 200 L165 200" stroke="url(#hero-gradient-go)" stroke-width="2" stroke-linecap="round"/>
+        <polygon class="connection-line connection-line-go" points="170,195 160,200 170,205" fill="#00add8"/>
+
+        <!-- To TypeScript (right) -->
+        <path class="connection-line connection-line-ts" d="M380 200 L435 200" stroke="url(#hero-gradient-ts)" stroke-width="2" stroke-linecap="round"/>
+        <polygon class="connection-line connection-line-ts" points="430,195 440,200 430,205" fill="#3178c6"/>
+
+        <!-- To Kotlin (bottom) -->
+        <path class="connection-line connection-line-kotlin" d="M300 255 L300 315" stroke="url(#hero-gradient-kotlin)" stroke-width="2" stroke-linecap="round"/>
+        <polygon class="connection-line connection-line-kotlin" points="295,310 300,320 305,310" fill="#7f52ff"/>
+
+        <!-- React box (top) -->
+        <g class="tech-box tech-box-react">
+          <rect x="215" y="5" width="170" height="80" rx="12" fill="#12121a" stroke="#61dafb" stroke-width="2"/>
+          <!-- React atom icon -->
+          <g transform="translate(300, 30)">
+            <circle r="4" fill="#61dafb"/>
+            <ellipse rx="14" ry="5.5" fill="none" stroke="#61dafb" stroke-width="1.2"/>
+            <ellipse rx="14" ry="5.5" fill="none" stroke="#61dafb" stroke-width="1.2" transform="rotate(60)"/>
+            <ellipse rx="14" ry="5.5" fill="none" stroke="#61dafb" stroke-width="1.2" transform="rotate(-60)"/>
+          </g>
+          <text x="300" y="58" text-anchor="middle" fill="#61dafb" font-family="var(--font-mono)" font-size="14" font-weight="600">React</text>
+          <text x="300" y="74" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="11">Client + Hooks</text>
+        </g>
+
+        <!-- Go box (left) -->
+        <g class="tech-box tech-box-go">
+          <rect x="0" y="155" width="160" height="90" rx="12" fill="#12121a" stroke="#00add8" stroke-width="2"/>
+          <text x="80" y="185" text-anchor="middle" fill="#00add8" font-family="var(--font-mono)" font-size="12" font-weight="700">{ }</text>
+          <text x="80" y="208" text-anchor="middle" fill="#00add8" font-family="var(--font-mono)" font-size="14" font-weight="600">Go</text>
+          <text x="80" y="228" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="11">Server + Types</text>
+        </g>
+
+        <!-- api.ts box (center) - larger and emphasized -->
+        <g class="api-box">
+          <rect x="220" y="145" width="160" height="110" rx="14" fill="#12121a" stroke="url(#hero-gradient-center)" stroke-width="2.5"/>
+          <text x="300" y="185" text-anchor="middle" fill="#00d4ff" font-family="var(--font-mono)" font-size="18" font-weight="700">api.ts</text>
+          <text x="300" y="210" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="12">Zod Schema</text>
+          <text x="300" y="232" text-anchor="middle" fill="#5a5a70" font-family="var(--font-sans)" font-size="10">Single source of truth</text>
+        </g>
+
+        <!-- TypeScript box (right) -->
+        <g class="tech-box tech-box-ts">
+          <rect x="440" y="155" width="160" height="90" rx="12" fill="#12121a" stroke="#3178c6" stroke-width="2"/>
+          <text x="520" y="185" text-anchor="middle" fill="#3178c6" font-family="var(--font-mono)" font-size="12" font-weight="700">TS</text>
+          <text x="520" y="208" text-anchor="middle" fill="#3178c6" font-family="var(--font-mono)" font-size="14" font-weight="600">TypeScript</text>
+          <text x="520" y="228" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="11">Server + Client</text>
+        </g>
+
+        <!-- Kotlin box (bottom) -->
+        <g class="tech-box tech-box-kotlin">
+          <rect x="215" y="320" width="170" height="80" rx="12" fill="#12121a" stroke="#7f52ff" stroke-width="2"/>
+          <text x="300" y="350" text-anchor="middle" fill="#7f52ff" font-family="var(--font-mono)" font-size="12" font-weight="700">Kt</text>
+          <text x="300" y="373" text-anchor="middle" fill="#7f52ff" font-family="var(--font-mono)" font-size="14" font-weight="600">Kotlin</text>
+          <text x="300" y="389" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="11">Spring Boot</text>
+        </g>
+      </svg>
     </div>
-    <div class="comparison-callout">
-      <div class="comparison-callout-item">
-        <span>Like <strong>OpenAPI</strong></span>
-        <span class="vs">but</span>
-        <span>in TypeScript</span>
-      </div>
-      <div class="comparison-callout-item">
-        <span>Like <strong>tRPC</strong></span>
-        <span class="vs">but</span>
-        <span>cross-platform</span>
-      </div>
-    </div>
+    <p class="diagram-caption">One schema. Every platform.</p>
   </div>
 </section>
 
 <style>
-.hero-code-preview {
-  max-width: 700px;
-  margin: var(--space-3xl) auto 0;
+/* Hero diagram */
+.hero-diagram {
+  max-width: 600px;
+  margin: var(--space-2xl) auto 0;
   padding: 0 var(--space-lg);
-  animation: fadeInUp 0.8s ease-out 0.8s both;
+  animation: fadeInUp 0.8s ease-out 0.6s both;
 }
 
-.hero-code-preview .code-preview {
-  box-shadow: var(--shadow-lg), 0 0 60px rgba(0, 212, 255, 0.1);
-}
-
-.hero-code-preview pre {
+.hero-diagram .api-diagram {
+  background: rgba(18, 18, 26, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
   padding: var(--space-lg);
-  font-size: 0.85rem;
-  line-height: 1.7;
+  backdrop-filter: blur(10px);
 }
 
-.hero-code-preview code {
-  color: var(--text-primary);
+.hero-diagram .api-diagram-svg {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
-.hero-code-preview .k { color: #c792ea; }
-.hero-code-preview .s { color: #c3e88d; }
-.hero-code-preview .n, .hero-code-preview .na { color: #82aaff; }
-.hero-code-preview .nf { color: #82aaff; }
-.hero-code-preview .m { color: #f78c6c; }
+.hero-diagram .diagram-caption {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: var(--space-md);
+  margin-bottom: 0;
+}
+
+/* Tech boxes */
+.hero-diagram .tech-box,
+.hero-diagram .api-box {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.hero-diagram .api-box {
+  animation-delay: 0.3s;
+}
+
+.hero-diagram .tech-box-react {
+  animation-delay: 0.6s;
+}
+
+.hero-diagram .tech-box-go {
+  animation-delay: 0.8s;
+}
+
+.hero-diagram .tech-box-ts {
+  animation-delay: 1.0s;
+}
+
+.hero-diagram .tech-box-kotlin {
+  animation-delay: 1.2s;
+}
+
+/* Connection lines animation */
+.hero-diagram .connection-line {
+  opacity: 0;
+}
+
+.hero-diagram .connection-line-react {
+  animation: drawLine 0.4s ease-out 0.5s forwards;
+}
+
+.hero-diagram .connection-line-go {
+  animation: drawLine 0.4s ease-out 0.7s forwards;
+}
+
+.hero-diagram .connection-line-ts {
+  animation: drawLine 0.4s ease-out 0.9s forwards;
+}
+
+.hero-diagram .connection-line-kotlin {
+  animation: drawLine 0.4s ease-out 1.1s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes drawLine {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile adjustments for diagram */
+@media (max-width: 600px) {
+  .hero-diagram {
+    padding: 0 var(--space-sm);
+  }
+
+  .hero-diagram .api-diagram {
+    padding: var(--space-md);
+  }
+
+  .hero-diagram .api-diagram-svg {
+    min-height: 300px;
+  }
+}
 </style>
