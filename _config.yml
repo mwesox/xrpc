@@ -1,5 +1,5 @@
 # Site settings
-title: xRpc
+title: xRPC
 description: Type-safe, cross-platform RPC framework with fantastic developer experience
 tagline: "Define once. Generate everywhere."
 url: "https://mwesox.github.io"
