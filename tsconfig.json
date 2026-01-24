@@ -3,7 +3,7 @@
     "target": "ES2022",
     "module": "ESNext",
     "lib": ["ES2022"],
-    "types": ["bun"],
+    "types": ["bun", "node"],
     "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
@@ -14,5 +14,5 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "exclude": ["node_modules", "dist", "generated", "examples", "tests"]
+  "exclude": ["node_modules", "dist", "generated", "examples", "tests", "tmp"]
 }

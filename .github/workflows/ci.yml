@@ -59,6 +59,9 @@ jobs:
           name: node_modules
           path: .
 
+      - name: Build packages
+        run: bun run build
+
       - name: TypeScript type check
         run: bun run tsc --noEmit
 
