@@ -97,10 +97,9 @@ All generated code includes:
 
 ## Documentation
 
-- [API Contract Definition](./docs/guides/api-contract.md)
-- [Go Server](./docs/guides/go-server.md)
-- [TypeScript Server](./docs/guides/typescript-server.md)
-- [Examples](./examples/)
+Check out the [full documentation](https://mwesox.github.io/xrpc/) for detailed guides.
+
+**Hands-on tutorial:** See the [x-rpc TODO App](./examples/x-rpc-todo-app/) for a complete walkthrough building a fullstack app with a Go backend and React frontend from a single contract.
 
 ## Contributing
 
