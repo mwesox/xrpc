@@ -10,12 +10,12 @@ export interface EndpointDefinition {
 /**
  * Creates a query endpoint definition.
  * Queries are typically used for read operations that don't modify server state.
- * 
+ *
  * @param config - Configuration object containing input and output Zod schemas
  * @param config.input - Zod schema for validating the input parameters
  * @param config.output - Zod schema for validating the output response
  * @returns An endpoint definition with type 'query'
- * 
+ *
  * @example
  * ```typescript
  * const getUser = query({
@@ -38,12 +38,12 @@ export function query(config: {
 /**
  * Creates a mutation endpoint definition.
  * Mutations are typically used for write operations that modify server state.
- * 
+ *
  * @param config - Configuration object containing input and output Zod schemas
  * @param config.input - Zod schema for validating the input parameters
  * @param config.output - Zod schema for validating the output response
  * @returns An endpoint definition with type 'mutation'
- * 
+ *
  * @example
  * ```typescript
  * const createUser = mutation({

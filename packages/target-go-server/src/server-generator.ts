@@ -1,5 +1,5 @@
 import { GoBuilder } from './go-builder';
-import { toPascalCase } from '@xrpckit/generator-core';
+import { toPascalCase } from '@xrpckit/codegen';
 import type { ContractDefinition, Endpoint } from '@xrpckit/parser';
 
 // Helper to convert "greeting.greet" to "GreetingGreet"

@@ -12,12 +12,12 @@ export function extractValidationRules(schema: ZodType): ValidationRules | undef
 
   // Unwrap optional/nullable to get to the base schema
   // Handle chained optional/nullable correctly
-  let baseSchema = schema;
+  let baseSchema: ZodType = schema;
   while (baseSchema instanceof z.ZodOptional || baseSchema instanceof z.ZodNullable) {
     if (baseSchema instanceof z.ZodOptional) {
-      baseSchema = baseSchema.unwrap();
+      baseSchema = baseSchema.unwrap() as ZodType;
     } else if (baseSchema instanceof z.ZodNullable) {
-      baseSchema = baseSchema.unwrap();
+      baseSchema = baseSchema.unwrap() as ZodType;
     }
   }
 
@@ -116,7 +116,7 @@ export function extractValidationRules(schema: ZodType): ValidationRules | undef
 export function extractTypeInfo(schema: ZodType): TypeReference {
   // Handle optional
   if (schema instanceof z.ZodOptional) {
-    const unwrapped = schema.unwrap();
+    const unwrapped = schema.unwrap() as ZodType;
     return {
       kind: 'optional',
       baseType: extractTypeInfo(unwrapped),
@@ -125,7 +125,7 @@ export function extractTypeInfo(schema: ZodType): TypeReference {
 
   // Handle nullable
   if (schema instanceof z.ZodNullable) {
-    const unwrapped = schema.unwrap();
+    const unwrapped = schema.unwrap() as ZodType;
     return {
       kind: 'nullable',
       baseType: extractTypeInfo(unwrapped),
@@ -158,7 +158,7 @@ export function extractTypeInfo(schema: ZodType): TypeReference {
 
   // Handle arrays
   if (schema instanceof z.ZodArray) {
-    const elementType = extractTypeInfo(schema.element);
+    const elementType = extractTypeInfo(schema.element as ZodType);
     const validation = extractValidationRules(schema);
     
     return {

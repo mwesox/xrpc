@@ -15,21 +15,24 @@ Type-safe, cross-platform RPC framework that generates clients and servers from 
 4. Generated code is self-contained (no runtime dependencies)
 
 **Key Packages**:
-- `@xrpckit/core` - DSL for defining API contracts (router, endpoint, query, mutation)
+- `@xrpckit/schema` - DSL for defining API contracts (router, endpoint, query, mutation)
 - `@xrpckit/parser` - Extracts contracts from TypeScript/Zod files
-- `@xrpckit/generator-core` - Shared generator utilities (CodeWriter, BaseCodeGenerator)
-- `@xrpckit/generator` - Main generator orchestrator
-- `@xrpckit/target-go` - Go code generator (types, server, validation)
+- `@xrpckit/codegen` - Code generation utilities and target registry
+- `@xrpckit/target-go-server` - Go server code generator
+- `@xrpckit/target-react-client` - React client code generator
 - `@xrpckit/cli` - Command-line interface
 
 ## Commands
 
 ```bash
-# Generate code for targets
-bun run xrpc generate --targets go --input examples/x-rpc-todo-app/packages/api/src/contract.ts
+# Install CLI globally
+npm install -g @xrpckit/cli
 
-# Or use npm script
-bun run generate --targets go --input <file>
+# Generate code for targets
+xrpc generate -i src/contract.ts -t go-server,react-client -o generated
+
+# Or during development (from monorepo root)
+bun run xrpc generate -i <file> -t <targets> -o <output>
 
 # Run tests
 bun test
@@ -43,7 +46,7 @@ bun run build
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/core';
+import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
 
 const greeting = createEndpoint({
   greet: query({
@@ -80,7 +83,7 @@ export const router = createRouter({
 - Handles optional/nullable chaining
 - Note: When `.int()` is used with `.min()`/`.max()`, Zod v4 resets bounds in JSON schema
 
-**Go Generator** (`packages/target-go/src/`):
+**Go Generator** (`packages/target-go-server/src/`):
 - `GoBuilder` - Fluent DSL for Go code generation
 - `GoTypeGenerator` - Generates struct types
 - `GoServerGenerator` - Generates HTTP router/handlers
@@ -109,18 +112,26 @@ export const router = createRouter({
 
 ```
 packages/
-  core/          - DSL library
-  parser/        - Contract extraction
-  generator-core/ - Shared utilities
-  target-go/     - Go generator
-  cli/           - CLI interface
+  schema/            - Contract DSL library
+  parser/            - Contract extraction
+  codegen/           - Generator utilities and registry
+  target-go-server/  - Go server generator
+  target-react-client/ - React client generator
+  cli/               - CLI interface
 examples/
-  x-rpc-todo-app/  - Full-stack TODO app (Go + React)
+  x-rpc-todo-app/    - Full-stack TODO app (Go + React)
 ```
+
+## Target Naming Convention
+
+Targets follow the pattern `{language}-{client|server}`:
+- `go-server` - Go server code generator
+- `react-client` - React client code generator
+- Future: `go-client`, `python-server`, `swift-client`, etc.
 
 ## Important Notes
 
-- Uses Bun runtime for CLI/generation (but generated code is language-native)
+- CLI is Node-compatible (`npm install -g @xrpckit/cli`) - works with npm, pnpm, yarn, or bun
 - Zod v4 is used for schema definition
 - Generated Go code uses only standard library
 - Validation extraction has limitation: `.int()` with custom min/max may not extract bounds correctly (Zod v4 behavior)

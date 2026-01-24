@@ -20,7 +20,7 @@ bun test packages/parser/src
 bun run build
 
 # Generate code
-bun run xrpc generate --targets go --input examples/x-rpc-todo-app/packages/api/src/contract.ts
+bun run xrpc generate --targets go-server --input examples/x-rpc-todo-app/packages/api/src/contract.ts
 ```
 
 ## Pull Requests
@@ -44,10 +44,10 @@ bun run xrpc generate --targets go --input examples/x-rpc-todo-app/packages/api/
 
 ## Adding a New Target
 
-1. Create `packages/target-<name>/`
-2. Extend `BaseCodeGenerator` from `@xrpckit/generator-core`
+1. Create `packages/target-{language}-{server|client}/`
+2. Extend `BaseCodeGenerator` from `@xrpckit/codegen`
 3. Implement type mapping and code generation
-4. Register in `@xrpckit/generator`
+4. Register in `@xrpckit/codegen/src/registry.ts`
 5. Add tests
 
 ## Need Help?

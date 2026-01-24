@@ -1,7 +1,8 @@
 import { parseContract, type ContractDefinition } from '@xrpckit/parser';
-import { getGenerator, listTargets, type GeneratorConfig } from '@xrpckit/generator';
-import { mkdir } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { type GeneratorConfig } from '@xrpckit/codegen';
+import { getGenerator, listTargets } from '../registry';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join, resolve, dirname } from 'node:path';
 import { existsSync } from 'node:fs';
 import {
   formatSuccess,
@@ -151,7 +152,7 @@ async function generateForTarget(
   contract: ContractDefinition,
   outputDir: string,
   inputPath: string,
-  createSpinner?: unknown
+  createSpinner?: (message: string) => { start: () => void; succeed: (msg?: string) => void; fail: (msg?: string) => void }
 ): Promise<void> {
   const generator = getGenerator(target);
   if (!generator) {
@@ -160,10 +161,12 @@ async function generateForTarget(
 
   // Validate output directory path
   const validatedOutputDir = validatePath(outputDir);
-  
+
   // Target-specific output directory structure
-  // React uses 'client' instead of 'server'
-  const subDir = target === 'react' ? 'client' : 'server';
+  // Target names are now like 'go-server', 'react-client'
+  // Extract the language and type from target name
+  const isClientTarget = target.endsWith('-client');
+  const subDir = isClientTarget ? 'client' : 'server';
   const targetOutputDir = join(validatedOutputDir, target, subDir);
   await mkdir(targetOutputDir, { recursive: true });
 
@@ -171,7 +174,7 @@ async function generateForTarget(
     outputDir: targetOutputDir,
     packageName: subDir,
     options: {
-      contractPath: inputPath, // Pass contract path for React target
+      contractPath: inputPath, // Pass contract path for client targets
     },
   };
 
@@ -184,32 +187,33 @@ async function generateForTarget(
   const writtenFiles: string[] = [];
 
   // Determine file extensions based on target
-  const typesExt = target === 'react' ? '.ts' : '.go';
-  const serverExt = target === 'react' ? '.ts' : '.go';
-  const clientExt = target === 'react' ? '.ts' : '.go';
-  const validationExt = target === 'react' ? '.ts' : '.go';
+  const isTypeScriptTarget = target.startsWith('react-') || target.startsWith('typescript-');
+  const typesExt = isTypeScriptTarget ? '.ts' : '.go';
+  const serverExt = isTypeScriptTarget ? '.ts' : '.go';
+  const clientExt = isTypeScriptTarget ? '.ts' : '.go';
+  const validationExt = isTypeScriptTarget ? '.ts' : '.go';
 
   if (files.types) {
     const typesPath = join(targetOutputDir, `types${typesExt}`);
-    await Bun.write(typesPath, files.types);
+    await writeFile(typesPath, files.types);
     writtenFiles.push(typesPath);
   }
 
   if (files.server) {
     const serverPath = join(targetOutputDir, `router${serverExt}`);
-    await Bun.write(serverPath, files.server);
+    await writeFile(serverPath, files.server);
     writtenFiles.push(serverPath);
   }
 
   if (files.client) {
     const clientPath = join(targetOutputDir, `client${clientExt}`);
-    await Bun.write(clientPath, files.client);
+    await writeFile(clientPath, files.client);
     writtenFiles.push(clientPath);
   }
 
   if (files.validation) {
     const validationPath = join(targetOutputDir, `validation${validationExt}`);
-    await Bun.write(validationPath, files.validation);
+    await writeFile(validationPath, files.validation);
     writtenFiles.push(validationPath);
   }
 

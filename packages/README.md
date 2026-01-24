@@ -6,21 +6,20 @@ The xRPC monorepo is organized with individual packages for each component:
 
 ### Core Packages
 
-- **`@xrpckit/core`** - DSL library for defining API contracts
+- **`@xrpckit/schema`** - DSL library for defining API contracts
 - **`@xrpckit/parser`** - Extracts API contracts from TypeScript/Zod files
-- **`@xrpckit/generator-core`** - Shared generator utilities (CodeWriter, BaseCodeGenerator)
-- **`@xrpckit/generator`** - Main generator orchestrator that loads target generators
+- **`@xrpckit/codegen`** - Code generation utilities and target registry
 - **`@xrpckit/cli`** - Command-line interface
 
 ### Target Generator Packages
 
-Each target language/framework has its own package:
+Each target language/framework has its own package following the naming convention `@xrpckit/target-{language}-{client|server}`:
 
-- **`@xrpckit/target-go`** - Go server code generator
-- **`@xrpckit/target-react`** - React client code generator
-- **`@xrpckit/target-typescript-express`** - (Future) TypeScript/Express generator
-- **`@xrpckit/target-kotlin-spring-boot`** - (Future) Kotlin/Spring Boot generator
-- **`@xrpckit/target-python-fastapi`** - (Future) Python/FastAPI generator
+- **`@xrpckit/target-go-server`** - Go server code generator
+- **`@xrpckit/target-react-client`** - React client code generator
+- **`@xrpckit/target-go-client`** - (Future) Go client generator
+- **`@xrpckit/target-python-server`** - (Future) Python/FastAPI server generator
+- **`@xrpckit/target-swift-client`** - (Future) Swift/iOS client generator
 
 ## Benefits of Individual Target Packages
 
@@ -32,18 +31,19 @@ Each target language/framework has its own package:
 
 ## Adding a New Target
 
-1. Create a new package: `packages/target-<target-name>/`
-2. Implement the generator extending `BaseCodeGenerator` from `@xrpckit/generator-core`
-3. Register it in `@xrpckit/generator/src/index.ts`
+1. Create a new package: `packages/target-{language}-{client|server}/`
+2. Implement the generator extending `BaseCodeGenerator` from `@xrpckit/codegen`
+3. Register it in `@xrpckit/codegen/src/registry.ts`
 4. Add it to the CLI validation
 
 Example structure:
 ```
-packages/target-<target>/
+packages/target-{language}-{server|client}/
 ├── package.json
 └── src/
     ├── index.ts          # Export generator
     ├── generator.ts       # Main generator class
     ├── type-generator.ts  # Type definitions generator
-    └── server-generator.ts # Server code generator
+    └── server-generator.ts # Server code generator (for server targets)
+    └── client-generator.ts # Client code generator (for client targets)
 ```

@@ -1,6 +1,6 @@
 import { GoBuilder } from './go-builder';
 import { GoTypeMapper } from './type-mapper';
-import { toPascalCase } from '@xrpckit/generator-core';
+import { toPascalCase } from '@xrpckit/codegen';
 import type { TypeDefinition, Property, ContractDefinition } from '@xrpckit/parser';
 
 // Helper to convert "greeting.greet" to "GreetingGreet"
@@ -97,7 +97,32 @@ export class GoTypeGenerator {
   }
 
   private generateType(type: TypeDefinition): void {
-    this.w.struct(toPascalCase(type.name), (b) => {
+    const typeName = toPascalCase(type.name);
+
+    // Handle array types - generate type alias instead of struct
+    if (type.kind === 'array' && type.elementType) {
+      // For array types with object elements, generate element struct first
+      if (type.elementType.kind === 'object' && type.elementType.properties) {
+        const elementTypeName = typeName + 'Item';
+        this.w.struct(elementTypeName, (b) => {
+          for (const prop of type.elementType!.properties!) {
+            const goType = this.typeMapper.mapType(prop.type);
+            const jsonTag = this.generateJSONTag(prop);
+            b.l(`${toPascalCase(prop.name)} ${goType} \`${jsonTag}\``);
+          }
+        });
+        // Generate type alias for the slice
+        this.w.type(typeName, `[]${elementTypeName}`);
+      } else {
+        // For primitive element types, use the type mapper directly
+        const elementGoType = this.typeMapper.mapType(type.elementType);
+        this.w.type(typeName, `[]${elementGoType}`);
+      }
+      return;
+    }
+
+    // Handle object types - generate struct
+    this.w.struct(typeName, (b) => {
       if (type.properties) {
         for (const prop of type.properties) {
           const goType = this.typeMapper.mapType(prop.type);

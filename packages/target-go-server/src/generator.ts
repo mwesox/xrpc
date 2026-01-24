@@ -1,4 +1,4 @@
-import { BaseCodeGenerator, type GeneratorConfig, type GeneratedFiles } from '@xrpckit/generator-core';
+import { BaseCodeGenerator, type GeneratorConfig, type GeneratedFiles } from '@xrpckit/codegen';
 import { GoTypeGenerator } from './type-generator';
 import { GoServerGenerator } from './server-generator';
 import { GoValidationGenerator } from './validation-generator';

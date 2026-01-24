@@ -1,4 +1,4 @@
-import { toPascalCase } from '@xrpckit/generator-core';
+import { toPascalCase } from '@xrpckit/codegen';
 import type { TypeReference } from '@xrpckit/parser';
 
 export class GoTypeMapper {

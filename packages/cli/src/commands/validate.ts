@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import * as ts from 'typescript';
 import { parseContract } from '@xrpckit/parser';
 import {
@@ -83,7 +84,7 @@ async function validateSyntax(filePath: string): Promise<Array<{ line: number; m
   const absolutePath = resolve(filePath);
 
   // Read the source file
-  const sourceCode = await Bun.file(absolutePath).text();
+  const sourceCode = await readFile(absolutePath, 'utf-8');
 
   // Create source file and check for syntax errors
   const sourceFile = ts.createSourceFile(
@@ -94,8 +95,10 @@ async function validateSyntax(filePath: string): Promise<Array<{ line: number; m
   );
 
   // Check for parse errors (syntax errors)
-  if (sourceFile.parseDiagnostics && sourceFile.parseDiagnostics.length > 0) {
-    for (const diagnostic of sourceFile.parseDiagnostics) {
+  // parseDiagnostics is an internal property not exposed in public types
+  const parseDiagnostics = (sourceFile as any).parseDiagnostics as ts.Diagnostic[] | undefined;
+  if (parseDiagnostics && parseDiagnostics.length > 0) {
+    for (const diagnostic of parseDiagnostics) {
       if (diagnostic.file && diagnostic.file.fileName === absolutePath) {
         const { line } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start || 0);
         const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');

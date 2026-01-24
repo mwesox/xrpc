@@ -6,14 +6,8 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
+	"go-backend/generated/server"
 )
-
-type Todo struct {
-	ID        string `json:"id"`
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
-	CreatedAt string `json:"createdAt"`
-}
 
 type DB struct {
 	conn *sql.DB
@@ -41,18 +35,19 @@ func NewDB(path string) (*DB, error) {
 	return &DB{conn: conn}, nil
 }
 
-func (db *DB) ListTodos() ([]Todo, error) {
+// ListTodos returns all todos using the generated TodoListOutput type
+func (db *DB) ListTodos() (server.TodoListOutput, error) {
 	rows, err := db.conn.Query("SELECT id, title, completed, created_at FROM todos ORDER BY created_at DESC")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var todos []Todo
+	var todos server.TodoListOutput
 	for rows.Next() {
-		var t Todo
+		var t server.TodoListOutputItem
 		var completed int
-		if err := rows.Scan(&t.ID, &t.Title, &completed, &t.CreatedAt); err != nil {
+		if err := rows.Scan(&t.Id, &t.Title, &completed, &t.CreatedAt); err != nil {
 			return nil, err
 		}
 		t.Completed = completed == 1
@@ -60,12 +55,13 @@ func (db *DB) ListTodos() ([]Todo, error) {
 	}
 
 	if todos == nil {
-		todos = []Todo{}
+		todos = server.TodoListOutput{}
 	}
 	return todos, nil
 }
 
-func (db *DB) CreateTodo(title string) (*Todo, error) {
+// CreateTodo creates a new todo and returns the generated TodoCreateOutput type
+func (db *DB) CreateTodo(title string) (server.TodoCreateOutput, error) {
 	id := generateID()
 	createdAt := time.Now().UTC().Format(time.RFC3339)
 
@@ -74,35 +70,37 @@ func (db *DB) CreateTodo(title string) (*Todo, error) {
 		id, title, createdAt,
 	)
 	if err != nil {
-		return nil, err
+		return server.TodoCreateOutput{}, err
 	}
 
-	return &Todo{
-		ID:        id,
+	return server.TodoCreateOutput{
+		Id:        id,
 		Title:     title,
 		Completed: false,
 		CreatedAt: createdAt,
 	}, nil
 }
 
-func (db *DB) ToggleTodo(id string) (*Todo, error) {
+// ToggleTodo toggles a todo's completed status and returns the generated TodoToggleOutput type
+func (db *DB) ToggleTodo(id string) (server.TodoToggleOutput, error) {
 	_, err := db.conn.Exec("UPDATE todos SET completed = NOT completed WHERE id = ?", id)
 	if err != nil {
-		return nil, err
+		return server.TodoToggleOutput{}, err
 	}
 
-	var t Todo
+	var t server.TodoToggleOutput
 	var completed int
 	err = db.conn.QueryRow("SELECT id, title, completed, created_at FROM todos WHERE id = ?", id).
-		Scan(&t.ID, &t.Title, &completed, &t.CreatedAt)
+		Scan(&t.Id, &t.Title, &completed, &t.CreatedAt)
 	if err != nil {
-		return nil, err
+		return server.TodoToggleOutput{}, err
 	}
 	t.Completed = completed == 1
 
-	return &t, nil
+	return t, nil
 }
 
+// DeleteTodo removes a todo from the database
 func (db *DB) DeleteTodo(id string) error {
 	_, err := db.conn.Exec("DELETE FROM todos WHERE id = ?", id)
 	return err

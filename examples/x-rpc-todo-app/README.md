@@ -211,17 +211,23 @@ x-rpc-todo-app/
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) 1.3+
+- [Node.js](https://nodejs.org/) 18+ (or [Bun](https://bun.sh/) 1.3+)
 - [Go](https://golang.org/) 1.21+
 
-### 1. Install Dependencies
+### 1. Install the xRPC CLI
+
+```bash
+npm install -g @xrpckit/cli
+```
+
+### 2. Install Dependencies
 
 ```bash
 # From xrpc repository root
 bun install
 ```
 
-### 2. Generate Code from Contract
+### 3. Generate Code from Contract
 
 ```bash
 cd examples/x-rpc-todo-app
@@ -230,7 +236,7 @@ bun run generate
 
 This runs the xrpc generator on the contract and outputs Go server and React client code to `packages/api/generated/`.
 
-### 3. Start the Go Backend
+### 4. Start the Go Backend
 
 ```bash
 cd apps/go-backend
@@ -238,7 +244,7 @@ go run .
 # Server running on :8080
 ```
 
-### 4. Start the React Frontend
+### 5. Start the React Frontend
 
 In a new terminal (from `examples/x-rpc-todo-app`):
 
@@ -247,7 +253,7 @@ bun run dev --filter=web
 # Frontend running on :3000
 ```
 
-### 5. Open the App
+### 6. Open the App
 
 Visit http://localhost:3000 to use the TODO app.
 

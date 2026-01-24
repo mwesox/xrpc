@@ -1,6 +1,7 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { parseContract } from '../../packages/parser/src/index.js';
-import { getGenerator } from '../../packages/generator/src/index.js';
+import { GoCodeGenerator } from '../../packages/target-go-server/src/index.js';
+import { ReactCodeGenerator } from '../../packages/target-react-client/src/index.js';
 import { mkdir, rm, writeFile, copyFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
@@ -52,19 +53,15 @@ async function setupGoServer(testDir: string, serverPort: number): Promise<{
   const outputDir = join(testDir, 'generated');
 
   const contract = await parseContract(inputPath);
-  const generator = getGenerator('go');
-  if (!generator) {
-    throw new Error('Go generator not found');
-  }
-
   const targetOutputDir = join(outputDir, 'go', 'server');
   await mkdir(targetOutputDir, { recursive: true });
 
-  const files = generator.generate(contract, {
+  const generator = new GoCodeGenerator({
     outputDir: targetOutputDir,
     packageName: 'server',
     options: {},
   });
+  const files = generator.generate(contract);
 
   // Write generated files
   if (files.types) {
@@ -294,21 +291,17 @@ describe('React Client E2E', () => {
     const outputDir = join(testDir, 'generated');
 
     const contract = await parseContract(inputPath); // Parse from original for contract object
-    const generator = getGenerator('react');
-    if (!generator) {
-      throw new Error('React generator not found');
-    }
-
     const targetOutputDir = join(outputDir, 'react', 'client');
     await mkdir(targetOutputDir, { recursive: true });
 
-    const files = generator.generate(contract, {
+    const generator = new ReactCodeGenerator({
       outputDir: targetOutputDir,
       packageName: 'client',
       options: {
         contractPath: inputPath,
       },
     });
+    const files = generator.generate(contract);
 
     // Write generated files
     if (files.types) {

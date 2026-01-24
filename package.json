@@ -24,6 +24,7 @@
   "devDependencies": {
     "@types/node": "^25.0.10",
     "knip": "^5.82.1",
+    "tsup": "^8.5.1",
     "typescript": "^5.0.0"
   }
 }

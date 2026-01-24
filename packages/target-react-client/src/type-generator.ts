@@ -21,7 +21,7 @@ export class ReactTypeGenerator {
 
     // Import router from original contract file
     w.import(relativePath, ['router']);
-    w.import('@xrpckit/core', ['type InferInput', 'type InferOutput']);
+    w.import('@xrpckit/schema', ['type InferInput', 'type InferOutput']);
     w.n();
 
     // Generate schema exports and type aliases for each endpoint

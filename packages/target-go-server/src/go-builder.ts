@@ -1,4 +1,4 @@
-import { CodeWriter } from '@xrpckit/generator-core';
+import { CodeWriter } from '@xrpckit/codegen';
 
 /**
  * Go-specific code builder with fluent DSL for common Go patterns
@@ -105,7 +105,7 @@ export class GoBuilder extends CodeWriter {
     return this.l(`${name} := ${value}`);
   }
 
-  switch(value: string, cases: Array<{ value: string; fn: (b: this) => void }>, defaultCase?: (b: this) => void): this {
+  switch(value: string, cases: Array<{ value: string; fn: (b: GoBuilder) => void }>, defaultCase?: (b: GoBuilder) => void): this {
     this.l(`switch ${value} {`).i();
     for (const c of cases) {
       this.l(`case ${c.value}:`).i();

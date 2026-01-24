@@ -7,8 +7,8 @@ import {
   useTodoToggle,
   useTodoDelete,
   type XRpcClientConfig,
-} from '@repo/api/generated/react/client/client';
-import type { TodoListOutput } from '@repo/api/generated/react/client/types';
+} from '@repo/api/generated/react-client/client/client';
+import type { TodoListOutput } from '@repo/api/generated/react-client/client/types';
 
 type Todo = TodoListOutput[number];
 

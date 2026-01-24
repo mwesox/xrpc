@@ -1,20 +1,42 @@
 {
   "name": "@xrpckit/parser",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "type": "module",
-  "main": "./src/index.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mwesox/xrpc.git",
+    "directory": "packages/parser"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "bun": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "test": "bun test src"
   },
   "dependencies": {
-    "@xrpckit/core": "workspace:*",
+    "@xrpckit/schema": "^0.0.1",
     "typescript": "^5.0.0",
     "zod": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "^25.0.10"
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0"
   },
-  "scripts": {
-    "test": "bun test src"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

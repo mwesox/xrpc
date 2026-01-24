@@ -1,7 +1,7 @@
 import type { ContractDefinition } from '@xrpckit/parser';
-import type { GeneratorConfig, GeneratedFiles } from '@xrpckit/generator-core';
-import { GoCodeGenerator } from '@xrpckit/target-go';
-import { ReactCodeGenerator } from '@xrpckit/target-react';
+import type { GeneratorConfig, GeneratedFiles } from '@xrpckit/codegen';
+import { GoCodeGenerator } from '@xrpckit/target-go-server';
+import { ReactCodeGenerator } from '@xrpckit/target-react-client';
 
 export type TargetGenerator = {
   name: string;
@@ -9,34 +9,35 @@ export type TargetGenerator = {
 };
 
 const generators: Record<string, TargetGenerator> = {
-  go: {
-    name: 'go',
+  'go-server': {
+    name: 'go-server',
     generate: (contract, config) => {
       const generator = new GoCodeGenerator(config);
       return generator.generate(contract);
     },
   },
-  react: {
-    name: 'react',
+  'react-client': {
+    name: 'react-client',
     generate: (contract, config) => {
       const generator = new ReactCodeGenerator(config);
       return generator.generate(contract);
     },
   },
   // Future targets can be added here:
-  // 'typescript-express': { ... },
-  // 'kotlin-spring-boot': { ... },
+  // 'go-client': { ... },
+  // 'python-server': { ... },
+  // 'swift-client': { ... },
 };
 
 /**
  * Gets a code generator for the specified target language/platform.
- * 
- * @param target - The target language/platform (e.g., 'go', 'react')
+ *
+ * @param target - The target language/platform (e.g., 'go-server', 'react-client')
  * @returns The generator for the target, or undefined if not found
- * 
+ *
  * @example
  * ```typescript
- * const generator = getGenerator('go');
+ * const generator = getGenerator('go-server');
  * if (generator) {
  *   const files = generator.generate(contract, config);
  * }
@@ -48,9 +49,9 @@ export function getGenerator(target: string): TargetGenerator | undefined {
 
 /**
  * Lists all available code generation targets.
- * 
+ *
  * @returns An array of target names that can be used with `getGenerator()`
- * 
+ *
  * @example
  * ```typescript
  * const targets = listTargets();
@@ -60,5 +61,3 @@ export function getGenerator(target: string): TargetGenerator | undefined {
 export function listTargets(): string[] {
   return Object.keys(generators);
 }
-
-export { type GeneratorConfig, type GeneratedFiles } from '@xrpckit/generator-core';

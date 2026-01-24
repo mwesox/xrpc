@@ -3,6 +3,6 @@
   "private": true,
   "dependencies": {
     "zod": "^4.0.0-beta.20250505",
-    "@xrpckit/core": "workspace:*"
+    "@xrpckit/schema": "workspace:*"
   }
 }

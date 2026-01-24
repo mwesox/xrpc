@@ -1,4 +1,4 @@
-import { listTargets } from '@xrpckit/generator';
+import { listTargets } from '../registry';
 import {
   formatHeader,
   formatCommand,

@@ -1,5 +1,5 @@
 import { GoBuilder } from './go-builder';
-import { toPascalCase } from '@xrpckit/generator-core';
+import { toPascalCase } from '@xrpckit/codegen';
 import type { ContractDefinition, TypeDefinition, Property, ValidationRules, TypeReference } from '@xrpckit/parser';
 
 export class GoValidationGenerator {
@@ -45,6 +45,15 @@ export class GoValidationGenerator {
     for (const type of contract.types) {
       if (type.kind === 'object' && type.properties) {
         this.generateTypeValidation(type, w);
+      } else if (type.kind === 'array' && type.elementType?.kind === 'object' && type.elementType.properties) {
+        // Generate validation function for the array element type
+        const elementTypeName = toPascalCase(type.name) + 'Item';
+        const elementType: TypeDefinition = {
+          name: elementTypeName,
+          kind: 'object',
+          properties: type.elementType.properties,
+        };
+        this.generateTypeValidation(elementType, w);
       }
     }
 

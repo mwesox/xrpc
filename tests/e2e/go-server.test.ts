@@ -1,6 +1,6 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { parseContract } from '../../packages/parser/src/index.js';
-import { getGenerator } from '../../packages/generator/src/index.js';
+import { GoCodeGenerator } from '../../packages/target-go-server/src/index.js';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
@@ -112,19 +112,15 @@ describe('Go Server E2E', () => {
     const outputDir = join(testDir, 'generated');
 
     const contract = await parseContract(inputPath);
-    const generator = getGenerator('go');
-    if (!generator) {
-      throw new Error('Go generator not found');
-    }
-
     const targetOutputDir = join(outputDir, 'go', 'server');
     await mkdir(targetOutputDir, { recursive: true });
 
-    const files = generator.generate(contract, {
+    const generator = new GoCodeGenerator({
       outputDir: targetOutputDir,
       packageName: 'server',
       options: {},
     });
+    const files = generator.generate(contract);
 
     // Write generated files
     if (files.types) {

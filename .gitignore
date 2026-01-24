@@ -83,3 +83,4 @@ temp/
 *.pem
 *.key
 *.cert
+examples/x-rpc-todo-app/apps/go-backend/go-backend

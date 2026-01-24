@@ -1,4 +1,4 @@
-import { BaseCodeGenerator, type GeneratorConfig, type GeneratedFiles } from '@xrpckit/generator-core';
+import { BaseCodeGenerator, type GeneratorConfig, type GeneratedFiles } from '@xrpckit/codegen';
 import { ReactTypeGenerator } from './type-generator';
 import { ReactClientGenerator } from './client-generator';
 import type { ContractDefinition } from '@xrpckit/parser';
