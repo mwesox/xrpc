@@ -8,7 +8,8 @@ import { existsSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 
 // Helper to find an available port
-async function findAvailablePort(startPort = 30000): Promise<number> {
+// Use different range from go-server.test.ts (30000) to avoid conflicts in parallel runs
+async function findAvailablePort(startPort = 31000): Promise<number> {
   for (let port = startPort; port < startPort + 100; port++) {
     try {
       const server = Bun.serve({
@@ -25,7 +26,7 @@ async function findAvailablePort(startPort = 30000): Promise<number> {
 }
 
 // Helper to wait for server to be ready
-async function waitForServer(url: string, timeout = 10000): Promise<void> {
+async function waitForServer(url: string, timeout = 30000): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeout) {
     try {
