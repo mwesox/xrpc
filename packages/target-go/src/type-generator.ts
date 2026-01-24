@@ -1,7 +1,12 @@
 import { GoBuilder } from './go-builder';
 import { GoTypeMapper } from './type-mapper';
-import { toPascalCase, toCamelCase } from '@xrpc/generator-core';
-import type { TypeDefinition, Property, ContractDefinition, Endpoint } from '@xrpc/parser';
+import { toPascalCase } from '@xrpc/generator-core';
+import type { TypeDefinition, Property, ContractDefinition } from '@xrpc/parser';
+
+// Helper to convert "greeting.greet" to "GreetingGreet"
+function toMethodName(fullName: string): string {
+  return fullName.split('.').map(part => toPascalCase(part)).join('');
+}
 
 export class GoTypeGenerator {
   private w: GoBuilder;
@@ -114,7 +119,7 @@ export class GoTypeGenerator {
     this.w.comment('Typed handler types for each endpoint').n();
 
     for (const endpoint of contract.endpoints) {
-      const handlerName = toPascalCase(endpoint.fullName.replace('.', '')) + 'Handler';
+      const handlerName = toMethodName(endpoint.fullName) + 'Handler';
       const inputType = toPascalCase(endpoint.input.name!);
       const outputType = toPascalCase(endpoint.output.name!);
 

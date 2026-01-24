@@ -9,7 +9,8 @@
     "examples/*",
     "examples/x-rpc-todo-app",
     "examples/x-rpc-todo-app/apps/*",
-    "examples/x-rpc-todo-app/packages/*"
+    "examples/x-rpc-todo-app/packages/*",
+    "tests/fixtures"
   ],
   "scripts": {
     "build": "bun run --filter='./packages/*' build",

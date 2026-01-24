@@ -20,7 +20,7 @@ bun test packages/parser/src
 bun run build
 
 # Generate code
-bun run xrpc generate --targets go --input examples/go-greeting-server/src/api.ts
+bun run xrpc generate --targets go --input examples/x-rpc-todo-app/packages/api/src/contract.ts
 ```
 
 ## Pull Requests

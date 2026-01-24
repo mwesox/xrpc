@@ -108,7 +108,7 @@ describe('Go Server E2E', () => {
     await mkdir(testDir, { recursive: true });
 
     // Generate Go code
-    const inputPath = join(process.cwd(), 'examples', 'go-greeting-server', 'src', 'api-with-validation.ts');
+    const inputPath = join(process.cwd(), 'tests', 'fixtures', 'api-with-validation.ts');
     const outputDir = join(testDir, 'generated');
 
     const contract = await parseContract(inputPath);
@@ -175,26 +175,23 @@ go 1.25
       '	"github.com/test/e2e-server/generated/go/server"',
       ')',
       '',
-      'func greetHandler(ctx *server.Context, input interface{}) (interface{}, error) {',
-      '	in := input.(server.GreetingGreetInput)',
+      'func greetHandler(ctx *server.Context, input server.GreetingGreetInput) (server.GreetingGreetOutput, error) {',
       '	return server.GreetingGreetOutput{',
-      '		Message: fmt.Sprintf("Hello, %s!", in.Name),',
+      '		Message: fmt.Sprintf("Hello, %s!", input.Name),',
       '	}, nil',
       '}',
       '',
-      'func createUserHandler(ctx *server.Context, input interface{}) (interface{}, error) {',
-      '	in := input.(server.GreetingCreateUserInput)',
+      'func createUserHandler(ctx *server.Context, input server.GreetingCreateUserInput) (server.GreetingCreateUserOutput, error) {',
       '	return server.GreetingCreateUserOutput{',
-      '		Id:   fmt.Sprintf("user-%d", len(in.Name)),',
-      '		Name: in.Name,',
+      '		Id:   fmt.Sprintf("user-%d", len(input.Name)),',
+      '		Name: input.Name,',
       '	}, nil',
       '}',
-      '',
       '',
       'func main() {',
       '	router := server.NewRouter()',
-      '	router.Query("greeting.greet", greetHandler)',
-      '	router.Mutation("greeting.createUser", createUserHandler)',
+      '	router.GreetingGreet(greetHandler)',
+      '	router.GreetingCreateUser(createUserHandler)',
       '',
       '	http.Handle("/api", router)',
       '',
@@ -333,8 +330,9 @@ go 1.25
 
     expect(validQueryResponse.status).toBe(200);
     const validQueryData = await validQueryResponse.json();
-    expect(validQueryData).toHaveProperty('message');
-    expect(validQueryData.message).toBe('Hello, World!');
+    expect(validQueryData).toHaveProperty('result');
+    expect(validQueryData.result).toHaveProperty('message');
+    expect(validQueryData.result.message).toBe('Hello, World!');
 
     // Test 2: Valid mutation request
     const validMutationResponse = await fetch(`${serverUrl}/api`, {
@@ -353,9 +351,10 @@ go 1.25
 
     expect(validMutationResponse.status).toBe(200);
     const validMutationData = await validMutationResponse.json();
-    expect(validMutationData).toHaveProperty('id');
-    expect(validMutationData).toHaveProperty('name');
-    expect(validMutationData.name).toBe('John');
+    expect(validMutationData).toHaveProperty('result');
+    expect(validMutationData.result).toHaveProperty('id');
+    expect(validMutationData.result).toHaveProperty('name');
+    expect(validMutationData.result.name).toBe('John');
 
     // Test 3: Validation error - missing required field
     const missingFieldResponse = await fetch(`${serverUrl}/api`, {
@@ -431,13 +430,5 @@ go 1.25
     });
 
     expect(missingMethodResponse.status).toBe(404);
-    
-    // Cleanup: abort readers before test ends
-    if (abortController) {
-      abortController.abort();
-    }
-    if (stdoutPromise && stderrPromise) {
-      await Promise.allSettled([stdoutPromise, stderrPromise]);
-    }
   }, 60000); // 60 second timeout
 });

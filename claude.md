@@ -26,7 +26,7 @@ Type-safe, cross-platform RPC framework that generates clients and servers from 
 
 ```bash
 # Generate code for targets
-bun run xrpc generate --targets go --input examples/go-greeting-server/src/api.ts
+bun run xrpc generate --targets go --input examples/x-rpc-todo-app/packages/api/src/contract.ts
 
 # Or use npm script
 bun run generate --targets go --input <file>
@@ -115,7 +115,7 @@ packages/
   target-go/     - Go generator
   cli/           - CLI interface
 examples/
-  go-greeting-server/ - Example with Go target
+  x-rpc-todo-app/  - Full-stack TODO app (Go + React)
 ```
 
 ## Important Notes
@@ -124,3 +124,4 @@ examples/
 - Zod v4 is used for schema definition
 - Generated Go code uses only standard library
 - Validation extraction has limitation: `.int()` with custom min/max may not extract bounds correctly (Zod v4 behavior)
+- Documentation site at `../xrpc-ghpages` (gh-pages branch) - keep in sync with API changes

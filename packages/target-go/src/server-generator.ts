@@ -1,6 +1,16 @@
 import { GoBuilder } from './go-builder';
-import { toPascalCase, toCamelCase } from '@xrpc/generator-core';
+import { toPascalCase } from '@xrpc/generator-core';
 import type { ContractDefinition, Endpoint } from '@xrpc/parser';
+
+// Helper to convert "greeting.greet" to "GreetingGreet"
+function toMethodName(fullName: string): string {
+  return fullName.split('.').map(part => toPascalCase(part)).join('');
+}
+
+// Helper to convert "greeting.greet" to "greetingGreet"
+function toFieldName(fullName: string): string {
+  return fullName.split('.').map((part, i) => i === 0 ? part : toPascalCase(part)).join('');
+}
 
 export class GoServerGenerator {
   private w: GoBuilder;
@@ -23,8 +33,8 @@ export class GoServerGenerator {
 
       // Generate typed handler field for each endpoint
       for (const endpoint of contract.endpoints) {
-        const fieldName = toCamelCase(endpoint.fullName.replace('.', ''));
-        const handlerType = toPascalCase(endpoint.fullName.replace('.', '')) + 'Handler';
+        const fieldName = toFieldName(endpoint.fullName);
+        const handlerType = toMethodName(endpoint.fullName) + 'Handler';
         b.l(`${fieldName} ${handlerType}`);
       }
     });
@@ -38,8 +48,8 @@ export class GoServerGenerator {
 
     // Generate typed setter methods for each endpoint
     for (const endpoint of contract.endpoints) {
-      const methodName = toPascalCase(endpoint.fullName.replace('.', ''));
-      const fieldName = toCamelCase(endpoint.fullName.replace('.', ''));
+      const methodName = toMethodName(endpoint.fullName);
+      const fieldName = toFieldName(endpoint.fullName);
       const handlerType = methodName + 'Handler';
 
       w.method('r *Router', methodName, `handler ${handlerType}`, '*Router', (b) => {
@@ -105,7 +115,7 @@ export class GoServerGenerator {
       const cases = endpoints.map((endpoint) => ({
         value: `"${endpoint.fullName}"`,
         fn: (b: GoBuilder) => {
-          const fieldName = toCamelCase(endpoint.fullName.replace('.', ''));
+          const fieldName = toFieldName(endpoint.fullName);
 
           // Check if handler is registered
           b.if(`r.${fieldName} == nil`, (b) => {

@@ -48,7 +48,7 @@ async function setupGoServer(testDir: string, serverPort: number): Promise<{
   process: ReturnType<typeof Bun.spawn>;
   url: string;
 }> {
-  const inputPath = join(process.cwd(), 'examples', 'go-greeting-server', 'src', 'api-with-validation.ts');
+  const inputPath = join(process.cwd(), 'tests', 'fixtures', 'api-with-validation.ts');
   const outputDir = join(testDir, 'generated');
 
   const contract = await parseContract(inputPath);
@@ -115,26 +115,23 @@ go 1.25
     '	"github.com/test/e2e-server/generated/go/server"',
     ')',
     '',
-    'func greetHandler(ctx *server.Context, input interface{}) (interface{}, error) {',
-    '	in := input.(server.GreetingGreetInput)',
+    'func greetHandler(ctx *server.Context, input server.GreetingGreetInput) (server.GreetingGreetOutput, error) {',
     '	return server.GreetingGreetOutput{',
-    '		Message: fmt.Sprintf("Hello, %s!", in.Name),',
+    '		Message: fmt.Sprintf("Hello, %s!", input.Name),',
     '	}, nil',
     '}',
     '',
-    'func createUserHandler(ctx *server.Context, input interface{}) (interface{}, error) {',
-    '	in := input.(server.GreetingCreateUserInput)',
+    'func createUserHandler(ctx *server.Context, input server.GreetingCreateUserInput) (server.GreetingCreateUserOutput, error) {',
     '	return server.GreetingCreateUserOutput{',
-    '		Id:   fmt.Sprintf("user-%d", len(in.Name)),',
-    '		Name: in.Name,',
+    '		Id:   fmt.Sprintf("user-%d", len(input.Name)),',
+    '		Name: input.Name,',
     '	}, nil',
     '}',
-    '',
     '',
     'func main() {',
     '	router := server.NewRouter()',
-    '	router.Query("greeting.greet", greetHandler)',
-    '	router.Mutation("greeting.createUser", createUserHandler)',
+    '	router.GreetingGreet(greetHandler)',
+    '	router.GreetingCreateUser(createUserHandler)',
     '',
     '	http.Handle("/api", router)',
     '',
@@ -293,7 +290,7 @@ describe('React Client E2E', () => {
     // Generate React client code
     // Use the original contract file path - the generated code will calculate relative paths
     // We'll need to ensure the generated code can resolve the import
-    const inputPath = join(process.cwd(), 'examples', 'go-greeting-server', 'src', 'api-with-validation.ts');
+    const inputPath = join(process.cwd(), 'tests', 'fixtures', 'api-with-validation.ts');
     const outputDir = join(testDir, 'generated');
 
     const contract = await parseContract(inputPath); // Parse from original for contract object
@@ -322,7 +319,7 @@ describe('React Client E2E', () => {
       const absoluteContractPath = `file://${contractPathWithoutExt}`;
       // Find and replace the relative import with absolute path
       typesContent = typesContent.replace(
-        /from ['"](\.\.\/)+examples\/go-greeting-server\/src\/api-with-validation['"]/g,
+        /from ['"](\.\.\/)+tests\/fixtures\/api-with-validation['"]/g,
         `from '${absoluteContractPath}'`
       );
       // Also handle other possible relative path patterns

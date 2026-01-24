@@ -117,7 +117,7 @@ The CLI uses a hybrid approach:
 
 ```bash
 # Run CLI locally
-bun run packages/cli/src/index.ts generate -i examples/go-greeting-server/src/api.ts -o generated -t go
+bun run packages/cli/src/index.ts generate -i examples/x-rpc-todo-app/packages/api/src/contract.ts -o generated -t go
 
 # Test interactive mode
 bun run packages/cli/src/index.ts generate
@@ -147,7 +147,7 @@ packages/cli/
 
 ```bash
 $ xrpc generate
-API contract file path: (src/api.ts) examples/go-greeting-server/src/api.ts
+API contract file path: (src/api.ts) examples/x-rpc-todo-app/packages/api/src/contract.ts
 Output directory: (generated) 
 Select targets to generate: [Use arrow keys, space to select]
   ◯ go
