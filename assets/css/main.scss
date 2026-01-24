@@ -60,7 +60,7 @@
   // Layout
   --max-width: 1200px;
   --sidebar-width: 280px;
-  --header-height: 64px;
+  --header-height: 90px;
 
   // Transitions
   --transition-fast: 150ms ease;
@@ -1066,7 +1066,7 @@ img {
 
 @media (max-width: 768px) {
   :root {
-    --header-height: 56px;
+    --header-height: 75px;
   }
 
   .header-nav {
