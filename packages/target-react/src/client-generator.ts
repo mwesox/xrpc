@@ -111,6 +111,10 @@ export class ReactClientGenerator {
 
         b.comment('Parse response');
         b.l('const result = await response.json();');
+        b.comment('Handle JSON-RPC response format');
+        b.l('if (result.error) {');
+        b.i().l('throw new Error(result.error.message || result.error);');
+        b.u().l('}');
         b.l('const data = result.result;').n();
 
         b.comment('Validate output if enabled');
@@ -209,7 +213,8 @@ export class ReactClientGenerator {
         b.i().l('abortController.abort();');
         b.u().l('};');
         b.u();
-        b.l('}, [config.baseUrl, input, options?.enabled]);').n();
+        b.comment('Note: input is serialized for stable dependency comparison');
+        b.l('}, [config.baseUrl, JSON.stringify(input), options?.enabled]);').n();
 
         b.l('return { data, loading, error };');
       }

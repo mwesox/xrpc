@@ -36,10 +36,16 @@ export interface Endpoint {
 
 export interface TypeDefinition {
   name: string;
-  kind: 'object' | 'array' | 'union' | 'primitive' | 'nullable' | 'optional';
+  kind: 'object' | 'array' | 'union' | 'primitive' | 'nullable' | 'optional' | 'enum' | 'literal' | 'record' | 'tuple' | 'date';
   properties?: Property[];
   elementType?: TypeReference;
   baseType?: string;
+  unionTypes?: TypeReference[];      // For union types
+  enumValues?: (string | number)[];  // For enum types
+  literalValue?: string | number | boolean;  // For literal types
+  keyType?: TypeReference;           // For record types
+  valueType?: TypeReference;         // For record types
+  tupleElements?: TypeReference[];   // For tuple types
 }
 
 export interface ValidationRules {
@@ -73,8 +79,14 @@ export interface Property {
 export interface TypeReference {
   name?: string;
   kind: TypeDefinition['kind'];
-  baseType?: string;
+  baseType?: string | TypeReference;
   elementType?: TypeReference;
   properties?: Property[];
   validation?: ValidationRules;
+  unionTypes?: TypeReference[];      // For union types
+  enumValues?: (string | number)[];  // For enum types
+  literalValue?: string | number | boolean;  // For literal types
+  keyType?: TypeReference;           // For record types
+  valueType?: TypeReference;         // For record types
+  tupleElements?: TypeReference[];   // For tuple types
 }

@@ -1,5 +1,5 @@
 import { GoBuilder } from './go-builder';
-import { toPascalCase } from '@xrpc/generator-core';
+import { toPascalCase, toCamelCase } from '@xrpc/generator-core';
 import type { ContractDefinition, Endpoint } from '@xrpc/parser';
 
 export class GoServerGenerator {
@@ -13,42 +13,45 @@ export class GoServerGenerator {
 
   generateServer(contract: ContractDefinition): string {
     const w = this.w.reset();
-    
+
     w.package(this.packageName)
       .import('encoding/json', 'net/http', 'fmt');
 
-    // Generate handler types (now using Context instead of context.Context)
-    w.type('QueryHandler', 'func(ctx *Context, input interface{}) (interface{}, error)')
-      .type('MutationHandler', 'func(ctx *Context, input interface{}) (interface{}, error)');
-
-    // Generate Router struct with middleware support
+    // Generate Router struct with typed handler fields
     w.struct('Router', (b) => {
-      b.l('queryHandlers    map[string]QueryHandler')
-        .l('mutationHandlers map[string]MutationHandler')
-        .l('middleware       []MiddlewareFunc');
+      b.l('middleware []MiddlewareFunc');
+
+      // Generate typed handler field for each endpoint
+      for (const endpoint of contract.endpoints) {
+        const fieldName = toCamelCase(endpoint.fullName.replace('.', ''));
+        const handlerType = toPascalCase(endpoint.fullName.replace('.', '')) + 'Handler';
+        b.l(`${fieldName} ${handlerType}`);
+      }
     });
 
     // Generate NewRouter
     w.func('NewRouter() *Router', (b) => {
       b.l('return &Router{').i()
-        .l('queryHandlers:    make(map[string]QueryHandler),')
-        .l('mutationHandlers: make(map[string]MutationHandler),')
-        .l('middleware:       make([]MiddlewareFunc, 0),')
+        .l('middleware: make([]MiddlewareFunc, 0),')
         .u().l('}');
     });
 
-    // Generate Query and Mutation registration methods
-    w.method('r *Router', 'Query', 'name string, handler QueryHandler', '', (b) => {
-      b.l('r.queryHandlers[name] = handler');
-    });
+    // Generate typed setter methods for each endpoint
+    for (const endpoint of contract.endpoints) {
+      const methodName = toPascalCase(endpoint.fullName.replace('.', ''));
+      const fieldName = toCamelCase(endpoint.fullName.replace('.', ''));
+      const handlerType = methodName + 'Handler';
 
-    w.method('r *Router', 'Mutation', 'name string, handler MutationHandler', '', (b) => {
-      b.l('r.mutationHandlers[name] = handler');
-    });
+      w.method('r *Router', methodName, `handler ${handlerType}`, '*Router', (b) => {
+        b.l(`r.${fieldName} = handler`)
+          .return('r');
+      });
+    }
 
     // Generate middleware registration method
-    w.method('r *Router', 'Use', 'middleware MiddlewareFunc', '', (b) => {
-      b.l('r.middleware = append(r.middleware, middleware)');
+    w.method('r *Router', 'Use', 'middleware MiddlewareFunc', '*Router', (b) => {
+      b.l('r.middleware = append(r.middleware, middleware)')
+        .return('r');
     });
 
     // Generate ServeHTTP
@@ -99,20 +102,14 @@ export class GoServerGenerator {
         .u().l('}').n();
 
       // Route to handler based on method name
-      b.var('handler', 'interface{}')
-        .var('ok', 'bool').n();
-
       const cases = endpoints.map((endpoint) => ({
         value: `"${endpoint.fullName}"`,
         fn: (b: GoBuilder) => {
-          // Get handler
-          const handlerMap = endpoint.type === 'query' 
-            ? 'r.queryHandlers'
-            : 'r.mutationHandlers';
-          b.l(`handler, ok = ${handlerMap}["${endpoint.fullName}"]`);
+          const fieldName = toCamelCase(endpoint.fullName.replace('.', ''));
 
-          b.if('!ok', (b) => {
-            b.l('http.Error(w, "Handler not found", http.StatusNotFound)')
+          // Check if handler is registered
+          b.if(`r.${fieldName} == nil`, (b) => {
+            b.l('http.Error(w, "Handler not registered", http.StatusNotFound)')
               .return();
           }).n();
 
@@ -142,19 +139,18 @@ export class GoServerGenerator {
             b.return();
           }).n();
 
-          // Call handler with Context (not context.Context)
-          const handlerType = endpoint.type === 'query' ? 'QueryHandler' : 'MutationHandler';
-          b.decl(`${endpoint.type}Handler`, `handler.(${handlerType})`)
-            .decl('result, err', `${endpoint.type}Handler(ctx, input)`);
+          // Call typed handler directly
+          b.decl('result, err', `r.${fieldName}(ctx, input)`);
 
           b.ifErr((b) => {
-            b.l('http.Error(w, fmt.Sprintf("Handler error: %v", err), http.StatusInternalServerError)')
+            b.l('w.Header().Set("Content-Type", "application/json")')
+              .l('json.NewEncoder(w).Encode(map[string]interface{}{"error": err.Error()})')
               .return();
           }).n();
 
-          // Write response
+          // Write response wrapped in JSON-RPC format
           b.l('w.Header().Set("Content-Type", "application/json")')
-            .l('json.NewEncoder(w).Encode(result)')
+            .l('json.NewEncoder(w).Encode(map[string]interface{}{"result": result})')
             .return();
         },
       }));

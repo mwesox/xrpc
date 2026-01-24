@@ -1,7 +1,7 @@
 import { GoBuilder } from './go-builder';
 import { GoTypeMapper } from './type-mapper';
-import { toPascalCase } from '@xrpc/generator-core';
-import type { TypeDefinition, Property, ContractDefinition } from '@xrpc/parser';
+import { toPascalCase, toCamelCase } from '@xrpc/generator-core';
+import type { TypeDefinition, Property, ContractDefinition, Endpoint } from '@xrpc/parser';
 
 export class GoTypeGenerator {
   private w: GoBuilder;
@@ -29,6 +29,9 @@ export class GoTypeGenerator {
     for (const type of contract.types) {
       this.generateType(type);
     }
+
+    // Generate typed handler types for each endpoint
+    this.generateTypedHandlers(contract);
 
     return w.toString();
   }
@@ -107,4 +110,17 @@ export class GoTypeGenerator {
     return `json:"${prop.name},omitempty"`;
   }
 
+  private generateTypedHandlers(contract: ContractDefinition): void {
+    this.w.comment('Typed handler types for each endpoint').n();
+
+    for (const endpoint of contract.endpoints) {
+      const handlerName = toPascalCase(endpoint.fullName.replace('.', '')) + 'Handler';
+      const inputType = toPascalCase(endpoint.input.name!);
+      const outputType = toPascalCase(endpoint.output.name!);
+
+      this.w.comment(`Handler type for ${endpoint.fullName}`)
+        .type(handlerName, `func(ctx *Context, input ${inputType}) (${outputType}, error)`)
+        .n();
+    }
+  }
 }

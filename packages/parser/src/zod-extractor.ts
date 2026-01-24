@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ZodType, ZodObject, ZodOptional, ZodString, ZodNumber, ZodBoolean, ZodArray } from 'zod';
+import type { ZodType, ZodObject, ZodOptional, ZodString, ZodNumber, ZodBoolean, ZodArray, ZodUnion, ZodEnum, ZodLiteral, ZodRecord, ZodTuple, ZodDate } from 'zod';
 import type { TypeDefinition, TypeReference, Property, ValidationRules } from './contract';
 
 // Safe integer bounds for JavaScript (used when Zod .int() is applied)
@@ -187,6 +187,57 @@ export function extractTypeInfo(schema: ZodType): TypeReference {
     return {
       kind: 'primitive',
       baseType: 'boolean',
+    };
+  }
+
+  // Handle unions
+  if (schema instanceof z.ZodUnion) {
+    const options = (schema as any).options;
+    return {
+      kind: 'union',
+      unionTypes: options.map((opt: ZodType) => extractTypeInfo(opt)),
+    };
+  }
+
+  // Handle enums
+  if (schema instanceof z.ZodEnum) {
+    return {
+      kind: 'enum',
+      enumValues: (schema as any).options,
+    };
+  }
+
+  // Handle literals
+  if (schema instanceof z.ZodLiteral) {
+    return {
+      kind: 'literal',
+      literalValue: (schema as any).value,
+      baseType: typeof (schema as any).value as string,
+    };
+  }
+
+  // Handle records
+  if (schema instanceof z.ZodRecord) {
+    return {
+      kind: 'record',
+      keyType: { kind: 'primitive', baseType: 'string' },
+      valueType: extractTypeInfo((schema as any).valueSchema),
+    };
+  }
+
+  // Handle tuples
+  if (schema instanceof z.ZodTuple) {
+    return {
+      kind: 'tuple',
+      tupleElements: (schema as any).items.map((item: ZodType) => extractTypeInfo(item)),
+    };
+  }
+
+  // Handle dates
+  if (schema instanceof z.ZodDate) {
+    return {
+      kind: 'date',
+      baseType: 'date',
     };
   }
 

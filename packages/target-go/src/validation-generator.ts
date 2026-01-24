@@ -467,10 +467,19 @@ export class GoValidationGenerator {
     // Unwrap optional/nullable to get actual base type
     if (typeRef.kind === 'optional' || typeRef.kind === 'nullable') {
       if (typeRef.baseType) {
+        if (typeof typeRef.baseType === 'string') {
+          return typeRef.baseType;
+        }
         return this.getActualType(typeRef.baseType);
       }
     }
-    return typeRef.baseType || 'unknown';
+    if (typeof typeRef.baseType === 'string') {
+      return typeRef.baseType;
+    }
+    if (typeRef.baseType) {
+      return this.getActualType(typeRef.baseType);
+    }
+    return 'unknown';
   }
 
   private toPascalCase(str: string): string {

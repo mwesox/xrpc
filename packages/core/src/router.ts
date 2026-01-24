@@ -8,6 +8,17 @@ export interface RouterDefinition {
   [groupName: string]: EndpointGroup;
 }
 
+// WeakMap to store middleware separately from router definition
+const routerMiddleware = new WeakMap<RouterDefinition, Middleware[]>();
+
+/**
+ * Get middleware associated with a router definition
+ * Used by parser to extract middleware metadata
+ */
+export function getRouterMiddleware(router: RouterDefinition): Middleware[] | undefined {
+  return routerMiddleware.get(router);
+}
+
 /**
  * Middleware function type for extending context
  * Middleware receives the request and current context, and returns updated context
@@ -36,10 +47,10 @@ function isRouterConfig(value: RouterDefinition | RouterConfig): value is Router
 
 /**
  * Creates an endpoint group containing one or more endpoints.
- * 
+ *
  * @param endpoints - An object mapping endpoint names to their definitions (query or mutation)
- * @returns The endpoint group
- * 
+ * @returns The endpoint group with preserved types
+ *
  * @example
  * ```typescript
  * const greeting = createEndpoint({
@@ -50,21 +61,19 @@ function isRouterConfig(value: RouterDefinition | RouterConfig): value is Router
  * });
  * ```
  */
-export function createEndpoint(
-  endpoints: EndpointGroup
-): EndpointGroup {
+export function createEndpoint<T extends EndpointGroup>(endpoints: T): T {
   return endpoints;
 }
 
 /**
  * Creates a router with optional middleware support
- * 
+ *
  * @example
  * // Without middleware
  * const router = createRouter({
  *   greeting: createEndpoint({ ... })
  * });
- * 
+ *
  * @example
  * // With middleware
  * const router = createRouter({
@@ -74,26 +83,21 @@ export function createEndpoint(
  *   greeting: createEndpoint({ ... })
  * });
  */
-export function createRouter(
-  config: RouterConfig | RouterDefinition
-): RouterDefinition {
+export function createRouter<T extends RouterConfig | RouterDefinition>(
+  config: T
+): T extends RouterConfig ? Omit<T, 'middleware'> : T {
   // If it's a RouterConfig with middleware, extract the endpoints
   if (isRouterConfig(config)) {
     const { middleware, ...endpoints } = config;
-    // Store middleware metadata on the router definition for parser extraction
     const routerDef = endpoints as RouterDefinition;
-    // Attach middleware to router definition as metadata (non-enumerable)
+
+    // Store middleware in WeakMap instead of property
     if (middleware && middleware.length > 0) {
-      Object.defineProperty(routerDef, '__middleware', {
-        value: middleware,
-        enumerable: false,
-        writable: false,
-        configurable: false,
-      });
+      routerMiddleware.set(routerDef, middleware);
     }
-    return routerDef;
+    return routerDef as T extends RouterConfig ? Omit<T, 'middleware'> : T;
   }
-  
+
   // Otherwise, it's a plain RouterDefinition
-  return config;
+  return config as T extends RouterConfig ? Omit<T, 'middleware'> : T;
 }

@@ -6,7 +6,10 @@
   "workspaces": [
     "packages/*",
     "packages/target-*",
-    "examples/*"
+    "examples/*",
+    "examples/x-rpc-todo-app",
+    "examples/x-rpc-todo-app/apps/*",
+    "examples/x-rpc-todo-app/packages/*"
   ],
   "scripts": {
     "build": "bun run --filter='./packages/*' build",

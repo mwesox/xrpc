@@ -4,20 +4,19 @@ import { dirname, join } from 'node:path';
 import { extractTypeInfo, generateTypeName } from './zod-extractor';
 import type { ContractDefinition, Router, EndpointGroup, Endpoint, TypeDefinition } from './contract';
 import type { RouterDefinition, EndpointGroup as CoreEndpointGroup, EndpointDefinition } from '@xrpc/core';
+import { getRouterMiddleware } from '@xrpc/core';
 
 // Re-export types for convenience
 export type { ContractDefinition, Router, EndpointGroup, Endpoint, TypeDefinition, Property, ValidationRules, TypeReference, MiddlewareDefinition } from './contract';
 
 /**
- * Type guard to check if an object has a __middleware property
+ * Import a module with a timeout to detect circular dependencies or slow initialization
  */
-function hasMiddleware(obj: unknown): obj is { __middleware: unknown[] } {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    '__middleware' in obj &&
-    Array.isArray((obj as Record<string, unknown>).__middleware)
+async function importWithTimeout(path: string, timeout = 5000): Promise<any> {
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error(`Import timeout after ${timeout}ms`)), timeout)
   );
+  return Promise.race([import(path), timeoutPromise]);
 }
 
 /**
@@ -67,10 +66,17 @@ export async function parseContract(filePath: string): Promise<ContractDefinitio
   
   let routerModule;
   try {
-    routerModule = await import(absolutePath);
+    routerModule = await importWithTimeout(absolutePath);
   } catch (error) {
     if (error instanceof Error) {
       // Provide more helpful error messages
+      if (error.message.includes('timeout')) {
+        throw new Error(
+          `Contract file import timed out: ${filePath}\n` +
+          `This may indicate circular dependencies or slow initialization.\n` +
+          `Ensure the file exports a router synchronously.`
+        );
+      }
       if (error.message.includes('Cannot find module')) {
         throw new Error(
           `Failed to import contract file: ${filePath}\n` +
@@ -159,8 +165,8 @@ function buildContractDefinition(
     throw new Error('Router definition must be an object. Use: createRouter({ ... })');
   }
 
-  // Extract middleware if present (stored as non-enumerable property)
-  const middleware = hasMiddleware(routerDef) ? routerDef.__middleware : undefined;
+  // Extract middleware if present (stored in WeakMap)
+  const middleware = getRouterMiddleware(routerDef);
   const middlewareDefinitions = middleware?.map((_, index) => ({
     name: `middleware_${index}`,
   })) || [];

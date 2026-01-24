@@ -21,7 +21,7 @@ export class ReactTypeGenerator {
 
     // Import router from original contract file
     w.import(relativePath, ['router']);
-    w.import('zod', ['z']);
+    w.import('@xrpc/core', ['type InferInput', 'type InferOutput']);
     w.n();
 
     // Generate schema exports and type aliases for each endpoint
@@ -41,23 +41,17 @@ export class ReactTypeGenerator {
     // Extract group and endpoint names from fullName (e.g., "greeting.greet")
     const [groupName, endpointName] = endpoint.fullName.split('.');
 
+    const routerPath = `router.${groupName}.${endpointName}`;
+
     // Export input schema
-    w.const(
-      inputSchemaName,
-      `router.${groupName}.${endpointName}.input`,
-      true
-    );
+    w.const(inputSchemaName, `${routerPath}.input`, true);
 
     // Export output schema
-    w.const(
-      outputSchemaName,
-      `router.${groupName}.${endpointName}.output`,
-      true
-    );
+    w.const(outputSchemaName, `${routerPath}.output`, true);
 
-    // Generate type aliases using z.infer
-    w.type(inputTypeName, `z.infer<typeof ${inputSchemaName}>`);
-    w.type(outputTypeName, `z.infer<typeof ${outputSchemaName}>`);
+    // Generate type aliases using utility types
+    w.type(inputTypeName, `InferInput<typeof ${routerPath}>`);
+    w.type(outputTypeName, `InferOutput<typeof ${routerPath}>`);
     w.n();
   }
 
@@ -82,7 +76,7 @@ export class ReactTypeGenerator {
     const contractFile = contractPathWithoutExt.split('/').pop() || 'api';
     
     // Calculate relative path from output directory to contract directory
-    const relativePath = relative(dirname(outputDir), contractDir);
+    const relativePath = relative(outputDir, contractDir);
     
     // Handle same directory case
     if (relativePath === '' || relativePath === '.') {
