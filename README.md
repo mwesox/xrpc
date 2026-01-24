@@ -3,6 +3,7 @@
 **Define once. Generate everywhere. Type-safe across every boundary.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/docs-mwesox.github.io%2Fxrpc-blue)](https://mwesox.github.io/xrpc/)
 
 xRPC is a next-generation RPC framework that bridges the gap between type safety and cross-platform development. Write your API contracts in TypeScript with Zod schemas, and generate idiomatic, dependency-free code for any language.
 
