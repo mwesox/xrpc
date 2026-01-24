@@ -10,7 +10,7 @@ This guide shows how to use an xRPC client in TypeScript.
 
 ## Prerequisites
 
-1. Define your API contract (see `api-contract.md`)
+1. Define your API contract (see [API Contract](api-contract.html))
 2. Generate TypeScript Express code: `xrpc generate --targets typescript-express`
 3. Use the generated client in your application
 

@@ -10,7 +10,7 @@ This guide shows how to implement an xRPC server using Kotlin and Spring Boot.
 
 ## Prerequisites
 
-1. Define your API contract (see `api-contract.md`)
+1. Define your API contract (see [API Contract](api-contract.html))
 2. Generate Kotlin Spring Boot code: `xrpc generate --targets kotlin-spring-boot`
 3. Implement your handlers using the generated code
 
@@ -20,7 +20,7 @@ This guide shows how to implement an xRPC server using Kotlin and Spring Boot.
 
 ## Basic Server Setup
 
-First, define your API contract (see `api-contract.md` for contract definition):
+First, define your API contract (see [API Contract](api-contract.html) for details):
 
 ```typescript
 // contract.ts

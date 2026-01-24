@@ -142,7 +142,7 @@ Each method within an endpoint is either a query or mutation:
 - **Query**: Read operations that don't modify state
 - **Mutation**: Write operations that modify state
 
-Both use the same structure with `input` and `output` properties. **No handlers in the contract** - those are implemented separately in server files (see `go-server.md`, `typescript-server.md`, or `kotlin-springboot-server.md`).
+Both use the same structure with `input` and `output` properties. **No handlers in the contract** - those are implemented separately in server files (see [Go Server](go-server.html), [TypeScript Server](typescript-server.html), or [Kotlin Server](kotlin-springboot-server.html)).
 
 ## Code Generation
 

@@ -10,7 +10,7 @@ This guide shows how to use an xRPC client in Go.
 
 ## Prerequisites
 
-1. Define your API contract (see `api-contract.md`)
+1. Define your API contract (see [API Contract](api-contract.html))
 2. Generate Go code: `xrpc generate --targets go`
 3. Use the generated client in your application
 

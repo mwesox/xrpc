@@ -10,7 +10,7 @@ This guide shows how to implement an xRPC server in Go.
 
 ## Prerequisites
 
-1. Define your API contract (see `api-contract.md`)
+1. Define your API contract (see [API Contract](api-contract.html))
 2. Generate Go code: `xrpc generate --targets go`
 3. Implement your handlers using the generated code
 

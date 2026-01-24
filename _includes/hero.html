@@ -27,11 +27,7 @@
 
     <div class="hero-cta">
       <a href="{{ '/docs/usage/api-contract.html' | relative_url }}" class="btn btn-primary btn-lg">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 20h9"/>
-          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-        </svg>
-        Get Started
+        Start now
       </a>
       <a href="https://github.com/{{ site.repository }}" class="btn btn-secondary btn-lg" target="_blank" rel="noopener">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -45,92 +41,109 @@
   <!-- Hub-and-spoke API Diagram -->
   <div class="hero-diagram">
     <div class="api-diagram">
-      <svg class="api-diagram-svg" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Gradients -->
+      <svg class="api-diagram-svg" viewBox="0 0 700 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Gradients and Filters -->
         <defs>
-          <linearGradient id="hero-gradient-center" x1="220" y1="145" x2="380" y2="255" gradientUnits="userSpaceOnUse">
+          <linearGradient id="hero-gradient-center" x1="250" y1="175" x2="450" y2="325" gradientUnits="userSpaceOnUse">
             <stop stop-color="#00d4ff"/>
             <stop offset="1" stop-color="#7c3aed"/>
           </linearGradient>
-          <linearGradient id="hero-gradient-react" x1="300" y1="145" x2="300" y2="30" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#00d4ff"/>
-            <stop offset="1" stop-color="#61dafb"/>
+          <!-- Kotlin gradient -->
+          <linearGradient id="kotlin-gradient" x1="-12" y1="-12" x2="12" y2="12" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#7f52ff"/>
+            <stop offset="0.5" stop-color="#c757bc"/>
+            <stop offset="1" stop-color="#f88a36"/>
           </linearGradient>
-          <linearGradient id="hero-gradient-go" x1="220" y1="200" x2="80" y2="200" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#00d4ff"/>
-            <stop offset="1" stop-color="#00add8"/>
-          </linearGradient>
-          <linearGradient id="hero-gradient-ts" x1="380" y1="200" x2="520" y2="200" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#00d4ff"/>
-            <stop offset="1" stop-color="#3178c6"/>
-          </linearGradient>
-          <linearGradient id="hero-gradient-kotlin" x1="300" y1="255" x2="300" y2="370" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#00d4ff"/>
-            <stop offset="1" stop-color="#7f52ff"/>
-          </linearGradient>
+          <!-- White glow filter for connection lines -->
+          <filter id="glow-white" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2" result="blur1"/>
+            <feGaussianBlur stdDeviation="5" result="blur2"/>
+            <feMerge>
+              <feMergeNode in="blur2"/>
+              <feMergeNode in="blur1"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
         </defs>
 
-        <!-- Connection lines (animated) -->
-        <!-- To React (top) -->
-        <path class="connection-line connection-line-react" d="M300 145 L300 85" stroke="url(#hero-gradient-react)" stroke-width="2" stroke-linecap="round"/>
-        <polygon class="connection-line connection-line-react" points="295,90 300,80 305,90" fill="#61dafb"/>
+        <!-- Connection lines (animated with glow) -->
+        <g filter="url(#glow-white)">
+          <!-- To React (top) -->
+          <path class="connection-line connection-line-react" d="M350 175 L350 110" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2"/>
+          <polygon class="connection-line connection-line-react arrow-head" points="343,118 350,102 357,118" fill="#ffffff"/>
 
-        <!-- To Go (left) -->
-        <path class="connection-line connection-line-go" d="M220 200 L165 200" stroke="url(#hero-gradient-go)" stroke-width="2" stroke-linecap="round"/>
-        <polygon class="connection-line connection-line-go" points="170,195 160,200 170,205" fill="#00add8"/>
+          <!-- To Go (left) -->
+          <path class="connection-line connection-line-go" d="M250 250 L185 250" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2"/>
+          <polygon class="connection-line connection-line-go arrow-head" points="193,242 177,250 193,258" fill="#ffffff"/>
 
-        <!-- To TypeScript (right) -->
-        <path class="connection-line connection-line-ts" d="M380 200 L435 200" stroke="url(#hero-gradient-ts)" stroke-width="2" stroke-linecap="round"/>
-        <polygon class="connection-line connection-line-ts" points="430,195 440,200 430,205" fill="#3178c6"/>
+          <!-- To TypeScript (right) -->
+          <path class="connection-line connection-line-ts" d="M450 250 L515 250" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2"/>
+          <polygon class="connection-line connection-line-ts arrow-head" points="507,242 523,250 507,258" fill="#ffffff"/>
 
-        <!-- To Kotlin (bottom) -->
-        <path class="connection-line connection-line-kotlin" d="M300 255 L300 315" stroke="url(#hero-gradient-kotlin)" stroke-width="2" stroke-linecap="round"/>
-        <polygon class="connection-line connection-line-kotlin" points="295,310 300,320 305,310" fill="#7f52ff"/>
+          <!-- To Kotlin (bottom) -->
+          <path class="connection-line connection-line-kotlin" d="M350 325 L350 390" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2"/>
+          <polygon class="connection-line connection-line-kotlin arrow-head" points="343,382 350,398 357,382" fill="#ffffff"/>
+        </g>
 
-        <!-- React box (top) -->
+        <!-- React box (top) - BIGGER -->
         <g class="tech-box tech-box-react">
-          <rect x="215" y="5" width="170" height="80" rx="12" fill="#12121a" stroke="#61dafb" stroke-width="2"/>
+          <rect x="230" y="0" width="240" height="110" rx="14" fill="#12121a" stroke="#61dafb" stroke-width="2.5"/>
           <!-- React atom icon -->
-          <g transform="translate(300, 30)">
-            <circle r="4" fill="#61dafb"/>
-            <ellipse rx="14" ry="5.5" fill="none" stroke="#61dafb" stroke-width="1.2"/>
-            <ellipse rx="14" ry="5.5" fill="none" stroke="#61dafb" stroke-width="1.2" transform="rotate(60)"/>
-            <ellipse rx="14" ry="5.5" fill="none" stroke="#61dafb" stroke-width="1.2" transform="rotate(-60)"/>
+          <g transform="translate(350, 35)">
+            <circle r="5" fill="#61dafb"/>
+            <ellipse rx="18" ry="7" fill="none" stroke="#61dafb" stroke-width="1.5"/>
+            <ellipse rx="18" ry="7" fill="none" stroke="#61dafb" stroke-width="1.5" transform="rotate(60)"/>
+            <ellipse rx="18" ry="7" fill="none" stroke="#61dafb" stroke-width="1.5" transform="rotate(-60)"/>
           </g>
-          <text x="300" y="58" text-anchor="middle" fill="#61dafb" font-family="var(--font-mono)" font-size="14" font-weight="600">React</text>
-          <text x="300" y="74" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="11">Client + Hooks</text>
+          <text x="350" y="72" text-anchor="middle" fill="#61dafb" font-family="var(--font-mono)" font-size="22" font-weight="700">React</text>
+          <text x="350" y="96" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="14">Client + Hooks</text>
         </g>
 
-        <!-- Go box (left) -->
+        <!-- Go box (left) - BIGGER -->
         <g class="tech-box tech-box-go">
-          <rect x="0" y="155" width="160" height="90" rx="12" fill="#12121a" stroke="#00add8" stroke-width="2"/>
-          <text x="80" y="185" text-anchor="middle" fill="#00add8" font-family="var(--font-mono)" font-size="12" font-weight="700">{ }</text>
-          <text x="80" y="208" text-anchor="middle" fill="#00add8" font-family="var(--font-mono)" font-size="14" font-weight="600">Go</text>
-          <text x="80" y="228" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="11">Server + Types</text>
+          <rect x="0" y="190" width="180" height="120" rx="14" fill="#12121a" stroke="#00add8" stroke-width="2.5"/>
+          <!-- Go Gopher icon -->
+          <g transform="translate(90, 228)">
+            <ellipse rx="14" ry="12" fill="#00add8"/>
+            <circle cx="-5" cy="-3" r="3" fill="#12121a"/>
+            <circle cx="5" cy="-3" r="3" fill="#12121a"/>
+            <circle cx="-5" cy="-3" r="1.5" fill="#ffffff"/>
+            <circle cx="5" cy="-3" r="1.5" fill="#ffffff"/>
+            <ellipse cx="0" cy="4" rx="4" ry="2" fill="#12121a"/>
+          </g>
+          <text x="90" y="262" text-anchor="middle" fill="#00add8" font-family="var(--font-mono)" font-size="22" font-weight="700">Go</text>
+          <text x="90" y="290" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="14">Server + Types</text>
         </g>
 
-        <!-- api.ts box (center) - larger and emphasized -->
+        <!-- api.ts box (center) - LARGER and emphasized -->
         <g class="api-box">
-          <rect x="220" y="145" width="160" height="110" rx="14" fill="#12121a" stroke="url(#hero-gradient-center)" stroke-width="2.5"/>
-          <text x="300" y="185" text-anchor="middle" fill="#00d4ff" font-family="var(--font-mono)" font-size="18" font-weight="700">api.ts</text>
-          <text x="300" y="210" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="12">Zod Schema</text>
-          <text x="300" y="232" text-anchor="middle" fill="#5a5a70" font-family="var(--font-sans)" font-size="10">Single source of truth</text>
+          <rect x="250" y="175" width="200" height="150" rx="16" fill="#12121a" stroke="url(#hero-gradient-center)" stroke-width="3"/>
+          <text x="350" y="230" text-anchor="middle" fill="#00d4ff" font-family="var(--font-mono)" font-size="28" font-weight="700">api.ts</text>
+          <text x="350" y="262" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="16">Zod Schema</text>
+          <text x="350" y="295" text-anchor="middle" fill="#5a5a70" font-family="var(--font-sans)" font-size="13">Single source of truth</text>
         </g>
 
-        <!-- TypeScript box (right) -->
+        <!-- TypeScript box (right) - BIGGER -->
         <g class="tech-box tech-box-ts">
-          <rect x="440" y="155" width="160" height="90" rx="12" fill="#12121a" stroke="#3178c6" stroke-width="2"/>
-          <text x="520" y="185" text-anchor="middle" fill="#3178c6" font-family="var(--font-mono)" font-size="12" font-weight="700">TS</text>
-          <text x="520" y="208" text-anchor="middle" fill="#3178c6" font-family="var(--font-mono)" font-size="14" font-weight="600">TypeScript</text>
-          <text x="520" y="228" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="11">Server + Client</text>
+          <rect x="520" y="190" width="180" height="120" rx="14" fill="#12121a" stroke="#3178c6" stroke-width="2.5"/>
+          <!-- TypeScript logo icon -->
+          <g transform="translate(610, 225)">
+            <rect x="-14" y="-14" width="28" height="28" rx="4" fill="#3178c6"/>
+            <text x="0" y="6" text-anchor="middle" fill="#ffffff" font-family="var(--font-mono)" font-size="14" font-weight="700">TS</text>
+          </g>
+          <text x="610" y="262" text-anchor="middle" fill="#3178c6" font-family="var(--font-mono)" font-size="22" font-weight="700">TypeScript</text>
+          <text x="610" y="290" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="14">Server + Client</text>
         </g>
 
-        <!-- Kotlin box (bottom) -->
+        <!-- Kotlin box (bottom) - BIGGER -->
         <g class="tech-box tech-box-kotlin">
-          <rect x="215" y="320" width="170" height="80" rx="12" fill="#12121a" stroke="#7f52ff" stroke-width="2"/>
-          <text x="300" y="350" text-anchor="middle" fill="#7f52ff" font-family="var(--font-mono)" font-size="12" font-weight="700">Kt</text>
-          <text x="300" y="373" text-anchor="middle" fill="#7f52ff" font-family="var(--font-mono)" font-size="14" font-weight="600">Kotlin</text>
-          <text x="300" y="389" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="11">Spring Boot</text>
+          <rect x="230" y="395" width="240" height="105" rx="14" fill="#12121a" stroke="#7f52ff" stroke-width="2.5"/>
+          <!-- Kotlin logo icon (gradient triangle/K shape) -->
+          <g transform="translate(350, 430)">
+            <polygon points="-12,-12 12,-12 0,0 12,12 -12,12 0,0" fill="url(#kotlin-gradient)"/>
+          </g>
+          <text x="350" y="464" text-anchor="middle" fill="#7f52ff" font-family="var(--font-mono)" font-size="22" font-weight="700">Kotlin</text>
+          <text x="350" y="488" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="14">Spring Boot</text>
         </g>
       </svg>
     </div>
@@ -141,7 +154,7 @@
 <style>
 /* Hero diagram */
 .hero-diagram {
-  max-width: 600px;
+  max-width: 750px;
   margin: var(--space-2xl) auto 0;
   padding: 0 var(--space-lg);
   animation: fadeInUp 0.8s ease-out 0.6s both;
@@ -163,10 +176,12 @@
 
 .hero-diagram .diagram-caption {
   text-align: center;
-  color: var(--text-secondary);
-  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 1.125rem;
   font-weight: 500;
-  margin-top: var(--space-md);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: var(--space-lg);
   margin-bottom: 0;
 }
 
@@ -236,6 +251,68 @@
   to {
     opacity: 1;
   }
+}
+
+@keyframes flowDash {
+  from {
+    stroke-dashoffset: 12;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulseArrow {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.hero-diagram .connection-line[stroke-dasharray] {
+  animation: drawLine 0.4s ease-out forwards, flowDash 0.8s linear infinite;
+}
+
+.hero-diagram .connection-line-react[stroke-dasharray] {
+  animation-delay: 0.5s, 0.9s;
+}
+
+.hero-diagram .connection-line-go[stroke-dasharray] {
+  animation-delay: 0.7s, 1.1s;
+}
+
+.hero-diagram .connection-line-ts[stroke-dasharray] {
+  animation-delay: 0.9s, 1.3s;
+}
+
+.hero-diagram .connection-line-kotlin[stroke-dasharray] {
+  animation-delay: 1.1s, 1.5s;
+}
+
+.hero-diagram .arrow-head {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: drawLine 0.4s ease-out forwards, pulseArrow 2s ease-in-out infinite;
+}
+
+.hero-diagram .connection-line-react.arrow-head {
+  animation-delay: 0.5s, 1.5s;
+}
+
+.hero-diagram .connection-line-go.arrow-head {
+  animation-delay: 0.7s, 1.7s;
+}
+
+.hero-diagram .connection-line-ts.arrow-head {
+  animation-delay: 0.9s, 1.9s;
+}
+
+.hero-diagram .connection-line-kotlin.arrow-head {
+  animation-delay: 1.1s, 2.1s;
 }
 
 /* Mobile adjustments for diagram */

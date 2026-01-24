@@ -10,7 +10,7 @@ This guide shows how to implement an xRPC server using TypeScript and Express.
 
 ## Prerequisites
 
-1. Define your API contract (see `api-contract.md`)
+1. Define your API contract (see [API Contract](api-contract.html))
 2. Generate TypeScript Express code: `xrpc generate --targets typescript-express`
 3. Implement your handlers using the generated code
 
@@ -20,7 +20,7 @@ This guide shows how to implement an xRPC server using TypeScript and Express.
 
 ## Basic Server Setup
 
-First, define your API contract (see `api-contract.md` for contract definition):
+First, define your API contract (see [API Contract](api-contract.html) for details):
 
 ```typescript
 // contract.ts
@@ -53,7 +53,7 @@ xrpc generate --targets typescript-express
 This generates code in `generated/typescript-express/`:
 - `types.ts`: Type definitions including `ServerRouter` type
 - `server.ts`: Express middleware factory (`createServer`)
-- `client.ts`: Type-safe client SDK (see `typescript-client.md`)
+- `client.ts`: Type-safe client SDK (see [TypeScript Client](typescript-client.html))
 
 ```typescript
 // server.ts
