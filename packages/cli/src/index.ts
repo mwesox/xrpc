@@ -101,7 +101,7 @@ if (parsed.flags.help || parsed.flags.h || parsed.command === 'help') {
 
 // Handle version flag
 if (parsed.flags.version || parsed.flags.v) {
-  console.log('0.0.1');
+  console.log('0.0.2');
   process.exit(0);
 }
 

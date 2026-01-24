@@ -1,13 +1,20 @@
 {
   "name": "@xrpckit/codegen",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "description": "Code generation utilities for xRPC - base classes and helpers for target generators",
   "type": "module",
   "license": "MIT",
+  "author": "mwesox",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mwesox/xrpc.git",
+    "url": "git+https://github.com/mwesox/xrpc.git",
     "directory": "packages/codegen"
   },
+  "bugs": {
+    "url": "https://github.com/mwesox/xrpc/issues"
+  },
+  "homepage": "https://github.com/mwesox/xrpc#readme",
+  "keywords": ["xrpc", "rpc", "typescript", "codegen", "code-generation", "api"],
   "publishConfig": {
     "access": "public"
   },
@@ -27,7 +34,7 @@
     "build": "tsup src/index.ts --format esm --dts --clean"
   },
   "dependencies": {
-    "@xrpckit/parser": "^0.0.1"
+    "@xrpckit/parser": "^0.0.2"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

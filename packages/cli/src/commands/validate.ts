@@ -34,7 +34,7 @@ export async function validateCommand(options: ValidateOptions = {}): Promise<vo
   }
 
   // Validate file exists
-  if (!existsSync(filePath)) {
+  if (!filePath || !existsSync(filePath)) {
     throw new Error(`File not found: ${filePath}`);
   }
 

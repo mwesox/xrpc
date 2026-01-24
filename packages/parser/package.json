@@ -1,13 +1,20 @@
 {
   "name": "@xrpckit/parser",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "description": "Contract parser for xRPC - extracts API definitions from TypeScript/Zod files",
   "type": "module",
   "license": "MIT",
+  "author": "mwesox",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mwesox/xrpc.git",
+    "url": "git+https://github.com/mwesox/xrpc.git",
     "directory": "packages/parser"
   },
+  "bugs": {
+    "url": "https://github.com/mwesox/xrpc/issues"
+  },
+  "homepage": "https://github.com/mwesox/xrpc#readme",
+  "keywords": ["xrpc", "rpc", "typescript", "parser", "zod", "api", "type-safe"],
   "publishConfig": {
     "access": "public"
   },
@@ -28,7 +35,7 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "@xrpckit/schema": "^0.0.1",
+    "@xrpckit/schema": "^0.0.2",
     "typescript": "^5.0.0",
     "zod": "^4.0.0"
   },

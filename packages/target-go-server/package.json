@@ -1,13 +1,20 @@
 {
   "name": "@xrpckit/target-go-server",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "description": "Go server code generator for xRPC - generates idiomatic Go HTTP handlers from contracts",
   "type": "module",
   "license": "MIT",
+  "author": "mwesox",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mwesox/xrpc.git",
+    "url": "git+https://github.com/mwesox/xrpc.git",
     "directory": "packages/target-go-server"
   },
+  "bugs": {
+    "url": "https://github.com/mwesox/xrpc/issues"
+  },
+  "homepage": "https://github.com/mwesox/xrpc#readme",
+  "keywords": ["xrpc", "rpc", "go", "golang", "server", "codegen", "api", "type-safe"],
   "publishConfig": {
     "access": "public"
   },
@@ -27,8 +34,8 @@
     "build": "tsup src/index.ts --format esm --dts --clean"
   },
   "dependencies": {
-    "@xrpckit/codegen": "^0.0.1",
-    "@xrpckit/parser": "^0.0.1"
+    "@xrpckit/codegen": "^0.0.2",
+    "@xrpckit/parser": "^0.0.2"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

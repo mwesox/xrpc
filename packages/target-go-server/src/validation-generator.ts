@@ -19,14 +19,14 @@ export class GoValidationGenerator {
     
     // Check if any validation rules require these imports
     // Note: email uses mail.ParseAddress, not regex, so we check separately
-    const needsRegex = this.hasValidationRule(contract, (rules) => 
-      rules.uuid || (rules.regex && !rules.email) // regex but not email (email uses mail)
+    const needsRegex = this.hasValidationRule(contract, (rules) =>
+      !!(rules.uuid || (rules.regex && !rules.email)) // regex but not email (email uses mail)
     );
-    const needsMail = this.hasValidationRule(contract, (rules) => 
-      rules.email
+    const needsMail = this.hasValidationRule(contract, (rules) =>
+      !!rules.email
     );
-    const needsURL = this.hasValidationRule(contract, (rules) => 
-      rules.url
+    const needsURL = this.hasValidationRule(contract, (rules) =>
+      !!rules.url
     );
     
     if (needsRegex) imports.add('regexp');

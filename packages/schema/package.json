@@ -1,13 +1,20 @@
 {
   "name": "@xrpckit/schema",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "description": "Type-safe API contract DSL for xRPC - define endpoints with Zod schemas",
   "type": "module",
   "license": "MIT",
+  "author": "mwesox",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mwesox/xrpc.git",
+    "url": "git+https://github.com/mwesox/xrpc.git",
     "directory": "packages/schema"
   },
+  "bugs": {
+    "url": "https://github.com/mwesox/xrpc/issues"
+  },
+  "homepage": "https://github.com/mwesox/xrpc#readme",
+  "keywords": ["xrpc", "rpc", "typescript", "zod", "schema", "api", "type-safe", "contract"],
   "publishConfig": {
     "access": "public"
   },
