@@ -205,15 +205,16 @@ go 1.25
   })();
 
   // Wait a bit for server to start
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 3000));
 
   // Check if server process is still running
   if (serverProcess.exitCode !== null) {
-    // Process exited, read all output
+    // Process exited, wait for streams to be fully read
+    await new Promise((resolve) => setTimeout(resolve, 500));
     const allOutput = serverOutput.join('');
     const allErrors = serverErrors.join('');
     throw new Error(
-      `Server process exited with code ${serverProcess.exitCode}. Output: ${allOutput}\nErrors: ${allErrors}`
+      `Server process exited with code ${serverProcess.exitCode}.\nOutput: ${allOutput}\nErrors: ${allErrors}`
     );
   }
 
@@ -221,15 +222,25 @@ go 1.25
   try {
     await waitForServer(`${serverUrl}/api`);
   } catch (error) {
-    // Log server output if it failed
+    // Give time for streams to collect data
+    await new Promise((resolve) => setTimeout(resolve, 500));
     const allOutput = serverOutput.join('');
     const allErrors = serverErrors.join('');
     // Kill process
     if (serverProcess) {
       serverProcess.kill();
+      // Wait for process to exit and collect final output
+      await Promise.race([
+        serverProcess.exited,
+        new Promise((resolve) => setTimeout(resolve, 2000)),
+      ]);
     }
+    // Collect any remaining output after kill
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    const finalOutput = serverOutput.join('');
+    const finalErrors = serverErrors.join('');
     throw new Error(
-      `Server failed to start. Output: ${allOutput}\nErrors: ${allErrors}\nOriginal error: ${error}`
+      `Server failed to start within timeout.\nOutput: ${finalOutput}\nErrors: ${finalErrors}\nOriginal error: ${error}`
     );
   }
 
