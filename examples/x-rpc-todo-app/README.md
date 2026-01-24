@@ -54,7 +54,7 @@ Let's walk through `packages/api/src/contract.ts` line by line. This is the most
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpc/schema';
+import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
 ```
 
 Two imports:

@@ -1,5 +1,5 @@
-import { parseContract, type ContractDefinition } from '@xrpc/parser';
-import { getGenerator, listTargets, type GeneratorConfig } from '@xrpc/generator';
+import { parseContract, type ContractDefinition } from '@xrpckit/parser';
+import { getGenerator, listTargets, type GeneratorConfig } from '@xrpckit/generator';
 import { mkdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { existsSync } from 'node:fs';

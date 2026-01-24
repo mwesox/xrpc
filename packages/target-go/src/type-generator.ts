@@ -1,7 +1,7 @@
 import { GoBuilder } from './go-builder';
 import { GoTypeMapper } from './type-mapper';
-import { toPascalCase } from '@xrpc/generator-core';
-import type { TypeDefinition, Property, ContractDefinition } from '@xrpc/parser';
+import { toPascalCase } from '@xrpckit/generator-core';
+import type { TypeDefinition, Property, ContractDefinition } from '@xrpckit/parser';
 
 // Helper to convert "greeting.greet" to "GreetingGreet"
 function toMethodName(fullName: string): string {

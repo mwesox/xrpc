@@ -1,4 +1,4 @@
-import { listTargets } from '@xrpc/generator';
+import { listTargets } from '@xrpckit/generator';
 import {
   formatHeader,
   formatCommand,

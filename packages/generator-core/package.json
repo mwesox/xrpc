@@ -1,5 +1,5 @@
 {
-  "name": "@xrpc/generator-core",
+  "name": "@xrpckit/generator-core",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -7,7 +7,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@xrpc/parser": "workspace:*"
+    "@xrpckit/parser": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",

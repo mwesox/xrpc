@@ -1,6 +1,6 @@
 import { GoBuilder } from './go-builder';
-import { toPascalCase } from '@xrpc/generator-core';
-import type { ContractDefinition, TypeDefinition, Property, ValidationRules, TypeReference } from '@xrpc/parser';
+import { toPascalCase } from '@xrpckit/generator-core';
+import type { ContractDefinition, TypeDefinition, Property, ValidationRules, TypeReference } from '@xrpckit/parser';
 
 export class GoValidationGenerator {
   private w: GoBuilder;

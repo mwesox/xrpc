@@ -45,9 +45,9 @@ bun run xrpc generate --targets go --input examples/x-rpc-todo-app/packages/api/
 ## Adding a New Target
 
 1. Create `packages/target-<name>/`
-2. Extend `BaseCodeGenerator` from `@xrpc/generator-core`
+2. Extend `BaseCodeGenerator` from `@xrpckit/generator-core`
 3. Implement type mapping and code generation
-4. Register in `@xrpc/generator`
+4. Register in `@xrpckit/generator`
 5. Add tests
 
 ## Need Help?

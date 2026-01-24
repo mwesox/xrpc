@@ -15,12 +15,12 @@ Type-safe, cross-platform RPC framework that generates clients and servers from 
 4. Generated code is self-contained (no runtime dependencies)
 
 **Key Packages**:
-- `@xrpc/core` - DSL for defining API contracts (router, endpoint, query, mutation)
-- `@xrpc/parser` - Extracts contracts from TypeScript/Zod files
-- `@xrpc/generator-core` - Shared generator utilities (CodeWriter, BaseCodeGenerator)
-- `@xrpc/generator` - Main generator orchestrator
-- `@xrpc/target-go` - Go code generator (types, server, validation)
-- `@xrpc/cli` - Command-line interface
+- `@xrpckit/core` - DSL for defining API contracts (router, endpoint, query, mutation)
+- `@xrpckit/parser` - Extracts contracts from TypeScript/Zod files
+- `@xrpckit/generator-core` - Shared generator utilities (CodeWriter, BaseCodeGenerator)
+- `@xrpckit/generator` - Main generator orchestrator
+- `@xrpckit/target-go` - Go code generator (types, server, validation)
+- `@xrpckit/cli` - Command-line interface
 
 ## Commands
 
@@ -43,7 +43,7 @@ bun run build
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpc/core';
+import { createRouter, createEndpoint, query, mutation } from '@xrpckit/core';
 
 const greeting = createEndpoint({
   greet: query({

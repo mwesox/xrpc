@@ -1,5 +1,5 @@
 {
-  "name": "@xrpc/generator",
+  "name": "@xrpckit/generator",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -7,10 +7,10 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@xrpc/generator-core": "workspace:*",
-    "@xrpc/target-go": "workspace:*",
-    "@xrpc/target-react": "workspace:*",
-    "@xrpc/parser": "workspace:*"
+    "@xrpckit/generator-core": "workspace:*",
+    "@xrpckit/target-go": "workspace:*",
+    "@xrpckit/target-react": "workspace:*",
+    "@xrpckit/parser": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",

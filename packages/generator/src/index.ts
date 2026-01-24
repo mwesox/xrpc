@@ -1,7 +1,7 @@
-import type { ContractDefinition } from '@xrpc/parser';
-import type { GeneratorConfig, GeneratedFiles } from '@xrpc/generator-core';
-import { GoCodeGenerator } from '@xrpc/target-go';
-import { ReactCodeGenerator } from '@xrpc/target-react';
+import type { ContractDefinition } from '@xrpckit/parser';
+import type { GeneratorConfig, GeneratedFiles } from '@xrpckit/generator-core';
+import { GoCodeGenerator } from '@xrpckit/target-go';
+import { ReactCodeGenerator } from '@xrpckit/target-react';
 
 export type TargetGenerator = {
   name: string;
@@ -61,4 +61,4 @@ export function listTargets(): string[] {
   return Object.keys(generators);
 }
 
-export { type GeneratorConfig, type GeneratedFiles } from '@xrpc/generator-core';
+export { type GeneratorConfig, type GeneratedFiles } from '@xrpckit/generator-core';

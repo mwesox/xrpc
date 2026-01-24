@@ -1,13 +1,13 @@
 {
-  "name": "@xrpc/cli",
+  "name": "@xrpckit/cli",
   "version": "0.1.0",
   "type": "module",
   "bin": {
     "xrpc": "./src/index.ts"
   },
   "dependencies": {
-    "@xrpc/parser": "workspace:*",
-    "@xrpc/generator": "workspace:*",
+    "@xrpckit/parser": "workspace:*",
+    "@xrpckit/generator": "workspace:*",
     "@bunli/utils": "latest",
     "figlet": "^1.7.0",
     "typescript": "^5.0.0"

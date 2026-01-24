@@ -1,5 +1,5 @@
 import { ReactBuilder } from './react-builder';
-import type { ContractDefinition, Endpoint } from '@xrpc/parser';
+import type { ContractDefinition, Endpoint } from '@xrpckit/parser';
 import { relative, dirname } from 'node:path';
 
 export class ReactTypeGenerator {
@@ -21,7 +21,7 @@ export class ReactTypeGenerator {
 
     // Import router from original contract file
     w.import(relativePath, ['router']);
-    w.import('@xrpc/core', ['type InferInput', 'type InferOutput']);
+    w.import('@xrpckit/core', ['type InferInput', 'type InferOutput']);
     w.n();
 
     // Generate schema exports and type aliases for each endpoint

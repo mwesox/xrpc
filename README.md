@@ -25,14 +25,14 @@ Traditional API development forces a choice: type safety within a single languag
 ## Get Started
 
 ```bash
-npm install -g @xrpc/cli
+npm install -g @xrpckit/cli
 ```
 
 Define your API with the xRPC DSL:
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpc/core';
+import { createRouter, createEndpoint, query, mutation } from '@xrpckit/core';
 
 const users = createEndpoint({
   get: query({

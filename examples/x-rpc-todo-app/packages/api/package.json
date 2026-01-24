@@ -14,7 +14,7 @@
     "generate": "cd ../../../.. && bun run xrpc generate -i examples/x-rpc-todo-app/packages/api/src/contract.ts -t go,react -o examples/x-rpc-todo-app/packages/api/generated"
   },
   "dependencies": {
-    "@xrpc/core": "workspace:*",
+    "@xrpckit/core": "workspace:*",
     "zod": "^4.0.0"
   },
   "devDependencies": {

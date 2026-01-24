@@ -1,5 +1,5 @@
 {
-  "name": "@xrpc/target-react",
+  "name": "@xrpckit/target-react",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -7,8 +7,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@xrpc/generator-core": "workspace:*",
-    "@xrpc/parser": "workspace:*"
+    "@xrpckit/generator-core": "workspace:*",
+    "@xrpckit/parser": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",

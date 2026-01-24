@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpc/core';
+import { createRouter, createEndpoint, query, mutation } from '@xrpckit/core';
 
 // Shared Todo schema
 const Todo = z.object({

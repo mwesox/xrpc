@@ -3,8 +3,8 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { extractTypeInfo, generateTypeName } from './zod-extractor';
 import type { ContractDefinition, Router, EndpointGroup, Endpoint, TypeDefinition } from './contract';
-import type { RouterDefinition, EndpointGroup as CoreEndpointGroup, EndpointDefinition } from '@xrpc/core';
-import { getRouterMiddleware } from '@xrpc/core';
+import type { RouterDefinition, EndpointGroup as CoreEndpointGroup, EndpointDefinition } from '@xrpckit/core';
+import { getRouterMiddleware } from '@xrpckit/core';
 
 // Re-export types for convenience
 export type { ContractDefinition, Router, EndpointGroup, Endpoint, TypeDefinition, Property, ValidationRules, TypeReference, MiddlewareDefinition } from './contract';

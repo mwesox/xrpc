@@ -1,4 +1,4 @@
-import { CodeWriter } from '@xrpc/generator-core';
+import { CodeWriter } from '@xrpckit/generator-core';
 
 /**
  * TypeScript/React-specific code builder with fluent DSL for common patterns

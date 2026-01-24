@@ -1,4 +1,4 @@
-import { CodeWriter } from '@xrpc/generator-core';
+import { CodeWriter } from '@xrpckit/generator-core';
 
 /**
  * Go-specific code builder with fluent DSL for common Go patterns

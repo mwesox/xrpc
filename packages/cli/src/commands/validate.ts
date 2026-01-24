@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import * as ts from 'typescript';
-import { parseContract } from '@xrpc/parser';
+import { parseContract } from '@xrpckit/parser';
 import {
   formatSuccess,
   formatError,

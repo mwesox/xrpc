@@ -1,5 +1,5 @@
-import { toPascalCase } from '@xrpc/generator-core';
-import type { TypeReference } from '@xrpc/parser';
+import { toPascalCase } from '@xrpckit/generator-core';
+import type { TypeReference } from '@xrpckit/parser';
 
 export class GoTypeMapper {
   mapType(typeRef: TypeReference): string {
