@@ -1,19 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import {
-  taskList,
-  taskCreate,
-  taskUpdate,
-  taskDelete,
-  taskGet,
-  subtaskAdd,
-  subtaskToggle,
-  subtaskDelete,
-  tagAdd,
-  tagRemove,
-  type XRpcClientConfig,
-} from '../xrpc/client';
+import { createClient } from '../xrpc/client';
 
 // Form data interface for creating tasks
 interface TaskFormData {
@@ -25,11 +13,12 @@ interface TaskFormData {
   tags?: { name: string; color: string }[];
 }
 
-const config: XRpcClientConfig = {
+// Create the API client once with configuration
+const api = createClient({
   baseUrl: 'http://localhost:8080/api',
   validateInputs: true,
   validateOutputs: false,
-};
+});
 
 // Types for the task list response
 interface TaskSummary {
@@ -130,7 +119,7 @@ export default function TaskManager() {
     setLoading(true);
     setError(null);
     try {
-      const result = await taskList(config, {
+      const result = await api.task.list({
         status: statusFilter || undefined,
         priority: priorityFilter || undefined,
       });
@@ -146,7 +135,7 @@ export default function TaskManager() {
   const loadTaskDetail = useCallback(async (id: string) => {
     setDetailLoading(true);
     try {
-      const result = await taskGet(config, { id });
+      const result = await api.task.get({ id });
       setSelectedTask(result as unknown as FullTask);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load task');
@@ -184,7 +173,7 @@ export default function TaskManager() {
     }
 
     try {
-      await taskCreate(config, {
+      await api.task.create({
         title: formData.title.trim(),
         description: formData.description?.trim() || undefined,
         priority: formData.priority,
@@ -219,7 +208,7 @@ export default function TaskManager() {
 
   const handleUpdateStatus = async (id: string, status: FullTask['status']) => {
     try {
-      await taskUpdate(config, { id, status });
+      await api.task.update({ id, status });
       loadTasks();
       if (selectedTask?.id === id) {
         loadTaskDetail(id);
@@ -232,7 +221,7 @@ export default function TaskManager() {
   const handleDeleteTask = async (id: string) => {
     if (!confirm('Are you sure you want to delete this task?')) return;
     try {
-      await taskDelete(config, { id });
+      await api.task.delete({ id });
       if (selectedTask?.id === id) {
         setSelectedTask(null);
       }
@@ -245,7 +234,7 @@ export default function TaskManager() {
   const handleAddSubtask = async () => {
     if (!selectedTask || !newSubtaskTitle.trim()) return;
     try {
-      await subtaskAdd(config, {
+      await api.subtask.add({
         taskId: selectedTask.id,
         title: newSubtaskTitle.trim(),
       });
@@ -259,7 +248,7 @@ export default function TaskManager() {
   const handleToggleSubtask = async (subtaskId: string) => {
     if (!selectedTask) return;
     try {
-      await subtaskToggle(config, {
+      await api.subtask.toggle({
         taskId: selectedTask.id,
         subtaskId,
       });
@@ -272,7 +261,7 @@ export default function TaskManager() {
   const handleDeleteSubtask = async (subtaskId: string) => {
     if (!selectedTask) return;
     try {
-      await subtaskDelete(config, {
+      await api.subtask.delete({
         taskId: selectedTask.id,
         subtaskId,
       });
@@ -294,7 +283,7 @@ export default function TaskManager() {
       return;
     }
     try {
-      await tagAdd(config, {
+      await api.tag.add({
         taskId: selectedTask.id,
         name: newTagName.trim(),
         color: newTagColor,
@@ -309,7 +298,7 @@ export default function TaskManager() {
   const handleRemoveTag = async (tagName: string) => {
     if (!selectedTask) return;
     try {
-      await tagRemove(config, {
+      await api.tag.remove({
         taskId: selectedTask.id,
         tagName,
       });

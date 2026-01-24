@@ -11,20 +11,21 @@ export class ReactClientGenerator {
   generateClient(contract: ContractDefinition): string {
     const w = this.w.reset();
 
-    // Import React hooks
-    w.import('react', ['useState', 'useEffect', 'useRef']);
-    
+    // Import React and hooks
+    w.l("import React, { useState, useEffect, useRef, createContext, useContext, type ReactNode } from 'react';");
+    w.n();
+
     // Import types - collect all unique imports
     const schemaImports = new Set<string>();
     const typeImports = new Set<string>();
-    
+
     for (const ep of contract.endpoints) {
       schemaImports.add(this.getSchemaName(ep, 'input'));
       schemaImports.add(this.getSchemaName(ep, 'output'));
       typeImports.add(this.getTypeName(ep, 'Input'));
       typeImports.add(this.getTypeName(ep, 'Output'));
     }
-    
+
     // Import schemas and types
     const allImports = [
       ...Array.from(schemaImports),
@@ -42,14 +43,25 @@ export class ReactClientGenerator {
     this.generateCallRpcFunction(w);
 
     // Generate type-safe wrapper functions for each endpoint
+    w.comment('=== Individual Functions (backward compatible) ===');
+    w.n();
     for (const endpoint of contract.endpoints) {
-      w.n();
       this.generateEndpointFunction(endpoint, w);
+      w.n();
     }
 
-    // Generate React hooks
+    // Generate client factory
+    w.comment('=== Client Factory ===');
     w.n();
-    w.comment('React Hooks');
+    this.generateClientFactory(contract, w);
+
+    // Generate React Context provider
+    w.comment('=== React Context ===');
+    w.n();
+    this.generateContextProvider(w);
+
+    // Generate React hooks
+    w.comment('=== React Hooks ===');
     w.n();
 
     for (const endpoint of contract.endpoints) {
@@ -61,6 +73,89 @@ export class ReactClientGenerator {
     }
 
     return w.toString();
+  }
+
+  private groupEndpointsByGroup(contract: ContractDefinition): Record<string, Endpoint[]> {
+    const groups: Record<string, Endpoint[]> = {};
+
+    for (const endpoint of contract.endpoints) {
+      const parts = endpoint.fullName.split('.');
+      const groupName = parts[0];
+
+      if (!groups[groupName]) {
+        groups[groupName] = [];
+      }
+      groups[groupName].push(endpoint);
+    }
+
+    return groups;
+  }
+
+  private generateClientFactory(contract: ContractDefinition, w: ReactBuilder): void {
+    const groups = this.groupEndpointsByGroup(contract);
+
+    w.l('export function createClient(config: XRpcClientConfig) {');
+    w.i();
+    w.l('return {');
+    w.i();
+
+    const groupNames = Object.keys(groups);
+    for (let i = 0; i < groupNames.length; i++) {
+      const groupName = groupNames[i];
+      const endpoints = groups[groupName];
+      const isLastGroup = i === groupNames.length - 1;
+
+      w.l(`${groupName}: {`);
+      w.i();
+
+      for (let j = 0; j < endpoints.length; j++) {
+        const endpoint = endpoints[j];
+        const parts = endpoint.fullName.split('.');
+        const methodName = this.toCamelCase(parts[1]);
+        const functionName = this.getFunctionName(endpoint);
+        const inputType = this.getTypeName(endpoint, 'Input');
+        const isLastEndpoint = j === endpoints.length - 1;
+
+        w.l(`${methodName}: (input: ${inputType}, options?: { signal?: AbortSignal }) =>`);
+        w.i();
+        w.l(`${functionName}(config, input, options)${isLastEndpoint ? '' : ','}`);
+        w.u();
+      }
+
+      w.u();
+      w.l(`}${isLastGroup ? '' : ','}`);
+    }
+
+    w.u();
+    w.l('};');
+    w.u();
+    w.l('}');
+    w.n();
+
+    w.l('export type ApiClient = ReturnType<typeof createClient>;');
+    w.n();
+  }
+
+  private generateContextProvider(w: ReactBuilder): void {
+    w.l('const XRpcContext = createContext<ApiClient | null>(null);');
+    w.n();
+
+    w.l('export function XRpcProvider({ client, children }: { client: ApiClient; children: ReactNode }) {');
+    w.i();
+    w.comment('Using createElement to avoid requiring .tsx extension');
+    w.l('return React.createElement(XRpcContext.Provider, { value: client }, children);');
+    w.u();
+    w.l('}');
+    w.n();
+
+    w.l('export function useXRpcClient(): ApiClient {');
+    w.i();
+    w.l('const client = useContext(XRpcContext);');
+    w.l("if (!client) throw new Error('useXRpcClient must be used within XRpcProvider');");
+    w.l('return client;');
+    w.u();
+    w.l('}');
+    w.n();
   }
 
   private generateClientConfig(w: ReactBuilder): void {

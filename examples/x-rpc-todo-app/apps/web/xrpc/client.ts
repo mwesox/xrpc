@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext, type ReactNode } from 'react';
 
 import { taskListInputSchema, taskListOutputSchema, taskGetInputSchema, taskGetOutputSchema, taskCreateInputSchema, taskCreateOutputSchema, taskUpdateInputSchema, taskUpdateOutputSchema, taskDeleteInputSchema, taskDeleteOutputSchema, subtaskAddInputSchema, subtaskAddOutputSchema, subtaskToggleInputSchema, subtaskToggleOutputSchema, subtaskDeleteInputSchema, subtaskDeleteOutputSchema, tagAddInputSchema, tagAddOutputSchema, tagRemoveInputSchema, tagRemoveOutputSchema, type TaskListInput, type TaskListOutput, type TaskGetInput, type TaskGetOutput, type TaskCreateInput, type TaskCreateOutput, type TaskUpdateInput, type TaskUpdateOutput, type TaskDeleteInput, type TaskDeleteOutput, type SubtaskAddInput, type SubtaskAddOutput, type SubtaskToggleInput, type SubtaskToggleOutput, type SubtaskDeleteInput, type SubtaskDeleteOutput, type TagAddInput, type TagAddOutput, type TagRemoveInput, type TagRemoveOutput } from './types';
 
@@ -54,6 +54,7 @@ export async function callRpc<T>(config: XRpcClientConfig, method: string, param
     return data;
 }
 
+// === Individual Functions (backward compatible) ===
 
 // Type-safe wrapper for task.list
 export async function taskList(config: XRpcClientConfig, input: TaskListInput, options?: { signal?: AbortSignal }) {
@@ -205,7 +206,57 @@ export async function tagRemove(config: XRpcClientConfig, input: TagRemoveInput,
 }
 
 
-// React Hooks
+// === Client Factory ===
+
+export function createClient(config: XRpcClientConfig) {
+    return {
+        task: {
+            list: (input: TaskListInput, options?: { signal?: AbortSignal }) =>
+                taskList(config, input, options),
+            get: (input: TaskGetInput, options?: { signal?: AbortSignal }) =>
+                taskGet(config, input, options),
+            create: (input: TaskCreateInput, options?: { signal?: AbortSignal }) =>
+                taskCreate(config, input, options),
+            update: (input: TaskUpdateInput, options?: { signal?: AbortSignal }) =>
+                taskUpdate(config, input, options),
+            delete: (input: TaskDeleteInput, options?: { signal?: AbortSignal }) =>
+                taskDelete(config, input, options)
+        },
+        subtask: {
+            add: (input: SubtaskAddInput, options?: { signal?: AbortSignal }) =>
+                subtaskAdd(config, input, options),
+            toggle: (input: SubtaskToggleInput, options?: { signal?: AbortSignal }) =>
+                subtaskToggle(config, input, options),
+            delete: (input: SubtaskDeleteInput, options?: { signal?: AbortSignal }) =>
+                subtaskDelete(config, input, options)
+        },
+        tag: {
+            add: (input: TagAddInput, options?: { signal?: AbortSignal }) =>
+                tagAdd(config, input, options),
+            remove: (input: TagRemoveInput, options?: { signal?: AbortSignal }) =>
+                tagRemove(config, input, options)
+        }
+    };
+}
+
+export type ApiClient = ReturnType<typeof createClient>;
+
+// === React Context ===
+
+const XRpcContext = createContext<ApiClient | null>(null);
+
+export function XRpcProvider({ client, children }: { client: ApiClient; children: ReactNode }) {
+    // Using createElement to avoid requiring .tsx extension
+    return React.createElement(XRpcContext.Provider, { value: client }, children);
+}
+
+export function useXRpcClient(): ApiClient {
+    const client = useContext(XRpcContext);
+    if (!client) throw new Error('useXRpcClient must be used within XRpcProvider');
+    return client;
+}
+
+// === React Hooks ===
 
 // React hook for task.list query
 export function useTaskList(config: XRpcClientConfig, input: TaskListInput, options?: { enabled?: boolean }) {
