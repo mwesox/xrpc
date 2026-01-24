@@ -1,5 +1,5 @@
 import { describe, test, expect, afterEach } from 'bun:test';
-import { parseContract } from '../../packages/parser/src/index.js';
+import { parseContract } from '../../packages/sdk/src/parser/index.js';
 import { GoCodeGenerator } from '../../packages/target-go-server/src/index.js';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';

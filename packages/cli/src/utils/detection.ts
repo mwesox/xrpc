@@ -186,10 +186,10 @@ async function detectAppType(dirPath: string, name: string): Promise<DetectedApp
     return null;
   }
 
-  const deps = {
-    ...packageJson.dependencies,
-    ...packageJson.devDependencies,
-  } as Record<string, string> | undefined;
+  const deps: Record<string, string> = {
+    ...(packageJson.dependencies || {}),
+    ...(packageJson.devDependencies || {}),
+  };
 
   if (!deps) {
     return null;

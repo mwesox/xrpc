@@ -130,16 +130,17 @@ describe('config', () => {
     });
 
     test('skips modules without contract field', () => {
-      const config: XrpcConfig = {
+      // Intentionally malformed config to test runtime validation
+      // (TOML parsing can produce objects missing required fields)
+      const config = {
         users: {
           contract: './users/contract.ts',
           'go-server': './backend/users',
         },
         invalid: {
-          // Missing contract field
           'go-server': './backend/invalid',
-        } as ModuleConfig,
-      };
+        },
+      } as unknown as XrpcConfig;
 
       const modules = extractModules(config);
       expect(Object.keys(modules)).toEqual(['users']);
