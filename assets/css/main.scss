@@ -301,7 +301,7 @@ img {
   left: 0;
   right: 0;
   height: var(--header-height);
-  background: rgba(10, 10, 15, 0.8);
+  background: linear-gradient(to right, #000000 0%, #000000 180px, rgba(10, 10, 15, 0.8) 300px);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
