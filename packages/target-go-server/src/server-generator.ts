@@ -1,6 +1,5 @@
 import { GoBuilder } from './go-builder';
-import { toPascalCase } from '@xrpckit/codegen';
-import type { ContractDefinition, Endpoint } from '@xrpckit/parser';
+import { toPascalCase, type ContractDefinition, type Endpoint } from '@xrpckit/sdk';
 
 // Helper to convert "greeting.greet" to "GreetingGreet"
 function toMethodName(fullName: string): string {

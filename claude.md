@@ -16,8 +16,7 @@ Type-safe, cross-platform RPC framework that generates clients and servers from 
 
 **Key Packages**:
 - `@xrpckit/schema` - DSL for defining API contracts (router, endpoint, query, mutation)
-- `@xrpckit/parser` - Extracts contracts from TypeScript/Zod files
-- `@xrpckit/codegen` - Code generation utilities and target registry
+- `@xrpckit/sdk` - SDK for building target generators (parser + codegen utilities)
 - `@xrpckit/target-go-server` - Go server code generator
 - `@xrpckit/target-react-client` - React client code generator
 - `@xrpckit/cli` - Command-line interface
@@ -36,7 +35,7 @@ bun run xrpc generate -i <file> -t <targets> -o <output>
 
 # Run tests
 bun test
-bun test packages/parser/src
+bun test packages/sdk/src
 
 # Build packages
 bun run build
@@ -77,7 +76,7 @@ export const router = createRouter({
 
 ## Implementation Details
 
-**Parser** (`packages/parser/src/zod-extractor.ts`):
+**Parser** (`packages/sdk/src/parser/zod-extractor.ts`):
 - Extracts type information and validation rules from Zod schemas
 - Uses `toJSONSchema()` for reliable validation extraction
 - Handles optional/nullable chaining
@@ -98,7 +97,7 @@ export const router = createRouter({
 ## Testing
 
 - Tests use Bun's built-in test runner
-- Test file: `packages/parser/src/zod-extractor.test.ts`
+- Test file: `packages/sdk/src/parser/zod-extractor.test.ts`
 - 28 tests covering validation extraction for strings, numbers, arrays, optional/nullable
 
 ## Key Principles
@@ -112,12 +111,11 @@ export const router = createRouter({
 
 ```
 packages/
-  schema/            - Contract DSL library
-  parser/            - Contract extraction
-  codegen/           - Generator utilities and registry
+  schema/            - Contract DSL library (users define contracts)
+  sdk/               - SDK for target authors (parser + codegen utilities)
   target-go-server/  - Go server generator
   target-react-client/ - React client generator
-  cli/               - CLI interface
+  cli/               - CLI interface (users generate code)
 examples/
   x-rpc-todo-app/    - Full-stack TODO app (Go + React)
 ```

@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup:
+  typecheck:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -23,7 +23,6 @@ jobs:
 
       - name: Cache Bun dependencies
         uses: actions/cache@v4
-        id: bun-cache
         with:
           path: ~/.bun/install/cache
           key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
@@ -33,32 +32,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Upload node_modules
-        uses: actions/upload-artifact@v4
-        with:
-          name: node_modules
-          path: |
-            node_modules
-            packages/*/node_modules
-            tests/fixtures/node_modules
-          retention-days: 1
-
-  typecheck:
-    needs: setup
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: "1.3.6"
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: node_modules
-          path: .
-
       - name: Build packages
         run: bun run build
 
@@ -66,7 +39,6 @@ jobs:
         run: bun run tsc --noEmit
 
   unit-tests:
-    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -76,10 +48,16 @@ jobs:
         with:
           bun-version: "1.3.6"
 
-      - uses: actions/download-artifact@v4
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          name: node_modules
-          path: .
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Run unit tests
         run: bun test packages/parser/src
@@ -100,10 +78,16 @@ jobs:
           go-version: "1.24"
           cache: true
 
-      - uses: actions/download-artifact@v4
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
         with:
-          name: node_modules
-          path: .
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Run E2E tests
         run: bun test tests/e2e

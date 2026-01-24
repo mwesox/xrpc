@@ -56,14 +56,14 @@ export interface ValidationRules {
   url?: boolean;
   uuid?: boolean;
   regex?: string;
-  
+
   // Number validations
   min?: number;
   max?: number;
   int?: boolean;
   positive?: boolean;
   negative?: boolean;
-  
+
   // Array validations
   minItems?: number;
   maxItems?: number;

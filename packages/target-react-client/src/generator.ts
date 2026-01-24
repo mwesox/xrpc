@@ -1,7 +1,6 @@
-import { BaseCodeGenerator, type GeneratorConfig, type GeneratedFiles } from '@xrpckit/codegen';
+import { BaseCodeGenerator, type GeneratorConfig, type GeneratedFiles, type ContractDefinition } from '@xrpckit/sdk';
 import { ReactTypeGenerator } from './type-generator';
 import { ReactClientGenerator } from './client-generator';
-import type { ContractDefinition } from '@xrpckit/parser';
 
 export class ReactCodeGenerator extends BaseCodeGenerator {
   private typeGenerator: ReactTypeGenerator;

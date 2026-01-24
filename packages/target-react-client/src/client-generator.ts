@@ -1,5 +1,5 @@
 import { ReactBuilder } from './react-builder';
-import type { ContractDefinition, Endpoint } from '@xrpckit/parser';
+import type { ContractDefinition, Endpoint } from '@xrpckit/sdk';
 
 export class ReactClientGenerator {
   private w: ReactBuilder;

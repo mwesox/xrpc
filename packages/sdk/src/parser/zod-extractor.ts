@@ -65,9 +65,9 @@ export function extractValidationRules(schema: ZodType): ValidationRules | undef
     // Extract number validations from JSON schema
     // Note: When .int() is used, Zod v4 may reset min/max to safe integer bounds in JSON schema
     // We'll extract what we can, but custom min/max with .int() may not be fully extractable via JSON schema
-    
+
     const isInteger = jsonSchema.type === 'integer';
-    
+
     // Only extract min/max if they're not the default safe integer bounds (when int is used)
     if (typeof jsonSchema.minimum === 'number') {
       if (!isInteger || jsonSchema.minimum !== SAFE_INTEGER_MIN) {
@@ -75,20 +75,20 @@ export function extractValidationRules(schema: ZodType): ValidationRules | undef
         hasRules = true;
       }
     }
-    
+
     if (typeof jsonSchema.maximum === 'number') {
       if (!isInteger || jsonSchema.maximum !== SAFE_INTEGER_MAX) {
         rules.max = jsonSchema.maximum;
         hasRules = true;
       }
     }
-    
+
     // Check if it's an integer type
     if (isInteger) {
       rules.int = true;
       hasRules = true;
     }
-    
+
     // Note: positive/negative might be in exclusiveMinimum/exclusiveMaximum
     if (jsonSchema.exclusiveMinimum === 0 || (typeof jsonSchema.minimum === 'number' && jsonSchema.minimum > 0 && (!isInteger || jsonSchema.minimum !== SAFE_INTEGER_MIN))) {
       rules.positive = true;
@@ -160,7 +160,7 @@ export function extractTypeInfo(schema: ZodType): TypeReference {
   if (schema instanceof z.ZodArray) {
     const elementType = extractTypeInfo(schema.element as ZodType);
     const validation = extractValidationRules(schema);
-    
+
     return {
       kind: 'array',
       elementType,

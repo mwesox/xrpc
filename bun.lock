@@ -15,6 +15,7 @@
     "examples/x-rpc-todo-app": {
       "name": "x-rpc-todo-app",
       "devDependencies": {
+        "@xrpckit/cli": "workspace:*",
         "prettier": "^3.7.4",
         "turbo": "^2.7.5",
         "typescript": "5.9.2",
@@ -30,9 +31,11 @@
       "dependencies": {
         "@repo/api": "*",
         "@repo/ui": "*",
+        "@xrpckit/schema": "workspace:*",
         "next": "16.1.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
+        "zod": "^4.0.0",
       },
       "devDependencies": {
         "@repo/eslint-config": "*",
@@ -103,42 +106,17 @@
       },
       "dependencies": {
         "@inquirer/prompts": "^7.0.0",
-        "@xrpckit/codegen": "^0.0.1",
-        "@xrpckit/parser": "^0.0.1",
-        "@xrpckit/target-go-server": "^0.0.1",
-        "@xrpckit/target-react-client": "^0.0.1",
+        "@xrpckit/sdk": "workspace:*",
+        "@xrpckit/target-go-server": "workspace:*",
+        "@xrpckit/target-react-client": "workspace:*",
         "chalk": "^5.3.0",
         "figlet": "^1.7.0",
         "ora": "^8.0.0",
+        "smol-toml": "^1.3.0",
         "typescript": "^5.0.0",
       },
       "devDependencies": {
         "@types/figlet": "^1.5.8",
-        "@types/node": "^22.0.0",
-        "tsup": "^8.0.0",
-      },
-    },
-    "packages/codegen": {
-      "name": "@xrpckit/codegen",
-      "version": "0.0.2",
-      "dependencies": {
-        "@xrpckit/parser": "^0.0.1",
-      },
-      "devDependencies": {
-        "@types/node": "^22.0.0",
-        "tsup": "^8.0.0",
-        "typescript": "^5.0.0",
-      },
-    },
-    "packages/parser": {
-      "name": "@xrpckit/parser",
-      "version": "0.0.2",
-      "dependencies": {
-        "@xrpckit/schema": "^0.0.1",
-        "typescript": "^5.0.0",
-        "zod": "^4.0.0",
-      },
-      "devDependencies": {
         "@types/node": "^22.0.0",
         "tsup": "^8.0.0",
       },
@@ -155,12 +133,24 @@
         "typescript": "^5.0.0",
       },
     },
+    "packages/sdk": {
+      "name": "@xrpckit/sdk",
+      "version": "0.0.2",
+      "dependencies": {
+        "@xrpckit/schema": "workspace:*",
+        "typescript": "^5.0.0",
+        "zod": "^4.0.0",
+      },
+      "devDependencies": {
+        "@types/node": "^22.0.0",
+        "tsup": "^8.0.0",
+      },
+    },
     "packages/target-go-server": {
       "name": "@xrpckit/target-go-server",
       "version": "0.0.2",
       "dependencies": {
-        "@xrpckit/codegen": "^0.0.1",
-        "@xrpckit/parser": "^0.0.1",
+        "@xrpckit/sdk": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "^22.0.0",
@@ -172,8 +162,7 @@
       "name": "@xrpckit/target-react-client",
       "version": "0.0.2",
       "dependencies": {
-        "@xrpckit/codegen": "^0.0.1",
-        "@xrpckit/parser": "^0.0.1",
+        "@xrpckit/sdk": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "^22.0.0",
@@ -530,11 +519,9 @@
 
     "@xrpckit/cli": ["@xrpckit/cli@workspace:packages/cli"],
 
-    "@xrpckit/codegen": ["@xrpckit/codegen@workspace:packages/codegen"],
-
-    "@xrpckit/parser": ["@xrpckit/parser@workspace:packages/parser"],
-
     "@xrpckit/schema": ["@xrpckit/schema@workspace:packages/schema"],
+
+    "@xrpckit/sdk": ["@xrpckit/sdk@workspace:packages/sdk"],
 
     "@xrpckit/target-go-server": ["@xrpckit/target-go-server@workspace:packages/target-go-server"],
 
@@ -1164,11 +1151,9 @@
 
     "@xrpckit/cli/@types/node": ["@types/node@22.19.7", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw=="],
 
-    "@xrpckit/codegen/@types/node": ["@types/node@22.19.7", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw=="],
-
-    "@xrpckit/parser/@types/node": ["@types/node@22.19.7", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw=="],
-
     "@xrpckit/schema/@types/node": ["@types/node@22.19.7", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw=="],
+
+    "@xrpckit/sdk/@types/node": ["@types/node@22.19.7", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw=="],
 
     "@xrpckit/target-go-server/@types/node": ["@types/node@22.19.7", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw=="],
 
@@ -1202,11 +1187,9 @@
 
     "@xrpckit/cli/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
-    "@xrpckit/codegen/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
-
-    "@xrpckit/parser/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
-
     "@xrpckit/schema/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
+
+    "@xrpckit/sdk/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
     "@xrpckit/target-go-server/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 

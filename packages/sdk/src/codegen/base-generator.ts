@@ -1,5 +1,5 @@
 import { CodeWriter } from './code-writer';
-import type { ContractDefinition } from '@xrpckit/parser';
+import type { ContractDefinition } from '../parser';
 
 export interface GeneratorConfig {
   outputDir: string;

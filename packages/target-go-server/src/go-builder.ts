@@ -1,4 +1,4 @@
-import { CodeWriter } from '@xrpckit/codegen';
+import { CodeWriter } from '@xrpckit/sdk';
 
 /**
  * Go-specific code builder with fluent DSL for common Go patterns

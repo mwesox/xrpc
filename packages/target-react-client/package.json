@@ -34,8 +34,7 @@
     "build": "tsup src/index.ts --format esm --dts --clean"
   },
   "dependencies": {
-    "@xrpckit/codegen": "^0.0.2",
-    "@xrpckit/parser": "^0.0.2"
+    "@xrpckit/sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

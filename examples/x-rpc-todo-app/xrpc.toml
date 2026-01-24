@@ -1,0 +1,6 @@
+# xRPC Configuration
+# Run "xrpc generate" to generate type-safe code for your targets
+
+contract = "packages/api/src/contract.ts"
+go-server = "apps/go-backend"
+react-client = "apps/web"

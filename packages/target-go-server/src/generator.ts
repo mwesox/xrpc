@@ -1,8 +1,7 @@
-import { BaseCodeGenerator, type GeneratorConfig, type GeneratedFiles } from '@xrpckit/codegen';
+import { BaseCodeGenerator, type GeneratorConfig, type GeneratedFiles, type ContractDefinition } from '@xrpckit/sdk';
 import { GoTypeGenerator } from './type-generator';
 import { GoServerGenerator } from './server-generator';
 import { GoValidationGenerator } from './validation-generator';
-import type { ContractDefinition } from '@xrpckit/parser';
 
 export class GoCodeGenerator extends BaseCodeGenerator {
   private typeGenerator: GoTypeGenerator;

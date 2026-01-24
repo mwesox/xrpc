@@ -1,5 +1,5 @@
 import { ReactBuilder } from './react-builder';
-import type { ContractDefinition, Endpoint } from '@xrpckit/parser';
+import type { ContractDefinition, Endpoint } from '@xrpckit/sdk';
 import { relative, dirname } from 'node:path';
 
 export class ReactTypeGenerator {

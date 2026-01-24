@@ -6,13 +6,9 @@
   "main": "./src/contract.ts",
   "types": "./src/contract.ts",
   "exports": {
-    ".": "./src/contract.ts",
-    "./generated/react-client/client/client": "./generated/react-client/client/client.ts",
-    "./generated/react-client/client/types": "./generated/react-client/client/types.ts"
+    ".": "./src/contract.ts"
   },
-  "scripts": {
-    "generate": "xrpc generate -i src/contract.ts -t go-server,react-client -o generated"
-  },
+  "scripts": {},
   "dependencies": {
     "@xrpckit/schema": "workspace:*",
     "zod": "^4.0.0"

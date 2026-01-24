@@ -1,12 +1,27 @@
 #!/usr/bin/env node
 
 import ora from 'ora';
+import chalk from 'chalk';
 import { input, select, checkbox } from '@inquirer/prompts';
 import { showMenu } from './commands/menu';
 import { showHelp } from './commands/help';
 import { generateCommand } from './commands/generate';
 import { validateCommand } from './commands/validate';
+import { initCommand } from './commands/init';
 import { formatError } from './utils/tui';
+
+// Custom theme for xRPC prompts - fancier selection style
+const xrpcTheme = {
+  prefix: { idle: '', done: '' }, // Remove "?" prefix
+  icon: {
+    cursor: chalk.cyan('▶'), // Fancy cyan arrow instead of ❯
+  },
+  style: {
+    message: (text: string) => chalk.cyan.bold(text), // Cyan + bold for prominent questions
+    highlight: (text: string) => chalk.cyan.bold(text), // Cyan highlight for selected item
+    help: () => '', // Hide help text for cleaner look
+  },
+};
 
 // Wrapper for ora spinner to match expected interface
 function createSpinner(message: string) {
@@ -23,6 +38,7 @@ async function prompt(message: string, options?: { default?: string }): Promise<
   return input({
     message,
     default: options?.default,
+    theme: xrpcTheme,
   });
 }
 
@@ -35,11 +51,13 @@ prompt.select = async function (
     return checkbox({
       message,
       choices: options.options.map((opt) => ({ name: opt, value: opt })),
+      theme: xrpcTheme,
     });
   }
   return select({
     message,
     choices: options.options.map((opt) => ({ name: opt, value: opt })),
+    theme: xrpcTheme,
   });
 };
 
@@ -95,7 +113,7 @@ if (args.length === 0 || (!parsed.command && !parsed.flags.help && !parsed.flags
 
 // Handle help flag
 if (parsed.flags.help || parsed.flags.h || parsed.command === 'help') {
-  await showHelp(parsed.flags.command || parsed.flags.c);
+  await showHelp(parsed.flags.command || parsed.flags.c || parsed.positional[0]);
   process.exit(0);
 }
 
@@ -113,6 +131,7 @@ try {
         input: parsed.flags.input || parsed.flags.i,
         output: parsed.flags.output || parsed.flags.o,
         targets: parsed.flags.targets || parsed.flags.t,
+        module: parsed.positional[0], // Module name for multi-module configs
         prompt,
         spinner: createSpinner,
       });
@@ -120,6 +139,12 @@ try {
     case 'validate':
       await validateCommand({
         file: parsed.flags.file || parsed.flags.f || parsed.positional[0],
+        prompt,
+        spinner: createSpinner,
+      });
+      break;
+    case 'init':
+      await initCommand({
         prompt,
         spinner: createSpinner,
       });

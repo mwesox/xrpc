@@ -25,7 +25,7 @@ async function importWithTimeout(path: string, timeout = 5000): Promise<any> {
 function hasPackageJson(filePath: string): boolean {
   const dir = dirname(resolve(filePath));
   let currentDir = dir;
-  
+
   // Check current directory and parent directories (up to 5 levels)
   for (let i = 0; i < 5; i++) {
     if (existsSync(join(currentDir, 'package.json'))) {
@@ -35,20 +35,20 @@ function hasPackageJson(filePath: string): boolean {
     if (parent === currentDir) break; // Reached root
     currentDir = parent;
   }
-  
+
   return false;
 }
 
 /**
  * Parses a contract file and returns a normalized contract definition.
- * 
+ *
  * The contract file must export a router created with `createRouter()`.
  * This function imports the file and extracts type information from Zod schemas.
- * 
+ *
  * @param filePath - Path to the TypeScript file containing the router definition
  * @returns A promise that resolves to a ContractDefinition containing all routers, endpoints, and types
  * @throws Error if the file cannot be imported, doesn't export a router, or has invalid structure
- * 
+ *
  * @example
  * ```typescript
  * const contract = await parseContract('src/api.ts');
@@ -59,11 +59,11 @@ export async function parseContract(filePath: string): Promise<ContractDefinitio
   // Import the actual router to get real Zod schemas
   // Resolve to absolute path for import
   const absolutePath = resolve(filePath);
-  
+
   // Try current approach first (works for 95% of cases with package.json)
   // For edge cases without package.json, we could fall back to AST parsing
   // but for now, we'll use the import approach which works for most cases
-  
+
   let routerModule;
   try {
     routerModule = await importWithTimeout(absolutePath);
@@ -98,7 +98,7 @@ export async function parseContract(filePath: string): Promise<ContractDefinitio
     }
     throw error;
   }
-  
+
   // Check if router exists before type assertion
   if (!routerModule.router) {
     // Check if router exists but is not exported correctly
@@ -109,7 +109,7 @@ export async function parseContract(filePath: string): Promise<ContractDefinitio
         `Make sure you're using: export const router = createRouter({ ... });`
       );
     }
-    
+
     // Check for common mistakes
     const exports = Object.keys(routerModule);
     if (exports.length === 0) {
@@ -119,7 +119,7 @@ export async function parseContract(filePath: string): Promise<ContractDefinitio
         `  export const router = createRouter({ ... });`
       );
     }
-    
+
     // Suggest what might be wrong
     const possibleExports = exports.filter(e => e.toLowerCase().includes('router'));
     if (possibleExports.length > 0) {
@@ -129,7 +129,7 @@ export async function parseContract(filePath: string): Promise<ContractDefinitio
         `Did you mean to export one of these? Make sure to use: export const router = createRouter({ ... });`
       );
     }
-    
+
     throw new Error(
       `No router export found in ${filePath}.\n` +
       `The contract file must export a router. Example:\n` +

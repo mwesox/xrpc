@@ -1,6 +1,5 @@
 import { GoBuilder } from './go-builder';
-import { toPascalCase } from '@xrpckit/codegen';
-import type { ContractDefinition, TypeDefinition, Property, ValidationRules, TypeReference } from '@xrpckit/parser';
+import { toPascalCase, type ContractDefinition, type TypeDefinition, type Property, type ValidationRules, type TypeReference } from '@xrpckit/sdk';
 
 export class GoValidationGenerator {
   private w: GoBuilder;
@@ -115,9 +114,32 @@ export class GoValidationGenerator {
     const isNumber = actualType === 'number';
     const isArray = prop.type.kind === 'array';
 
+    // Check if this is a pointer type (optional+nullable or nullable+optional)
+    // These become *type in Go and require special handling
+    const isPointerType = this.isPointerType(prop.type);
+
+    // Skip validation for pointer types - they require different handling
+    // that is beyond the scope of the current validation generator
+    if (isPointerType) {
+      w.comment(`Validate ${prop.name} (skipped - pointer type)`);
+      return;
+    }
+
+    // Check if this is an enum type
+    const enumValues = this.getEnumValues(prop.type);
+    const isEnum = enumValues !== null;
+
     if (prop.required) {
       w.comment(`Validate ${prop.name}`);
-      if (isString) {
+      if (isEnum) {
+        // Enum required check - empty string is invalid
+        w.if(`${fieldPath} == ""`, (b) => {
+          b.l(`errs = append(errs, &ValidationError{`).i()
+            .l(`Field:   "${fieldPathStr}",`)
+            .l(`Message: "is required",`)
+            .u().l(`})`);
+        });
+      } else if (isString) {
         w.if(`${fieldPath} == ""`, (b) => {
           b.l(`errs = append(errs, &ValidationError{`).i()
             .l(`Field:   "${fieldPathStr}",`)
@@ -132,6 +154,30 @@ export class GoValidationGenerator {
           b.l(`errs = append(errs, &ValidationError{`).i()
             .l(`Field:   "${fieldPathStr}",`)
             .l(`Message: "is required",`)
+            .u().l(`})`);
+        });
+      }
+    }
+
+    // Enum validation - check if value is one of the allowed options
+    if (isEnum && enumValues) {
+      const enumValuesStr = enumValues.join(', ');
+      const enumConditions = enumValues.map(v => `${fieldPath} != "${v}"`).join(' && ');
+
+      if (prop.required) {
+        // For required fields, only validate if not empty (empty already caught above)
+        w.if(`${fieldPath} != "" && ${enumConditions}`, (b) => {
+          b.l(`errs = append(errs, &ValidationError{`).i()
+            .l(`Field:   "${fieldPathStr}",`)
+            .l(`Message: "must be one of: ${enumValuesStr}",`)
+            .u().l(`})`);
+        });
+      } else {
+        // For optional fields, only validate if provided
+        w.if(`${fieldPath} != "" && ${enumConditions}`, (b) => {
+          b.l(`errs = append(errs, &ValidationError{`).i()
+            .l(`Field:   "${fieldPathStr}",`)
+            .l(`Message: "must be one of: ${enumValuesStr}",`)
             .u().l(`})`);
         });
       }
@@ -181,7 +227,8 @@ export class GoValidationGenerator {
       }
     }
 
-    // Handle nested objects - call validation function if type has a name
+    // Handle nested objects - only call validation function if type has a name
+    // Note: Inline objects are typed as interface{} in Go and cannot be validated at field level
     if (prop.type.kind === 'object' && prop.type.name) {
       const nestedTypeName = toPascalCase(prop.type.name);
       const nestedFuncName = `Validate${nestedTypeName}`;
@@ -197,22 +244,12 @@ export class GoValidationGenerator {
           .u().l(`}`)
           .u().l(`}`);
       });
-    } else if (prop.type.kind === 'object' && prop.type.properties) {
-      // Inline object - validate properties directly
-      w.if(`${fieldPath} != nil`, (b) => {
-        for (const nestedProp of prop.type.properties || []) {
-          // Create a dummy type for inline objects
-          const inlineType: TypeDefinition = {
-            name: '',
-            kind: 'object',
-            properties: prop.type.properties,
-          };
-          this.generatePropertyValidation(nestedProp, fieldPath, inlineType, b);
-        }
-      });
     }
+    // Skip inline object validation - Go types these as interface{}
 
     // Handle arrays with element validation
+    // Note: Only validate array elements when element type has a name (generates proper Go type)
+    // Inline objects in arrays are typed as []interface{} in Go and cannot be validated at field level
     if (prop.type.kind === 'array' && prop.type.elementType) {
       if (prop.type.elementType.kind === 'object' && prop.type.elementType.name) {
         const elementTypeName = toPascalCase(prop.type.elementType.name);
@@ -229,19 +266,8 @@ export class GoValidationGenerator {
           .u().l(`}`)
           .u().l(`}`)
           .u().l(`}`);
-      } else if (prop.type.elementType.kind === 'object' && prop.type.elementType.properties) {
-        // Inline object in array
-        w.l(`for i, item := range ${fieldPath} {`).i();
-        const inlineType: TypeDefinition = {
-          name: '',
-          kind: 'object',
-          properties: prop.type.elementType.properties,
-        };
-        for (const nestedProp of prop.type.elementType.properties || []) {
-          this.generatePropertyValidation(nestedProp, 'item', inlineType, w);
-        }
-        w.u().l(`}`);
       }
+      // Skip inline object array validation - Go types these as []interface{}
     }
   }
 
@@ -489,6 +515,44 @@ export class GoValidationGenerator {
       return this.getActualType(typeRef.baseType);
     }
     return 'unknown';
+  }
+
+  private getEnumValues(typeRef: TypeReference): string[] | null {
+    // Unwrap optional/nullable to find enum type
+    if (typeRef.kind === 'optional' || typeRef.kind === 'nullable') {
+      if (typeRef.baseType && typeof typeRef.baseType !== 'string') {
+        return this.getEnumValues(typeRef.baseType);
+      }
+    }
+
+    // Check if this is an enum type
+    if (typeRef.kind === 'enum' && typeRef.enumValues) {
+      return typeRef.enumValues.filter((v): v is string => typeof v === 'string');
+    }
+
+    return null;
+  }
+
+  private isPointerType(typeRef: TypeReference): boolean {
+    // A type becomes a pointer in Go when it's:
+    // - nullable (wrapping any type)
+    // - optional wrapping nullable
+    // - nullable wrapping optional
+
+    if (typeRef.kind === 'nullable') {
+      return true;
+    }
+
+    if (typeRef.kind === 'optional') {
+      if (typeRef.baseType && typeof typeRef.baseType !== 'string') {
+        // optional wrapping nullable = pointer
+        if (typeRef.baseType.kind === 'nullable') {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   private toPascalCase(str: string): string {

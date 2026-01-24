@@ -1,5 +1,4 @@
-import type { ContractDefinition } from '@xrpckit/parser';
-import type { GeneratorConfig, GeneratedFiles } from '@xrpckit/codegen';
+import type { ContractDefinition, GeneratorConfig, GeneratedFiles } from '@xrpckit/sdk';
 import { GoCodeGenerator } from '@xrpckit/target-go-server';
 import { ReactCodeGenerator } from '@xrpckit/target-react-client';
 
