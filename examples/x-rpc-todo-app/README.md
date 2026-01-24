@@ -30,7 +30,7 @@ Here's how it works:
      │          (Single Source of Truth)           │
      └─────────────────────┬───────────────────────┘
                            │
-                  bun run xrpc generate
+                     xrpc generate
                            │
               ┌────────────┴────────────┐
               ▼                         ▼
@@ -54,7 +54,7 @@ Let's walk through `packages/api/src/contract.ts` line by line. This is the most
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpc/core';
+import { createRouter, createEndpoint, query, mutation } from '@xrpc/schema';
 ```
 
 Two imports:
@@ -153,9 +153,9 @@ export const router = createRouter({
 
 ## What Gets Generated
 
-When you run `bun run xrpc generate`, x-rpc creates production-ready code:
+When you run `xrpc generate`, x-rpc creates production-ready code:
 
-### Go Server (`packages/api/generated/go/`)
+### Go Server (`packages/api/generated/go-server/`)
 
 **types.go** - Struct definitions:
 ```go
@@ -171,7 +171,7 @@ type Todo struct {
 
 **validation.go** - Input validation functions
 
-### React Client (`packages/api/generated/react/`)
+### React Client (`packages/api/generated/react-client/`)
 
 **types.ts** - TypeScript types inferred from Zod schemas
 
@@ -195,8 +195,8 @@ x-rpc-todo-app/
 │       ├── src/
 │       │   └── contract.ts       # Your API definition (34 lines!)
 │       └── generated/            # Generated code (don't edit)
-│           ├── go/               # Go types, router, validation
-│           └── react/            # TS types, hooks, client
+│           ├── go-server/        # Go types, router, validation
+│           └── react-client/     # TS types, hooks, client
 ├── apps/
 │   ├── go-backend/               # Go server implementation
 │   │   ├── main.go               # Uses generated types
@@ -224,26 +224,25 @@ bun install
 ### 2. Generate Code from Contract
 
 ```bash
-bun run xrpc generate \
-  -i examples/x-rpc-todo-app/packages/api/src/contract.ts \
-  -t go,react \
-  -o examples/x-rpc-todo-app/packages/api/generated
+cd examples/x-rpc-todo-app
+bun run generate
 ```
+
+This runs the xrpc generator on the contract and outputs Go server and React client code to `packages/api/generated/`.
 
 ### 3. Start the Go Backend
 
 ```bash
-cd examples/x-rpc-todo-app/apps/go-backend
+cd apps/go-backend
 go run .
 # Server running on :8080
 ```
 
 ### 4. Start the React Frontend
 
-In a new terminal:
+In a new terminal (from `examples/x-rpc-todo-app`):
 
 ```bash
-cd examples/x-rpc-todo-app
 bun run dev --filter=web
 # Frontend running on :3000
 ```
