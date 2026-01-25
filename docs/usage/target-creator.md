@@ -74,7 +74,7 @@ writer
 Refer to these existing targets for current implementation patterns:
 
 - `@xrpckit/target-go-server` - Go server generation
-- `@xrpckit/target-react-client` - React/TypeScript client with hooks
+- `@xrpckit/target-typescript-client` - Vanilla TypeScript client
 
 ## Note
 

@@ -27,7 +27,7 @@ input = "path/to/contract.ts"
 [targets.go-server]
 output = "apps/go-backend"
 
-[targets.react-client]
+[targets.typescript-client]
 output = "apps/web"
 ```
 
@@ -47,8 +47,7 @@ Available generation targets:
 | `go-server` | Go HTTP server |
 | `go-client` | Go HTTP client |
 | `typescript-server` | TypeScript Express server |
-| `typescript-client` | TypeScript fetch client |
-| `react-client` | React client with hooks |
+| `typescript-client` | Vanilla TypeScript client |
 | `kotlin-springboot-server` | Kotlin Spring Boot server |
 
 ## Full Example
@@ -69,8 +68,8 @@ output = "services/gateway/client"
 [targets.typescript-server]
 output = "apps/api/generated"
 
-# React frontend client
-[targets.react-client]
+# TypeScript frontend client
+[targets.typescript-client]
 output = "apps/web/src/api"
 ```
 

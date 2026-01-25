@@ -151,7 +151,7 @@
           </div>
         </section>
 
-        <!-- React + Go Story -->
+        <!-- TypeScript + Go Story -->
         <section class="comparison-section">
           <div class="container">
             <div class="section-header">
@@ -236,25 +236,23 @@
                     <div class="code-preview">
                       <div class="code-header">
                         <span class="code-title">
-                          <span class="tech-badge tech-badge-react">
+                          <span class="tech-badge tech-badge-typescript">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                              <circle cx="12" cy="12" r="2.5"/>
-                              <ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" stroke-width="1.5"/>
-                              <ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" stroke-width="1.5" transform="rotate(60 12 12)"/>
-                              <ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" stroke-width="1.5" transform="rotate(-60 12 12)"/>
+                              <rect x="2" y="2" width="20" height="20" rx="2" fill="currentColor"/>
+                              <text x="12" y="17" text-anchor="middle" fill="#12121a" font-size="12" font-weight="700">TS</text>
                             </svg>
-                            React
+                            TypeScript
                           </span>
                           Client
                         </span>
                       </div>
-                      <pre><code><span class="k">import</span> { useUserGetUser } <span class="k">from</span> <span class="s">'./client'</span>;
+                      <pre><code><span class="k">import</span> { client } <span class="k">from</span> <span class="s">'./client'</span>;
 
-<span class="k">function</span> <span class="nf">Profile</span>({ <span class="n">userId</span> }) {
-  <span class="k">const</span> { <span class="n">data</span>, <span class="n">isLoading</span> } =
-    <span class="nf">useUserGetUser</span>({ <span class="na">id</span>: <span class="n">userId</span> });
+<span class="k">async function</span> <span class="nf">getProfile</span>(<span class="n">userId</span>: <span class="n">string</span>) {
+  <span class="k">const</span> <span class="n">user</span> = <span class="k">await</span> <span class="n">client</span>
+    .<span class="n">user</span>.<span class="nf">getUser</span>({ <span class="na">id</span>: <span class="n">userId</span> });
 
-  <span class="k">return</span> &lt;<span class="n">h1</span>&gt;{<span class="n">data</span>.<span class="n">name</span>}&lt;/<span class="n">h1</span>&gt;;
+  <span class="k">return</span> <span class="n">user</span>.<span class="n">name</span>;
 }</code></pre>
                     </div>
                   </div>
@@ -312,7 +310,7 @@
         <section class="quickstart-section">
           <div class="container">
             <h2>Get started in seconds</h2>
-            <p class="quickstart-subtitle">Generate a Go backend and React frontend from a single schema.</p>
+            <p class="quickstart-subtitle">Generate a Go backend and TypeScript client from a single schema.</p>
 
             <div class="quickstart-steps">
               <div class="code-preview">
@@ -322,12 +320,12 @@
                 <pre><code><span class="c"># Install the CLI</span>
 npm install -g @xrpckit/cli
 
-<span class="c"># Generate Go server + React client from your schema</span>
-xrpc generate --targets go,react --input src/api.ts
+<span class="c"># Generate Go server + TypeScript client from your schema</span>
+xrpc generate --targets go-server,typescript-client --input src/api.ts
 
-<span class="nb">Generated 8 files in 0.3s</span>
+<span class="nb">Generated 6 files in 0.3s</span>
 <span class="c">#   go/types.go, go/router.go, go/validation.go</span>
-<span class="c">#   react/client.ts, react/hooks.ts, react/types.ts</span></code></pre>
+<span class="c">#   typescript/client.ts, typescript/types.ts</span></code></pre>
               </div>
             </div>
 
