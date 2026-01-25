@@ -8,6 +8,8 @@ description: Cross-cutting concerns with xRPC middleware
 
 Middleware in xRPC intercepts requests before they reach your handlers, allowing you to handle authentication, logging, request ID injection, and other cross-cutting concerns. Middleware can extend the request context with typed data.
 
+> **Note**: TypeScript middleware hooks are planned for the `ts-express` target. Go middleware is available today.
+
 ## Is Middleware Required?
 
 **No.** xRPC middleware is optional. Your framework's native middleware works perfectly fine.
@@ -15,29 +17,29 @@ Middleware in xRPC intercepts requests before they reach your handlers, allowing
 | Use framework middleware (Express, Gin, etc.) for: | Use xRPC middleware when you need: |
 |---------------------------------------------------|-----------------------------------|
 | CORS, compression, rate limiting | **Typed context** passed to handlers |
-| Standard request logging | Contract-defined context schema |
-| Static file serving | Cross-language type generation |
+| Standard request logging | Planned: contract-defined context schema |
+| Static file serving | Planned: cross-language type generation |
 
-If you just need standard middleware features, use what your framework provides. xRPC middleware is specifically for when you want typed context data that's validated against your contract schema.
+If you just need standard middleware features, use what your framework provides. Contract-defined context schemas and cross-language context generation are planned; today, middleware is defined as functions in your contract and handled per target.
 
 ## Defining Middleware in Contract
 
-Define middleware in your contract to get type-safe context across all generated targets:
+Define middleware in your contract. Cross-language typed context is planned; today, each target handles context differently.
 
 ```typescript
-import { z } from 'zod';
-import { middleware } from 'xrpckit';
+import { createRouter, type Middleware } from 'xrpckit';
 
-// Define what your middleware adds to context
-const authMiddleware = middleware({
-  name: 'auth',
-  context: z.object({
-    userId: z.string().uuid(),
-    role: z.enum(['user', 'admin']),
-  }),
-});
+type AuthContext = {
+  userId: string;
+  role: 'user' | 'admin';
+};
 
-export const api = createRouter({
+const authMiddleware: Middleware<AuthContext> = async (req, ctx) => {
+  const token = req.headers.get('authorization');
+  return { ...ctx, userId: extractUserId(token), role: 'user' };
+};
+
+export const router = createRouter({
   middleware: [authMiddleware],
   // ... endpoints
 });
@@ -45,10 +47,10 @@ export const api = createRouter({
 
 ## TypeScript Implementation
 
-Implement middleware as functions that validate and extend the context:
+**Planned (`ts-express`)**: The API below is a draft and may change. It illustrates the intended flow.
 
 ```typescript
-import { createMiddleware, createHandler } from './generated/server';
+import { createMiddleware, createHandler } from './xrpc/server';
 
 // Middleware: validate token and add typed user data to context
 export const authMiddleware = createMiddleware('auth', async (req, ctx) => {
@@ -77,26 +79,26 @@ Go middleware follows the same pattern using `ctx.Data` for context storage:
 
 ```go
 // Middleware: validate token and store user data in context
-func authMiddleware(ctx *server.Context) *server.MiddlewareResult {
+func authMiddleware(ctx *xrpc.Context) *xrpc.MiddlewareResult {
     token := ctx.Request.Header.Get("Authorization")
     if token == "" {
-        return server.NewMiddlewareError(fmt.Errorf("unauthorized"))
+        return xrpc.NewMiddlewareError(fmt.Errorf("unauthorized"))
     }
 
     userId, role, err := validateToken(strings.TrimPrefix(token, "Bearer "))
     if err != nil {
-        return server.NewMiddlewareError(err)
+        return xrpc.NewMiddlewareError(err)
     }
 
     ctx.Data["userId"] = userId
     ctx.Data["role"] = role
-    return server.NewMiddlewareResult(ctx)
+    return xrpc.NewMiddlewareResult(ctx)
 }
 
-// Handler: use generated helpers to access typed context
-func getProfileHandler(ctx *server.Context, input server.GetProfileInput) (*server.GetProfileOutput, error) {
-    userId, _ := server.GetUserId(ctx)  // Type-safe helper
-    role, _ := server.GetRole(ctx)
+// Handler: access context data from the map
+func getProfileHandler(ctx *xrpc.Context, input xrpc.GetProfileInput) (xrpc.GetProfileOutput, error) {
+    userId, _ := ctx.Data["userId"].(string)
+    role, _ := ctx.Data["role"].(string)
 
     if role != "admin" && userId != input.Id {
         return nil, fmt.Errorf("not authorized")
@@ -105,18 +107,18 @@ func getProfileHandler(ctx *server.Context, input server.GetProfileInput) (*serv
 }
 ```
 
-Return `server.NewMiddlewareError()` to short-circuit with an error, or `server.NewMiddlewareResponse()` for a custom HTTP response.
+Return `xrpc.NewMiddlewareError()` to short-circuit with an error, or `xrpc.NewMiddlewareResponse()` for a custom HTTP response.
 
 ## Context Helpers
 
-xRPC generates type-safe helpers for accessing context data:
+xRPC context access by language:
 
 | Language | Store context | Retrieve context |
 |----------|--------------|------------------|
 | **TypeScript** | `return { ...ctx, userId }` | `ctx.userId` (directly typed) |
-| **Go** | `ctx.Data["userId"] = value` | `server.GetUserId(ctx)` (generated helper) |
+| **Go** | `ctx.Data["userId"] = value` | `ctx.Data["userId"].(string)` |
 
-Go helpers return `(value, ok)` to handle missing context gracefully. TypeScript context is directly typed from your contract schema.
+Go access uses type assertions to handle missing context gracefully. TypeScript context typing is planned for `ts-express`.
 
 ## Middleware Order
 
@@ -135,6 +137,6 @@ router.Use(authMiddleware)       // 3rd
 
 ## Next Steps
 
-- [TypeScript Server](/docs/usage/typescript-server.html) - Full TypeScript server setup
+- [TypeScript Server](/docs/usage/typescript-server.html) - Planned TypeScript server setup
 - [Go Server](/docs/usage/go-server.html) - Full Go server setup
 - [API Contract](/docs/usage/api-contract.html) - Define your schema

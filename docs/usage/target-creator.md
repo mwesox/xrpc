@@ -74,7 +74,15 @@ writer
 Refer to these existing targets for current implementation patterns:
 
 - `@xrpckit/target-go-server` - Go server generation
-- `@xrpckit/target-typescript-client` - Vanilla TypeScript client
+- `@xrpckit/target-ts-client` - Vanilla TypeScript client
+
+CLI target names currently exposed: `go-server`, `ts-client`.
+
+Planned targets (not yet in the CLI):
+
+- `@xrpckit/target-ts-express` - TypeScript Express server
+- `@xrpckit/target-go-client` - Go client
+- `@xrpckit/target-kotlin-springboot-server` - Kotlin Spring Boot server
 
 ## Note
 

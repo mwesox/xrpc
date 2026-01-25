@@ -8,15 +8,17 @@ description: How to implement an xRPC server using TypeScript and Express
 
 This guide shows how to implement an xRPC server using TypeScript and Express.
 
+> **Planned**: The `ts-express` target is not available in the CLI yet. This page is a preview and the API may change. Current CLI targets are `go-server` and `ts-client`.
+
 ## Prerequisites
 
-1. Define your API contract (see [API Contract](api-contract.html))
-2. Generate TypeScript Express code: `xrpc generate --targets typescript-express`
+1. Define your API contract (see [API Contract](api-contract.html)) and export `router`
+2. Generate TypeScript Express code: `xrpc generate --targets ts-express` (planned)
 3. Implement your handlers using the generated code
 
-**Note**: The xRPC CLI and code generation run on **Bun runtime**, but the generated TypeScript code runs on **Node.js or Bun** (your choice). The generated code is self-contained and uses Express framework APIs. No separate runtime libraries are needed.
+**Note**: The xRPC CLI runs on **Node.js** (>= 18). The generated TypeScript code is expected to run on **Node.js or Bun** and use Express framework APIs.
 
-**Framework-Specific Target**: xRPC generates code for framework-specific targets. The `typescript-express` target generates code tailored specifically for Express, including Express middleware integration. This is not a generic TypeScript target - it's optimized for Express framework patterns.
+**Framework-Specific Target**: xRPC generates code for framework-specific targets. The `ts-express` target is planned to generate code tailored specifically for Express, including Express middleware integration.
 
 ## Basic Server Setup
 
@@ -27,7 +29,7 @@ First, define your API contract (see [API Contract](api-contract.html) for detai
 import { z } from 'zod';
 import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
-export const api = createRouter({
+export const router = createRouter({
   greeting: createEndpoint({
     greet: query({
       input: z.object({ name: z.string() }),
@@ -40,26 +42,25 @@ export const api = createRouter({
   }),
 });
 
-export type Api = typeof api;
+export type Api = typeof router;
 ```
 
 Then, generate code and implement your server with handlers:
 
 ```bash
-# Generate TypeScript Express code (CLI runs on Bun runtime)
-xrpc generate --targets typescript-express
+# Generate TypeScript Express code (planned target)
+xrpc generate --targets ts-express
 ```
 
-This generates code in `generated/typescript-express/`:
+This is planned to generate code in `<output>/xrpc/`:
 - `types.ts`: Type definitions including `ServerRouter` type
 - `server.ts`: Express middleware factory (`createServer`)
-- `client.ts`: Type-safe client SDK (see [TypeScript Client](typescript-client.html))
 
 ```typescript
 // server.ts
 import express from 'express';
-import { createServer } from './generated/typescript-express/server';  // Generated code
-import type { ServerRouter } from './generated/typescript-express/types';  // Generated types
+import { createServer } from './xrpc/server';  // Generated code (planned)
+import type { ServerRouter } from './xrpc/types';  // Generated types (planned)
 
 // Implement handlers matching the router structure
 // TypeScript enforces that serverRouter matches the contract exactly
@@ -100,7 +101,7 @@ When working with multiple endpoints in your router:
 
 ```typescript
 // contract.ts
-export const api = createRouter({
+export const router = createRouter({
   user: createEndpoint({
     getUser: query({ ... }),
     updateUser: mutation({ ... }),
@@ -111,15 +112,15 @@ export const api = createRouter({
   }),
 });
 
-export type Api = typeof api;
+export type Api = typeof router;
 ```
 
 Implement handlers for all endpoints:
 
 ```typescript
 // server.ts
-import { createServer } from './generated/typescript-express/server';  // Generated code
-import type { ServerRouter } from './generated/typescript-express/types';  // Generated types
+import { createServer } from './xrpc/server';  // Generated code (planned)
+import type { ServerRouter } from './xrpc/types';  // Generated types (planned)
 
 // Type-safe: TypeScript ensures all endpoints (user, product) and their queries/mutations are implemented
 const serverRouter: ServerRouter = {
@@ -165,10 +166,10 @@ xRPC ensures full type safety through generated types. The generated code provid
 
 ### Generated Types
 
-After running `xrpc generate --targets typescript-express`, the generated code includes:
+After running `xrpc generate --targets ts-express`, the generated code is planned to include:
 
 ```typescript
-// generated/typescript-express/types.ts
+// xrpc/types.ts
 export type ServerRouter = {
   greeting: {
     greet: {
@@ -257,6 +258,10 @@ Each handler receives:
 
 Each handler must return:
 - **Typed output** matching your Zod schema (e.g., `Promise<GreetOutput>`)
+
+## Related Target
+
+The TypeScript client is generated separately via the **ts-client** target (see [TypeScript Client](typescript-client.html)).
 
 ### Type Inference
 

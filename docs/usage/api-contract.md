@@ -8,6 +8,11 @@ description: How to define your xRPC API contract using TypeScript and Zod schem
 
 This guide shows how to define your xRPC API contract using TypeScript and Zod schemas. The API contract is a **pure DSL** - it defines schemas and endpoints only, with no implementation details. Handlers are implemented separately in server files.
 
+**Important**: Your contract file must export `router`:
+```typescript
+export const router = createRouter({ ... });
+```
+
 ## Core Concepts
 
 An xRPC API contract uses a hierarchical structure:
@@ -44,7 +49,7 @@ const greeting = createEndpoint({
 });
 
 // Router: Primary grouping mechanism (single export)
-export const api = createRouter({
+export const router = createRouter({
   greeting,  // Endpoint
 });
 ```
@@ -80,7 +85,7 @@ const product = createEndpoint({
 });
 
 // Router: Primary grouping mechanism (single export)
-export const api = createRouter({
+export const router = createRouter({
   user,      // Endpoint
   product,   // Endpoint
 });
@@ -94,7 +99,7 @@ For simple cases, define types inline:
 import { z } from 'zod';
 import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
-export const api = createRouter({
+export const router = createRouter({
   user: createEndpoint({
     getUser: query({
       input: z.object({ id: z.string() }),
@@ -121,7 +126,7 @@ const UserId = z.string();
 const User = z.object({ id: UserId, name: z.string(), email: z.string() });
 const UserUpdate = z.object({ name: z.string().optional(), email: z.string().optional() });
 
-export const api = createRouter({
+export const router = createRouter({
   user: createEndpoint({
     getUser: query({
       input: z.object({ id: UserId }),
@@ -142,7 +147,7 @@ Each method within an endpoint is either a query or mutation:
 - **Query**: Read operations that don't modify state
 - **Mutation**: Write operations that modify state
 
-Both use the same structure with `input` and `output` properties. **No handlers in the contract** - those are implemented separately in server files (see [Go Server](go-server.html), [TypeScript Server](typescript-server.html), or [Kotlin Server](kotlin-springboot-server.html)).
+Both use the same structure with `input` and `output` properties. **No handlers in the contract** - those are implemented separately in server files (see [Go Server](go-server.html), [TypeScript Server](typescript-server.html) (planned), or [Kotlin Server](kotlin-springboot-server.html) (planned)).
 
 ## Code Generation
 
@@ -150,7 +155,9 @@ After defining your contract, generate code for your target frameworks:
 
 ```bash
 # Generate for specific framework targets
-xrpc generate --targets go,typescript-express,kotlin-spring-boot
+xrpc generate --targets go-server,ts-client
 ```
 
-**Note**: The xRPC CLI and code generation run on **Bun runtime**. The generated code is self-contained and runs on native runtimes for each target language (Go runtime, Node.js/Bun, etc.).
+**Planned targets**: `ts-express`, `go-client`, and `kotlin-springboot-server` are not yet available in the CLI.
+
+**Note**: The xRPC CLI runs on **Node.js** (>= 18). Generated code runs on native runtimes for each target language (Go runtime, Node.js/Bun, etc.).

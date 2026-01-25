@@ -22,55 +22,45 @@ Create an `xrpc.toml` file in your project's root directory (current working dir
 
 ```toml
 # xRPC Configuration
-input = "path/to/contract.ts"
-
-[targets.go-server]
-output = "apps/go-backend"
-
-[targets.typescript-client]
-output = "apps/web"
+contract = "path/to/contract.ts"
+go-server = "apps/go-backend"
+ts-client = "apps/web"
 ```
 
 ## Configuration Options
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `input` | string | Path to the API contract file |
-| `targets.<name>.output` | string | Output directory for a generation target |
+| `contract` | string | Path to the API contract file |
+| `<target-name>` | string | Output directory for a generation target |
+
+Generated code is always written to an `xrpc/` subdirectory inside each target output path.
 
 ### Target Names
 
 Available generation targets:
 
-| Target | Description |
-|--------|-------------|
-| `go-server` | Go HTTP server |
-| `go-client` | Go HTTP client |
-| `typescript-server` | TypeScript Express server |
-| `typescript-client` | Vanilla TypeScript client |
-| `kotlin-springboot-server` | Kotlin Spring Boot server |
+| Target | Status | Description |
+|--------|--------|-------------|
+| `go-server` | Available | Go HTTP server |
+| `ts-client` | Available | Vanilla TypeScript client |
+| `ts-express` | Planned | TypeScript Express server |
+| `go-client` | Planned | Go HTTP client |
+| `kotlin-springboot-server` | Planned | Kotlin Spring Boot server |
+
+Planned targets are listed for clarity but are not yet available in the CLI.
 
 ## Full Example
 
 ```toml
 # xRPC Configuration
-input = "packages/api/contract.ts"
+contract = "packages/api/contract.ts"
 
 # Go backend server
-[targets.go-server]
-output = "apps/backend/generated"
-
-# Go client for service-to-service communication
-[targets.go-client]
-output = "services/gateway/client"
-
-# TypeScript server
-[targets.typescript-server]
-output = "apps/api/generated"
+go-server = "apps/backend"
 
 # TypeScript frontend client
-[targets.typescript-client]
-output = "apps/web/src/api"
+ts-client = "apps/web/src"
 ```
 
 ## CLI Overrides
@@ -81,7 +71,7 @@ CLI arguments always take precedence over `xrpc.toml` settings:
 # Uses xrpc.toml settings
 xrpc generate
 
-# Overrides input from xrpc.toml
+# Overrides contract from xrpc.toml
 xrpc generate --input ./other-contract.ts
 
 # Overrides specific target output

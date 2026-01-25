@@ -310,7 +310,7 @@
         <section class="quickstart-section">
           <div class="container">
             <h2>Get started in seconds</h2>
-            <p class="quickstart-subtitle">Generate a Go backend and TypeScript client from a single schema.</p>
+            <p class="quickstart-subtitle">Generate a Go server and TypeScript client from a single schema.</p>
 
             <div class="quickstart-steps">
               <div class="code-preview">
@@ -321,11 +321,11 @@
 npm install -g @xrpckit/cli
 
 <span class="c"># Generate Go server + TypeScript client from your schema</span>
-xrpc generate --targets go-server,typescript-client --input src/api.ts
+xrpc generate --targets go-server,ts-client --input src/contract.ts
 
-<span class="nb">Generated 6 files in 0.3s</span>
-<span class="c">#   go/types.go, go/router.go, go/validation.go</span>
-<span class="c">#   typescript/client.ts, typescript/types.ts</span></code></pre>
+<span class="nb">Generated 5 files in 0.3s</span>
+<span class="c">#   xrpc/types.go, xrpc/router.go, xrpc/validation.go</span>
+<span class="c">#   xrpc/client.ts, xrpc/types.ts</span></code></pre>
               </div>
             </div>
 
@@ -346,18 +346,18 @@ xrpc generate --targets go-server,typescript-client --input src/api.ts
           <div class="container">
             <div class="section-header">
               <h2>Targets</h2>
-              <p>xRPC generates idiomatic code for multiple platforms from your Zod schema.<br>Each target produces self-contained, dependency-free code.</p>
+              <p>xRPC generates idiomatic code for multiple platforms from your Zod schema.<br>Each target produces self-contained code with clear runtime requirements.</p>
             </div>
 
             <div class="targets-grid">
-              <a href="{{ '/docs/usage/typescript-server.html' | relative_url }}" class="glass-card target-card">
+              <a href="{{ '/docs/usage/typescript-client.html' | relative_url }}" class="glass-card target-card">
                 <div class="target-icon">TS</div>
                 <div class="target-content">
                   <div class="target-header">
                     <span class="target-name">TypeScript</span>
-                    <span class="badge badge-primary">Server & Client</span>
+                    <span class="badge badge-primary">Client (Available)</span>
                   </div>
-                  <p class="target-description">Full-stack type safety. Generate Express/Node servers and fetch-based clients with complete type inference.</p>
+                  <p class="target-description">Vanilla TS client with fetch + Zod validation. Express server target is planned as <code>ts-express</code>.</p>
                 </div>
               </a>
 
@@ -366,9 +366,9 @@ xrpc generate --targets go-server,typescript-client --input src/api.ts
                 <div class="target-content">
                   <div class="target-header">
                     <span class="target-name">Go</span>
-                    <span class="badge badge-primary">Server & Client</span>
+                    <span class="badge badge-primary">Server (Available)</span>
                   </div>
-                  <p class="target-description">Idiomatic Go with net/http handlers, struct validation, and JSON marshaling. Zero external dependencies.</p>
+                  <p class="target-description">Idiomatic Go with net/http handlers, struct validation, and JSON marshaling. Go client target is planned.</p>
                 </div>
               </a>
 
@@ -377,7 +377,7 @@ xrpc generate --targets go-server,typescript-client --input src/api.ts
                 <div class="target-content">
                   <div class="target-header">
                     <span class="target-name">Kotlin</span>
-                    <span class="badge badge-secondary">Spring Boot</span>
+                    <span class="badge badge-secondary">Planned</span>
                   </div>
                   <p class="target-description">Spring Boot integration with data classes, validation annotations, and controller generation.</p>
                 </div>

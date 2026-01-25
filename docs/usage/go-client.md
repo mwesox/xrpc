@@ -8,17 +8,19 @@ description: How to use an xRPC client in Go
 
 This guide shows how to use an xRPC client in Go.
 
+> **Planned**: The `go-client` target is not available in the CLI yet. This page is a preview and the API may change.
+
 ## Prerequisites
 
-1. Define your API contract (see [API Contract](api-contract.html))
-2. Generate Go code: `xrpc generate --targets go`
+1. Define your API contract (see [API Contract](api-contract.html)) and export `router`
+2. Generate Go code: `xrpc generate --targets go-client` (planned)
 3. Use the generated client in your application
 
-**Note**: The xRPC CLI and code generation run on **Bun runtime**, but the generated Go code runs on the **Go runtime**. The generated client is self-contained and uses Go's standard HTTP libraries (`net/http`). No separate runtime libraries are needed.
+**Note**: The xRPC CLI runs on **Node.js** (>= 18), but the generated Go code runs on the **Go runtime**. The generated client is expected to use Go's standard HTTP libraries (`net/http`).
 
 ## Generated Code Structure
 
-Code generation produces client code in `generated/go/client/`:
+Code generation is planned to produce client code in `<output>/xrpc/`:
 - Type-safe client implementation using standard `net/http`
 - Request serialization (to JSON)
 - Response deserialization (from JSON)
@@ -33,15 +35,15 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/yourorg/xrpc-go/client"  // Generated code (from generated/go/client)
+    "your-module/xrpc"  // Generated code (planned)
 )
 
 func main() {
     ctx := context.Background()
-    c := client.New("http://localhost:3000/api")
+    c := xrpc.NewClient("http://localhost:3000/api") // planned API
 
     // Call a query
-    result, err := c.Greet(ctx, client.GreetInput{
+    result, err := c.Greet(ctx, xrpc.GreetInput{
         Name: "World",
     })
     if err != nil {
@@ -50,7 +52,7 @@ func main() {
     fmt.Println(result.Message) // "Hello, World!"
 
     // Call a mutation
-    greeting, err := c.SetGreeting(ctx, client.SetGreetingInput{
+    greeting, err := c.SetGreeting(ctx, xrpc.SetGreetingInput{
         Name:     "Alice",
         Greeting: "Hi",
     })
@@ -67,7 +69,7 @@ All API calls are type-safe with generated types:
 
 ```go
 // Input is type-checked
-result, err := c.Greet(ctx, client.GreetInput{
+result, err := c.Greet(ctx, xrpc.GreetInput{
     Name: "World", // ✅ Type-checked
 })
 
@@ -78,7 +80,7 @@ fmt.Println(result.Message) // ✅ Type-checked
 ## Error Handling
 
 ```go
-result, err := c.Greet(ctx, client.GreetInput{Name: "World"})
+result, err := c.Greet(ctx, xrpc.GreetInput{Name: "World"})
 if err != nil {
     // Handle error (network, validation, server error, etc.)
     log.Printf("Error: %v", err)
