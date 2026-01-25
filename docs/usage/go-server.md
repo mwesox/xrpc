@@ -177,7 +177,7 @@ You can define middleware in your API contract:
 ```typescript
 // api.ts
 import { z } from 'zod';
-import { createRouter, createEndpoint, query } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query } from 'xrpckit';
 
 const greeting = createEndpoint({
   greet: query({

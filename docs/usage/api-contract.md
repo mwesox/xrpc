@@ -23,7 +23,7 @@ The hierarchy is: **Router → Endpoints → Queries/Mutations**
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
 // Types: Shared data schemas
 const GreetingInput = z.object({ name: z.string() });
@@ -53,7 +53,7 @@ export const api = createRouter({
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
 // User endpoint
 const user = createEndpoint({
@@ -92,7 +92,7 @@ For simple cases, define types inline:
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
 export const api = createRouter({
   user: createEndpoint({
@@ -114,7 +114,7 @@ For reusable types, define them separately:
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
 // Shared types
 const UserId = z.string();

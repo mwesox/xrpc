@@ -25,7 +25,7 @@ First, define your API contract (see [API Contract](api-contract.html) for detai
 ```typescript
 // contract.ts
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
 export const api = createRouter({
   greeting: createEndpoint({

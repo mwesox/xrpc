@@ -26,7 +26,7 @@ Define middleware in your contract to get type-safe context across all generated
 
 ```typescript
 import { z } from 'zod';
-import { middleware } from '@xrpckit/schema';
+import { middleware } from 'xrpckit';
 
 // Define what your middleware adds to context
 const authMiddleware = middleware({
