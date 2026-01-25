@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
 // =============================================================================
 // ENUMS
@@ -16,11 +16,6 @@ const Assignee = z.object({
   id: z.string().uuid(),
   name: z.string().min(2).max(100),
   email: z.string().email(),
-});
-
-const Tag = z.object({
-  name: z.string().min(1).max(30).regex(/^[a-z0-9-]+$/),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
 });
 
 const Subtask = z.object({
@@ -43,7 +38,6 @@ const Task = z.object({
   createdAt: z.string(),
   completedAt: z.string().optional().nullable(),
   assignee: Assignee.optional(),
-  tags: z.array(Tag).max(5),
   subtasks: z.array(Subtask).max(20),
   estimatedHours: z.number().positive().max(100).optional(),
   position: z.number().int().min(0),
@@ -58,7 +52,6 @@ const TaskSummary = z.object({
   dueDate: z.string().optional(),
   createdAt: z.string(),
   completedAt: z.string().optional().nullable(),
-  tagCount: z.number().int().min(0),
   subtaskCount: z.number().int().min(0),
   subtaskCompletedCount: z.number().int().min(0),
   estimatedHours: z.number().positive().max(100).optional(),
@@ -94,11 +87,10 @@ const task = createEndpoint({
   // Create a new task
   create: mutation({
     input: z.object({
-      title: z.string().min(1).max(200),
+      title: z.string().min(3).max(200),
       description: z.string().max(2000).optional(),
       priority: Priority,
       dueDate: z.string().optional(),
-      tags: z.array(Tag).max(5).optional(),
       estimatedHours: z.number().positive().max(100).optional(),
     }),
     output: Task,
@@ -151,44 +143,6 @@ const subtask = createEndpoint({
     }),
     output: Subtask,
   }),
-
-  // Delete a subtask
-  delete: mutation({
-    input: z.object({
-      taskId: z.string().uuid(),
-      subtaskId: z.string().uuid(),
-    }),
-    output: z.object({
-      success: z.boolean(),
-    }),
-  }),
-});
-
-// =============================================================================
-// TAG ENDPOINTS
-// =============================================================================
-
-const tag = createEndpoint({
-  // Add a tag to a task
-  add: mutation({
-    input: z.object({
-      taskId: z.string().uuid(),
-      name: z.string().min(1).max(30).regex(/^[a-z0-9-]+$/),
-      color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-    }),
-    output: Tag,
-  }),
-
-  // Remove a tag from a task
-  remove: mutation({
-    input: z.object({
-      taskId: z.string().uuid(),
-      tagName: z.string().min(1).max(30),
-    }),
-    output: z.object({
-      success: z.boolean(),
-    }),
-  }),
 });
 
 // =============================================================================
@@ -198,5 +152,4 @@ const tag = createEndpoint({
 export const router = createRouter({
   task,
   subtask,
-  tag,
 });

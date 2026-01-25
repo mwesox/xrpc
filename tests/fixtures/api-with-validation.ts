@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
 const greeting = createEndpoint({
   greet: query({

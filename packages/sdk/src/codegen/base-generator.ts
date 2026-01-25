@@ -1,5 +1,5 @@
-import { CodeWriter } from './code-writer';
-import type { ContractDefinition } from '../parser';
+import type { ContractDefinition } from "../parser";
+import { CodeWriter } from "./code-writer";
 
 export interface GeneratorConfig {
   outputDir: string;
@@ -30,7 +30,7 @@ export abstract class BaseCodeGenerator {
     return str
       .split(/[-_]/)
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join('');
+      .join("");
   }
 
   protected toCamelCase(str: string): string {
@@ -39,6 +39,6 @@ export abstract class BaseCodeGenerator {
   }
 
   protected toSnakeCase(str: string): string {
-    return str.replace(/([A-Z])/g, '_$1').toLowerCase();
+    return str.replace(/([A-Z])/g, "_$1").toLowerCase();
   }
 }

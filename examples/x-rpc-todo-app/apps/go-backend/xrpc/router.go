@@ -15,9 +15,6 @@ type Router struct {
     taskDelete TaskDeleteHandler
     subtaskAdd SubtaskAddHandler
     subtaskToggle SubtaskToggleHandler
-    subtaskDelete SubtaskDeleteHandler
-    tagAdd TagAddHandler
-    tagRemove TagRemoveHandler
 }
 func NewRouter() *Router {
     return &Router{
@@ -50,18 +47,6 @@ func (r *Router) SubtaskAdd(handler SubtaskAddHandler) *Router {
 }
 func (r *Router) SubtaskToggle(handler SubtaskToggleHandler) *Router {
     r.subtaskToggle = handler
-    return r
-}
-func (r *Router) SubtaskDelete(handler SubtaskDeleteHandler) *Router {
-    r.subtaskDelete = handler
-    return r
-}
-func (r *Router) TagAdd(handler TagAddHandler) *Router {
-    r.tagAdd = handler
-    return r
-}
-func (r *Router) TagRemove(handler TagRemoveHandler) *Router {
-    r.tagRemove = handler
     return r
 }
 func (r *Router) Use(middleware MiddlewareFunc) *Router {
@@ -362,120 +347,6 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
             }
 
             result, err := r.subtaskToggle(ctx, input)
-            if err != nil {
-                w.Header().Set("Content-Type", "application/json")
-                json.NewEncoder(w).Encode(map[string]interface{}{"error": err.Error()})
-                return
-            }
-
-            w.Header().Set("Content-Type", "application/json")
-            json.NewEncoder(w).Encode(map[string]interface{}{"result": result})
-            return
-        case "subtask.delete":
-            if r.subtaskDelete == nil {
-                http.Error(w, "Handler not registered", http.StatusNotFound)
-                return
-            }
-
-            var input SubtaskDeleteInput
-            if err := json.Unmarshal(request.Params, &input); err != nil {
-                http.Error(w, fmt.Sprintf("Invalid params: %v", err), http.StatusBadRequest)
-                return
-            }
-
-            if err := ValidateSubtaskDeleteInput(input); err != nil {
-                w.Header().Set("Content-Type", "application/json")
-                w.WriteHeader(http.StatusBadRequest)
-                if validationErrs, ok := err.(ValidationErrors); ok {
-                    json.NewEncoder(w).Encode(map[string]interface{}{
-                        "error": "Validation failed",
-                        "errors": validationErrs,
-                    })
-                } else {
-                    json.NewEncoder(w).Encode(map[string]interface{}{
-                        "error": err.Error(),
-                    })
-                }
-                return
-            }
-
-            result, err := r.subtaskDelete(ctx, input)
-            if err != nil {
-                w.Header().Set("Content-Type", "application/json")
-                json.NewEncoder(w).Encode(map[string]interface{}{"error": err.Error()})
-                return
-            }
-
-            w.Header().Set("Content-Type", "application/json")
-            json.NewEncoder(w).Encode(map[string]interface{}{"result": result})
-            return
-        case "tag.add":
-            if r.tagAdd == nil {
-                http.Error(w, "Handler not registered", http.StatusNotFound)
-                return
-            }
-
-            var input TagAddInput
-            if err := json.Unmarshal(request.Params, &input); err != nil {
-                http.Error(w, fmt.Sprintf("Invalid params: %v", err), http.StatusBadRequest)
-                return
-            }
-
-            if err := ValidateTagAddInput(input); err != nil {
-                w.Header().Set("Content-Type", "application/json")
-                w.WriteHeader(http.StatusBadRequest)
-                if validationErrs, ok := err.(ValidationErrors); ok {
-                    json.NewEncoder(w).Encode(map[string]interface{}{
-                        "error": "Validation failed",
-                        "errors": validationErrs,
-                    })
-                } else {
-                    json.NewEncoder(w).Encode(map[string]interface{}{
-                        "error": err.Error(),
-                    })
-                }
-                return
-            }
-
-            result, err := r.tagAdd(ctx, input)
-            if err != nil {
-                w.Header().Set("Content-Type", "application/json")
-                json.NewEncoder(w).Encode(map[string]interface{}{"error": err.Error()})
-                return
-            }
-
-            w.Header().Set("Content-Type", "application/json")
-            json.NewEncoder(w).Encode(map[string]interface{}{"result": result})
-            return
-        case "tag.remove":
-            if r.tagRemove == nil {
-                http.Error(w, "Handler not registered", http.StatusNotFound)
-                return
-            }
-
-            var input TagRemoveInput
-            if err := json.Unmarshal(request.Params, &input); err != nil {
-                http.Error(w, fmt.Sprintf("Invalid params: %v", err), http.StatusBadRequest)
-                return
-            }
-
-            if err := ValidateTagRemoveInput(input); err != nil {
-                w.Header().Set("Content-Type", "application/json")
-                w.WriteHeader(http.StatusBadRequest)
-                if validationErrs, ok := err.(ValidationErrors); ok {
-                    json.NewEncoder(w).Encode(map[string]interface{}{
-                        "error": "Validation failed",
-                        "errors": validationErrs,
-                    })
-                } else {
-                    json.NewEncoder(w).Encode(map[string]interface{}{
-                        "error": err.Error(),
-                    })
-                }
-                return
-            }
-
-            result, err := r.tagRemove(ctx, input)
             if err != nil {
                 w.Header().Set("Content-Type", "application/json")
                 json.NewEncoder(w).Encode(map[string]interface{}{"error": err.Error()})

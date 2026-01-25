@@ -64,7 +64,7 @@ type TaskListInput struct {
 }
 
 type TaskListOutput struct {
-    Tasks []interface{} `json:"tasks"`
+    Tasks []TaskListOutputTasksItem `json:"tasks"`
     Total float64 `json:"total"`
 }
 
@@ -81,9 +81,8 @@ type TaskGetOutput struct {
     DueDate string `json:"dueDate,omitempty"`
     CreatedAt string `json:"createdAt"`
     CompletedAt *string `json:"completedAt"`
-    Assignee interface{} `json:"assignee,omitempty"`
-    Tags []interface{} `json:"tags"`
-    Subtasks []interface{} `json:"subtasks"`
+    Assignee TaskGetOutputAssignee `json:"assignee,omitempty"`
+    Subtasks []TaskGetOutputSubtasksItem `json:"subtasks"`
     EstimatedHours float64 `json:"estimatedHours,omitempty"`
     Position float64 `json:"position"`
 }
@@ -93,7 +92,6 @@ type TaskCreateInput struct {
     Description string `json:"description,omitempty"`
     Priority string `json:"priority"`
     DueDate string `json:"dueDate,omitempty"`
-    Tags []interface{} `json:"tags,omitempty"`
     EstimatedHours float64 `json:"estimatedHours,omitempty"`
 }
 
@@ -106,9 +104,8 @@ type TaskCreateOutput struct {
     DueDate string `json:"dueDate,omitempty"`
     CreatedAt string `json:"createdAt"`
     CompletedAt *string `json:"completedAt"`
-    Assignee interface{} `json:"assignee,omitempty"`
-    Tags []interface{} `json:"tags"`
-    Subtasks []interface{} `json:"subtasks"`
+    Assignee TaskCreateOutputAssignee `json:"assignee,omitempty"`
+    Subtasks []TaskCreateOutputSubtasksItem `json:"subtasks"`
     EstimatedHours float64 `json:"estimatedHours,omitempty"`
     Position float64 `json:"position"`
 }
@@ -132,9 +129,8 @@ type TaskUpdateOutput struct {
     DueDate string `json:"dueDate,omitempty"`
     CreatedAt string `json:"createdAt"`
     CompletedAt *string `json:"completedAt"`
-    Assignee interface{} `json:"assignee,omitempty"`
-    Tags []interface{} `json:"tags"`
-    Subtasks []interface{} `json:"subtasks"`
+    Assignee TaskUpdateOutputAssignee `json:"assignee,omitempty"`
+    Subtasks []TaskUpdateOutputSubtasksItem `json:"subtasks"`
     EstimatedHours float64 `json:"estimatedHours,omitempty"`
     Position float64 `json:"position"`
 }
@@ -169,33 +165,54 @@ type SubtaskToggleOutput struct {
     Completed bool `json:"completed"`
 }
 
-type SubtaskDeleteInput struct {
-    TaskId string `json:"taskId"`
-    SubtaskId string `json:"subtaskId"`
+type TaskListOutputTasksItem struct {
+    Id string `json:"id"`
+    Title string `json:"title"`
+    Status string `json:"status"`
+    Priority string `json:"priority"`
+    DueDate string `json:"dueDate,omitempty"`
+    CreatedAt string `json:"createdAt"`
+    CompletedAt *string `json:"completedAt"`
+    SubtaskCount float64 `json:"subtaskCount"`
+    SubtaskCompletedCount float64 `json:"subtaskCompletedCount"`
+    EstimatedHours float64 `json:"estimatedHours,omitempty"`
+    Position float64 `json:"position"`
 }
 
-type SubtaskDeleteOutput struct {
-    Success bool `json:"success"`
-}
-
-type TagAddInput struct {
-    TaskId string `json:"taskId"`
+type TaskGetOutputAssignee struct {
+    Id string `json:"id"`
     Name string `json:"name"`
-    Color string `json:"color"`
+    Email string `json:"email"`
 }
 
-type TagAddOutput struct {
+type TaskGetOutputSubtasksItem struct {
+    Id string `json:"id"`
+    Title string `json:"title"`
+    Completed bool `json:"completed"`
+}
+
+type TaskCreateOutputAssignee struct {
+    Id string `json:"id"`
     Name string `json:"name"`
-    Color string `json:"color"`
+    Email string `json:"email"`
 }
 
-type TagRemoveInput struct {
-    TaskId string `json:"taskId"`
-    TagName string `json:"tagName"`
+type TaskCreateOutputSubtasksItem struct {
+    Id string `json:"id"`
+    Title string `json:"title"`
+    Completed bool `json:"completed"`
 }
 
-type TagRemoveOutput struct {
-    Success bool `json:"success"`
+type TaskUpdateOutputAssignee struct {
+    Id string `json:"id"`
+    Name string `json:"name"`
+    Email string `json:"email"`
+}
+
+type TaskUpdateOutputSubtasksItem struct {
+    Id string `json:"id"`
+    Title string `json:"title"`
+    Completed bool `json:"completed"`
 }
 
 // Typed handler types for each endpoint
@@ -226,16 +243,4 @@ type SubtaskAddHandler func(ctx *Context, input SubtaskAddInput) (SubtaskAddOutp
 
 // Handler type for subtask.toggle
 type SubtaskToggleHandler func(ctx *Context, input SubtaskToggleInput) (SubtaskToggleOutput, error)
-
-
-// Handler type for subtask.delete
-type SubtaskDeleteHandler func(ctx *Context, input SubtaskDeleteInput) (SubtaskDeleteOutput, error)
-
-
-// Handler type for tag.add
-type TagAddHandler func(ctx *Context, input TagAddInput) (TagAddOutput, error)
-
-
-// Handler type for tag.remove
-type TagRemoveHandler func(ctx *Context, input TagRemoveInput) (TagRemoveOutput, error)
 

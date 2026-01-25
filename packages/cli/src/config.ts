@@ -1,6 +1,6 @@
-import { parse } from 'smol-toml';
-import { readFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { parse } from "smol-toml";
 
 /**
  * Module configuration for multi-contract setups.
@@ -19,7 +19,7 @@ export interface ModuleConfig {
  * ```toml
  * contract = "./packages/api/src/contract.ts"
  * go-server = "./apps/backend"
- * react-client = "./apps/web"
+ * ts-client = "./apps/web"
  * ```
  *
  * Multi-module mode:
@@ -40,21 +40,23 @@ export interface XrpcConfig {
   [key: string]: string | ModuleConfig | undefined;
 }
 
-const CONFIG_FILENAME = 'xrpc.toml';
+const CONFIG_FILENAME = "xrpc.toml";
 
 /** Reserved keys that are not target names */
-const RESERVED_KEYS = new Set(['contract']);
+const RESERVED_KEYS = new Set(["contract"]);
 
 /**
  * Extract target configurations from the flat config structure.
  * Any key that's not a reserved key is treated as a target name.
  * Works for both single-contract configs and individual module configs.
  */
-export function extractTargets(config: XrpcConfig | ModuleConfig): Record<string, string> {
+export function extractTargets(
+  config: XrpcConfig | ModuleConfig,
+): Record<string, string> {
   const targets: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(config)) {
-    if (!RESERVED_KEYS.has(key) && typeof value === 'string') {
+    if (!RESERVED_KEYS.has(key) && typeof value === "string") {
       targets[key] = value;
     }
   }
@@ -68,7 +70,10 @@ export function extractTargets(config: XrpcConfig | ModuleConfig): Record<string
  * and at least one value is an object (section).
  */
 export function isMultiModule(config: XrpcConfig): boolean {
-  return !config.contract && Object.values(config).some((v) => typeof v === 'object' && v !== null);
+  return (
+    !config.contract &&
+    Object.values(config).some((v) => typeof v === "object" && v !== null)
+  );
 }
 
 /**
@@ -76,7 +81,9 @@ export function isMultiModule(config: XrpcConfig): boolean {
  * In single-contract mode, wraps the config in a 'default' module.
  * In multi-module mode, returns all section objects as modules.
  */
-export function extractModules(config: XrpcConfig): Record<string, ModuleConfig> {
+export function extractModules(
+  config: XrpcConfig,
+): Record<string, ModuleConfig> {
   if (config.contract) {
     // Single-contract mode: wrap in default module
     const targets = extractTargets(config);
@@ -91,7 +98,7 @@ export function extractModules(config: XrpcConfig): Record<string, ModuleConfig>
   // Multi-module mode: extract all object values as modules
   const modules: Record<string, ModuleConfig> = {};
   for (const [key, value] of Object.entries(config)) {
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === "object" && value !== null) {
       const moduleConfig = value as ModuleConfig;
       if (moduleConfig.contract) {
         modules[key] = moduleConfig;
@@ -111,7 +118,7 @@ export async function loadConfig(): Promise<XrpcConfig | null> {
   }
 
   try {
-    const content = await readFile(CONFIG_FILENAME, 'utf-8');
+    const content = await readFile(CONFIG_FILENAME, "utf-8");
     return parse(content) as XrpcConfig;
   } catch (error) {
     if (error instanceof Error) {

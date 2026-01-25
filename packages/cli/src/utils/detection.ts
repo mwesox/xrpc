@@ -1,13 +1,27 @@
-import { existsSync } from 'node:fs';
-import { readFile, readdir, stat } from 'node:fs/promises';
-import { join, basename, dirname } from 'node:path';
+import { existsSync } from "node:fs";
+import { readFile, readdir, stat } from "node:fs/promises";
+import { basename, dirname, join } from "node:path";
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
-export type MonorepoType = 'nx' | 'turbo' | 'bun' | 'pnpm' | 'npm' | 'yarn' | 'none';
-export type AppType = 'react' | 'next' | 'vite' | 'go' | 'python' | 'node' | 'unknown';
+export type MonorepoType =
+  | "nx"
+  | "turbo"
+  | "bun"
+  | "pnpm"
+  | "npm"
+  | "yarn"
+  | "none";
+export type AppType =
+  | "react"
+  | "next"
+  | "vite"
+  | "go"
+  | "python"
+  | "node"
+  | "unknown";
 
 export interface DetectedProject {
   isExistingProject: boolean;
@@ -39,12 +53,12 @@ export interface DetectedContract {
  * Detects if the current directory is an existing project.
  */
 export async function detectProject(cwd: string): Promise<DetectedProject> {
-  const packageJsonPath = join(cwd, 'package.json');
+  const packageJsonPath = join(cwd, "package.json");
   const isExistingProject = existsSync(packageJsonPath);
 
   const monorepoType = await detectMonorepoType(cwd);
-  const appsDir = await findDirectory(cwd, ['apps', 'applications']);
-  const packagesDir = await findDirectory(cwd, ['packages', 'libs', 'modules']);
+  const appsDir = await findDirectory(cwd, ["apps", "applications"]);
+  const packagesDir = await findDirectory(cwd, ["packages", "libs", "modules"]);
 
   return {
     isExistingProject,
@@ -61,25 +75,25 @@ export async function detectProject(cwd: string): Promise<DetectedProject> {
  */
 export async function detectMonorepoType(cwd: string): Promise<MonorepoType> {
   // Check for Nx
-  if (existsSync(join(cwd, 'nx.json'))) {
-    return 'nx';
+  if (existsSync(join(cwd, "nx.json"))) {
+    return "nx";
   }
 
   // Check for Turborepo
-  if (existsSync(join(cwd, 'turbo.json'))) {
-    return 'turbo';
+  if (existsSync(join(cwd, "turbo.json"))) {
+    return "turbo";
   }
 
   // Check for pnpm workspaces
-  if (existsSync(join(cwd, 'pnpm-workspace.yaml'))) {
-    return 'pnpm';
+  if (existsSync(join(cwd, "pnpm-workspace.yaml"))) {
+    return "pnpm";
   }
 
   // Check for bun workspaces
-  if (existsSync(join(cwd, 'bun.lockb')) || existsSync(join(cwd, 'bun.lock'))) {
+  if (existsSync(join(cwd, "bun.lockb")) || existsSync(join(cwd, "bun.lock"))) {
     const packageJson = await readPackageJson(cwd);
     if (packageJson?.workspaces) {
-      return 'bun';
+      return "bun";
     }
   }
 
@@ -87,23 +101,23 @@ export async function detectMonorepoType(cwd: string): Promise<MonorepoType> {
   const packageJson = await readPackageJson(cwd);
   if (packageJson?.workspaces) {
     const packageManager = packageJson.packageManager as string | undefined;
-    if (packageManager?.startsWith('yarn')) {
-      return 'yarn';
+    if (packageManager?.startsWith("yarn")) {
+      return "yarn";
     }
-    if (packageManager?.startsWith('pnpm')) {
-      return 'pnpm';
+    if (packageManager?.startsWith("pnpm")) {
+      return "pnpm";
     }
-    if (packageManager?.startsWith('bun')) {
-      return 'bun';
+    if (packageManager?.startsWith("bun")) {
+      return "bun";
     }
     // Default to npm if workspaces exist but no specific package manager
-    if (existsSync(join(cwd, 'yarn.lock'))) {
-      return 'yarn';
+    if (existsSync(join(cwd, "yarn.lock"))) {
+      return "yarn";
     }
-    return 'npm';
+    return "npm";
   }
 
-  return 'none';
+  return "none";
 }
 
 // =============================================================================
@@ -114,7 +128,10 @@ export async function detectMonorepoType(cwd: string): Promise<MonorepoType> {
  * Scans for apps in the project directory.
  * Looks in apps/ and packages/ directories for client/server applications.
  */
-export async function detectApps(cwd: string, project: DetectedProject): Promise<DetectedApp[]> {
+export async function detectApps(
+  cwd: string,
+  project: DetectedProject,
+): Promise<DetectedApp[]> {
   const apps: DetectedApp[] = [];
 
   // Scan apps directory
@@ -142,7 +159,7 @@ export async function detectApps(cwd: string, project: DetectedProject): Promise
   }
 
   // If not a monorepo, check root directory
-  if (project.monorepoType === 'none') {
+  if (project.monorepoType === "none") {
     const rootApp = await detectAppType(cwd, basename(cwd));
     if (rootApp) {
       apps.push(rootApp);
@@ -155,25 +172,31 @@ export async function detectApps(cwd: string, project: DetectedProject): Promise
 /**
  * Detects the type of application in a directory.
  */
-async function detectAppType(dirPath: string, name: string): Promise<DetectedApp | null> {
+async function detectAppType(
+  dirPath: string,
+  name: string,
+): Promise<DetectedApp | null> {
   // Check for Go
-  if (existsSync(join(dirPath, 'go.mod'))) {
+  if (existsSync(join(dirPath, "go.mod"))) {
     return {
       name,
       path: dirPath,
-      type: 'go',
+      type: "go",
       isClient: false,
       isServer: true,
-      suggestedTarget: 'go-server',
+      suggestedTarget: "go-server",
     };
   }
 
   // Check for Python
-  if (existsSync(join(dirPath, 'pyproject.toml')) || existsSync(join(dirPath, 'requirements.txt'))) {
+  if (
+    existsSync(join(dirPath, "pyproject.toml")) ||
+    existsSync(join(dirPath, "requirements.txt"))
+  ) {
     return {
       name,
       path: dirPath,
-      type: 'python',
+      type: "python",
       isClient: false,
       isServer: true,
       suggestedTarget: null, // python-server not yet available
@@ -196,47 +219,47 @@ async function detectAppType(dirPath: string, name: string): Promise<DetectedApp
   }
 
   // Check for Next.js
-  if (deps['next']) {
+  if (deps.next) {
     return {
       name,
       path: dirPath,
-      type: 'next',
+      type: "next",
       isClient: true,
       isServer: true,
-      suggestedTarget: 'react-client',
+      suggestedTarget: "ts-client",
     };
   }
 
   // Check for Vite with React
-  if (deps['vite'] && deps['react']) {
+  if (deps.vite && deps.react) {
     return {
       name,
       path: dirPath,
-      type: 'vite',
+      type: "vite",
       isClient: true,
       isServer: false,
-      suggestedTarget: 'react-client',
+      suggestedTarget: "ts-client",
     };
   }
 
   // Check for React (CRA or other)
-  if (deps['react']) {
+  if (deps.react) {
     return {
       name,
       path: dirPath,
-      type: 'react',
+      type: "react",
       isClient: true,
       isServer: false,
-      suggestedTarget: 'react-client',
+      suggestedTarget: "ts-client",
     };
   }
 
   // Check for Node.js server frameworks
-  if (deps['express'] || deps['fastify'] || deps['koa'] || deps['hono']) {
+  if (deps.express || deps.fastify || deps.koa || deps.hono) {
     return {
       name,
       path: dirPath,
-      type: 'node',
+      type: "node",
       isClient: false,
       isServer: true,
       suggestedTarget: null, // typescript-server not yet available
@@ -254,9 +277,11 @@ async function detectAppType(dirPath: string, name: string): Promise<DetectedApp
  * Finds existing contract files in the project.
  * Looks for files matching *contract*.ts, *api*.ts, or files containing router exports.
  */
-export async function detectExistingContracts(cwd: string): Promise<DetectedContract[]> {
+export async function detectExistingContracts(
+  cwd: string,
+): Promise<DetectedContract[]> {
   const contracts: DetectedContract[] = [];
-  const searchDirs = ['src', 'packages', 'libs', '.'];
+  const searchDirs = ["src", "packages", "libs", "."];
 
   for (const dir of searchDirs) {
     const searchPath = join(cwd, dir);
@@ -284,7 +309,11 @@ export async function detectExistingContracts(cwd: string): Promise<DetectedCont
 /**
  * Recursively finds contract files in a directory.
  */
-async function findContractFiles(dirPath: string, basePath: string, depth = 0): Promise<DetectedContract[]> {
+async function findContractFiles(
+  dirPath: string,
+  basePath: string,
+  depth = 0,
+): Promise<DetectedContract[]> {
   if (depth > 5) return []; // Limit recursion depth
 
   const contracts: DetectedContract[] = [];
@@ -297,24 +326,28 @@ async function findContractFiles(dirPath: string, basePath: string, depth = 0): 
 
       if (entry.isDirectory()) {
         // Skip node_modules and hidden directories
-        if (entry.name === 'node_modules' || entry.name.startsWith('.')) {
+        if (entry.name === "node_modules" || entry.name.startsWith(".")) {
           continue;
         }
-        const subContracts = await findContractFiles(fullPath, basePath, depth + 1);
+        const subContracts = await findContractFiles(
+          fullPath,
+          basePath,
+          depth + 1,
+        );
         contracts.push(...subContracts);
-      } else if (entry.isFile() && entry.name.endsWith('.ts')) {
+      } else if (entry.isFile() && entry.name.endsWith(".ts")) {
         // Check if filename suggests it's a contract
         const lowerName = entry.name.toLowerCase();
         if (
-          lowerName.includes('contract') ||
-          lowerName.includes('api') ||
-          lowerName.includes('router') ||
-          lowerName.includes('schema')
+          lowerName.includes("contract") ||
+          lowerName.includes("api") ||
+          lowerName.includes("router") ||
+          lowerName.includes("schema")
         ) {
           // Verify it contains xRPC schema imports
           const isContract = await isContractFile(fullPath);
           if (isContract) {
-            const relativePath = fullPath.replace(basePath + '/', '');
+            const relativePath = fullPath.replace(`${basePath}/`, "");
             contracts.push({
               path: relativePath,
               name: entry.name,
@@ -335,12 +368,12 @@ async function findContractFiles(dirPath: string, basePath: string, depth = 0): 
  */
 async function isContractFile(filePath: string): Promise<boolean> {
   try {
-    const content = await readFile(filePath, 'utf-8');
+    const content = await readFile(filePath, "utf-8");
     // Check for xRPC schema imports
     return (
-      content.includes('@xrpckit/schema') ||
-      content.includes('createRouter') ||
-      content.includes('createEndpoint')
+      content.includes("xrpckit") ||
+      content.includes("createRouter") ||
+      content.includes("createEndpoint")
     );
   } catch {
     return false;
@@ -354,14 +387,16 @@ async function isContractFile(filePath: string): Promise<boolean> {
 /**
  * Reads and parses a package.json file.
  */
-async function readPackageJson(dirPath: string): Promise<Record<string, unknown> | null> {
-  const packageJsonPath = join(dirPath, 'package.json');
+async function readPackageJson(
+  dirPath: string,
+): Promise<Record<string, unknown> | null> {
+  const packageJsonPath = join(dirPath, "package.json");
   if (!existsSync(packageJsonPath)) {
     return null;
   }
 
   try {
-    const content = await readFile(packageJsonPath, 'utf-8');
+    const content = await readFile(packageJsonPath, "utf-8");
     return JSON.parse(content);
   } catch {
     return null;
@@ -371,7 +406,10 @@ async function readPackageJson(dirPath: string): Promise<Record<string, unknown>
 /**
  * Finds the first existing directory from a list of candidates.
  */
-async function findDirectory(basePath: string, candidates: string[]): Promise<string | null> {
+async function findDirectory(
+  basePath: string,
+  candidates: string[],
+): Promise<string | null> {
   for (const candidate of candidates) {
     const fullPath = join(basePath, candidate);
     if (existsSync(fullPath)) {
@@ -399,7 +437,7 @@ async function getSubdirectories(dirPath: string): Promise<string[]> {
   try {
     const entries = await readdir(dirPath, { withFileTypes: true });
     return entries
-      .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.'))
+      .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
       .map((entry) => entry.name);
   } catch {
     return [];
@@ -411,12 +449,12 @@ async function getSubdirectories(dirPath: string): Promise<string[]> {
  */
 export function getTargetForAppType(appType: AppType): string | null {
   switch (appType) {
-    case 'react':
-    case 'next':
-    case 'vite':
-      return 'react-client';
-    case 'go':
-      return 'go-server';
+    case "react":
+    case "next":
+    case "vite":
+      return "ts-client";
+    case "go":
+      return "go-server";
     default:
       return null;
   }
@@ -427,20 +465,20 @@ export function getTargetForAppType(appType: AppType): string | null {
  */
 export function getMonorepoLabel(type: MonorepoType): string {
   switch (type) {
-    case 'nx':
-      return 'Nx';
-    case 'turbo':
-      return 'Turborepo';
-    case 'bun':
-      return 'Bun workspaces';
-    case 'pnpm':
-      return 'pnpm workspaces';
-    case 'npm':
-      return 'npm workspaces';
-    case 'yarn':
-      return 'Yarn workspaces';
-    case 'none':
-      return 'Single project';
+    case "nx":
+      return "Nx";
+    case "turbo":
+      return "Turborepo";
+    case "bun":
+      return "Bun workspaces";
+    case "pnpm":
+      return "pnpm workspaces";
+    case "npm":
+      return "npm workspaces";
+    case "yarn":
+      return "Yarn workspaces";
+    case "none":
+      return "Single project";
   }
 }
 
@@ -449,19 +487,19 @@ export function getMonorepoLabel(type: MonorepoType): string {
  */
 export function getAppTypeLabel(type: AppType): string {
   switch (type) {
-    case 'react':
-      return 'React';
-    case 'next':
-      return 'Next.js';
-    case 'vite':
-      return 'Vite + React';
-    case 'go':
-      return 'Go';
-    case 'python':
-      return 'Python';
-    case 'node':
-      return 'Node.js';
-    case 'unknown':
-      return 'Unknown';
+    case "react":
+      return "React";
+    case "next":
+      return "Next.js";
+    case "vite":
+      return "Vite + React";
+    case "go":
+      return "Go";
+    case "python":
+      return "Python";
+    case "node":
+      return "Node.js";
+    case "unknown":
+      return "Unknown";
   }
 }

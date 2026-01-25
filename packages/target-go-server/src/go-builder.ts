@@ -1,4 +1,4 @@
-import { CodeWriter } from '@xrpckit/sdk';
+import { CodeWriter } from "@xrpckit/sdk";
 
 /**
  * Go-specific code builder with fluent DSL for common Go patterns
@@ -31,11 +31,11 @@ export class GoBuilder extends CodeWriter {
     if (packages.length === 1) {
       return this.l(`import "${packages[0]}"`).n();
     }
-    this.l('import (').i();
+    this.l("import (").i();
     for (const pkg of packages) {
       this.l(`"${pkg}"`);
     }
-    return this.u().l(')').n();
+    return this.u().l(")").n();
   }
 
   type(name: string, typeDef: string): this {
@@ -45,14 +45,14 @@ export class GoBuilder extends CodeWriter {
   struct(name: string, fn: (b: this) => void): this {
     this.l(`type ${name} struct {`).i();
     fn(this);
-    return this.u().l('}').n();
+    return this.u().l("}").n();
   }
 
   // Anonymous struct
   anonStruct(fn: (b: this) => void): this {
-    this.l('struct {').i();
+    this.l("struct {").i();
     fn(this);
-    return this.u().l('}');
+    return this.u().l("}");
   }
 
   func(signature: string, fn?: (b: this) => void): this {
@@ -61,7 +61,7 @@ export class GoBuilder extends CodeWriter {
       this.indent();
       fn(this);
       this.unindent();
-      this.writeLine('}');
+      this.writeLine("}");
       this.newLine();
     } else {
       this.l(`func ${signature}`);
@@ -70,31 +70,41 @@ export class GoBuilder extends CodeWriter {
     return this;
   }
 
-  method(receiver: string, name: string, params: string, returns: string, fn: (b: this) => void): this {
-    const sig = returns ? `${name}(${params}) ${returns}` : `${name}(${params})`;
+  method(
+    receiver: string,
+    name: string,
+    params: string,
+    returns: string,
+    fn: (b: this) => void,
+  ): this {
+    const sig = returns
+      ? `${name}(${params}) ${returns}`
+      : `${name}(${params})`;
     return this.func(`(${receiver}) ${sig}`, fn);
   }
 
   if(condition: string, fn: (b: this) => void): this {
     this.l(`if ${condition} {`).i();
     fn(this);
-    return this.u().l('}');
+    return this.u().l("}");
   }
 
   ifErr(fn: (b: this) => void): this {
-    return this.if('err != nil', fn);
+    return this.if("err != nil", fn);
   }
 
   return(value?: string): this {
-    return value ? this.l(`return ${value}`) : this.l('return');
+    return value ? this.l(`return ${value}`) : this.l("return");
   }
 
   var(name: string, type?: string, value?: string): this {
     if (type && value) {
       return this.l(`var ${name} ${type} = ${value}`);
-    } else if (type) {
+    }
+    if (type) {
       return this.l(`var ${name} ${type}`);
-    } else if (value) {
+    }
+    if (value) {
       return this.l(`${name} := ${value}`);
     }
     return this.l(`var ${name}`);
@@ -105,7 +115,11 @@ export class GoBuilder extends CodeWriter {
     return this.l(`${name} := ${value}`);
   }
 
-  switch(value: string, cases: Array<{ value: string; fn: (b: GoBuilder) => void }>, defaultCase?: (b: GoBuilder) => void): this {
+  switch(
+    value: string,
+    cases: Array<{ value: string; fn: (b: GoBuilder) => void }>,
+    defaultCase?: (b: GoBuilder) => void,
+  ): this {
     this.l(`switch ${value} {`).i();
     for (const c of cases) {
       this.l(`case ${c.value}:`).i();
@@ -113,11 +127,11 @@ export class GoBuilder extends CodeWriter {
       this.u();
     }
     if (defaultCase) {
-      this.l('default:').i();
+      this.l("default:").i();
       defaultCase(this);
       this.u();
     }
-    return this.u().l('}');
+    return this.u().l("}");
   }
 
   comment(text: string): this {
@@ -125,10 +139,10 @@ export class GoBuilder extends CodeWriter {
   }
 
   blockComment(lines: string[]): this {
-    this.l('/*');
+    this.l("/*");
     for (const line of lines) {
       this.l(` * ${line}`);
     }
-    return this.l(' */');
+    return this.l(" */");
   }
 }

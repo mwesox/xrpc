@@ -1,20 +1,43 @@
-import { resolve } from 'node:path';
-import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { extractTypeInfo, generateTypeName } from './zod-extractor';
-import type { ContractDefinition, Router, EndpointGroup, Endpoint, TypeDefinition } from './contract';
-import type { RouterDefinition, EndpointGroup as CoreEndpointGroup, EndpointDefinition } from '@xrpckit/schema';
-import { getRouterMiddleware } from '@xrpckit/schema';
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { dirname, join } from "node:path";
+import type {
+  EndpointGroup as CoreEndpointGroup,
+  EndpointDefinition,
+  RouterDefinition,
+} from "xrpckit";
+import { getRouterMiddleware } from "xrpckit";
+import type {
+  ContractDefinition,
+  Endpoint,
+  EndpointGroup,
+  Router,
+  TypeDefinition,
+} from "./contract";
+import { extractTypeInfo, generateTypeName } from "./zod-extractor";
 
 // Re-export types for convenience
-export type { ContractDefinition, Router, EndpointGroup, Endpoint, TypeDefinition, Property, ValidationRules, TypeReference, MiddlewareDefinition } from './contract';
+export type {
+  ContractDefinition,
+  Router,
+  EndpointGroup,
+  Endpoint,
+  TypeDefinition,
+  Property,
+  ValidationRules,
+  TypeReference,
+  MiddlewareDefinition,
+} from "./contract";
 
 /**
  * Import a module with a timeout to detect circular dependencies or slow initialization
  */
 async function importWithTimeout(path: string, timeout = 5000): Promise<any> {
   const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error(`Import timeout after ${timeout}ms`)), timeout)
+    setTimeout(
+      () => reject(new Error(`Import timeout after ${timeout}ms`)),
+      timeout,
+    ),
   );
   return Promise.race([import(path), timeoutPromise]);
 }
@@ -28,7 +51,7 @@ function hasPackageJson(filePath: string): boolean {
 
   // Check current directory and parent directories (up to 5 levels)
   for (let i = 0; i < 5; i++) {
-    if (existsSync(join(currentDir, 'package.json'))) {
+    if (existsSync(join(currentDir, "package.json"))) {
       return true;
     }
     const parent = dirname(currentDir);
@@ -55,7 +78,9 @@ function hasPackageJson(filePath: string): boolean {
  * console.log(`Found ${contract.endpoints.length} endpoints`);
  * ```
  */
-export async function parseContract(filePath: string): Promise<ContractDefinition> {
+export async function parseContract(
+  filePath: string,
+): Promise<ContractDefinition> {
   // Import the actual router to get real Zod schemas
   // Resolve to absolute path for import
   const absolutePath = resolve(filePath);
@@ -70,30 +95,27 @@ export async function parseContract(filePath: string): Promise<ContractDefinitio
   } catch (error) {
     if (error instanceof Error) {
       // Provide more helpful error messages
-      if (error.message.includes('timeout')) {
+      if (error.message.includes("timeout")) {
         throw new Error(
-          `Contract file import timed out: ${filePath}\n` +
-          `This may indicate circular dependencies or slow initialization.\n` +
-          `Ensure the file exports a router synchronously.`
+          `Contract file import timed out: ${filePath}\nThis may indicate circular dependencies or slow initialization.\nEnsure the file exports a router synchronously.`,
         );
       }
-      if (error.message.includes('Cannot find module')) {
+      if (error.message.includes("Cannot find module")) {
         throw new Error(
-          `Failed to import contract file: ${filePath}\n` +
-          `Error: ${error.message}\n` +
-          `Make sure the file exists and all dependencies are installed.`
+          `Failed to import contract file: ${filePath}\nError: ${error.message}\nMake sure the file exists and all dependencies are installed.`,
         );
       }
-      if (error.message.includes('Unexpected token') || error.message.includes('SyntaxError')) {
+      if (
+        error.message.includes("Unexpected token") ||
+        error.message.includes("SyntaxError")
+      ) {
         throw new Error(
-          `Syntax error in contract file: ${filePath}\n` +
-          `Error: ${error.message}\n` +
-          `Please check the file for syntax errors.`
+          `Syntax error in contract file: ${filePath}\nError: ${error.message}\nPlease check the file for syntax errors.`,
         );
       }
       throw new Error(
         `Failed to parse contract file: ${filePath}\n` +
-        `Error: ${error.message}`
+          `Error: ${error.message}`,
       );
     }
     throw error;
@@ -102,11 +124,9 @@ export async function parseContract(filePath: string): Promise<ContractDefinitio
   // Check if router exists before type assertion
   if (!routerModule.router) {
     // Check if router exists but is not exported correctly
-    if ('router' in routerModule) {
+    if ("router" in routerModule) {
       throw new Error(
-        `Invalid router export in ${filePath}.\n` +
-        `The router export exists but is not a valid RouterDefinition.\n` +
-        `Make sure you're using: export const router = createRouter({ ... });`
+        `Invalid router export in ${filePath}.\nThe router export exists but is not a valid RouterDefinition.\nMake sure you're using: export const router = createRouter({ ... });`,
       );
     }
 
@@ -114,27 +134,22 @@ export async function parseContract(filePath: string): Promise<ContractDefinitio
     const exports = Object.keys(routerModule);
     if (exports.length === 0) {
       throw new Error(
-        `No exports found in ${filePath}.\n` +
-        `The contract file must export a router. Example:\n` +
-        `  export const router = createRouter({ ... });`
+        `No exports found in ${filePath}.\nThe contract file must export a router. Example:\n  export const router = createRouter({ ... });`,
       );
     }
 
     // Suggest what might be wrong
-    const possibleExports = exports.filter(e => e.toLowerCase().includes('router'));
+    const possibleExports = exports.filter((e) =>
+      e.toLowerCase().includes("router"),
+    );
     if (possibleExports.length > 0) {
       throw new Error(
-        `No router export found in ${filePath}.\n` +
-        `Found exports: ${exports.join(', ')}\n` +
-        `Did you mean to export one of these? Make sure to use: export const router = createRouter({ ... });`
+        `No router export found in ${filePath}.\nFound exports: ${exports.join(", ")}\nDid you mean to export one of these? Make sure to use: export const router = createRouter({ ... });`,
       );
     }
 
     throw new Error(
-      `No router export found in ${filePath}.\n` +
-      `The contract file must export a router. Example:\n` +
-      `  export const router = createRouter({ ... });\n` +
-      `Found exports: ${exports.length > 0 ? exports.join(', ') : 'none'}`
+      `No router export found in ${filePath}.\nThe contract file must export a router. Example:\n  export const router = createRouter({ ... });\nFound exports: ${exports.length > 0 ? exports.join(", ") : "none"}`,
     );
   }
 
@@ -146,7 +161,7 @@ export async function parseContract(filePath: string): Promise<ContractDefinitio
     if (error instanceof Error) {
       throw new Error(
         `Failed to build contract from router definition: ${error.message}\n` +
-        `File: ${filePath}`
+          `File: ${filePath}`,
       );
     }
     throw error;
@@ -154,35 +169,38 @@ export async function parseContract(filePath: string): Promise<ContractDefinitio
 }
 
 function buildContractDefinition(
-  routerDef: RouterDefinition
+  routerDef: RouterDefinition,
 ): ContractDefinition {
   const routers: Router[] = [];
   const endpoints: Endpoint[] = [];
   const typeMap = new Map<string, TypeDefinition>();
 
   // Validate router structure
-  if (!routerDef || typeof routerDef !== 'object') {
-    throw new Error('Router definition must be an object. Use: createRouter({ ... })');
+  if (!routerDef || typeof routerDef !== "object") {
+    throw new Error(
+      "Router definition must be an object. Use: createRouter({ ... })",
+    );
   }
 
   // Extract middleware if present (stored in WeakMap)
   const middleware = getRouterMiddleware(routerDef);
-  const middlewareDefinitions = middleware?.map((_, index) => ({
-    name: `middleware_${index}`,
-  })) || [];
+  const middlewareDefinitions =
+    middleware?.map((_, index) => ({
+      name: `middleware_${index}`,
+    })) || [];
 
   // Process router
   const router: Router = {
-    name: 'router',
+    name: "router",
     endpointGroups: [],
-    middleware: middlewareDefinitions.length > 0 ? middlewareDefinitions : undefined,
+    middleware:
+      middlewareDefinitions.length > 0 ? middlewareDefinitions : undefined,
   };
 
   for (const [groupName, groupDef] of Object.entries(routerDef)) {
-    if (!groupDef || typeof groupDef !== 'object') {
+    if (!groupDef || typeof groupDef !== "object") {
       throw new Error(
-        `Invalid endpoint group "${groupName}". ` +
-        `Endpoint groups must be created with createEndpoint({ ... }).`
+        `Invalid endpoint group "${groupName}". Endpoint groups must be created with createEndpoint({ ... }).`,
       );
     }
 
@@ -196,43 +214,45 @@ function buildContractDefinition(
       const epDef = endpointDef as EndpointDefinition;
 
       // Validate endpoint definition
-      if (!epDef || typeof epDef !== 'object') {
+      if (!epDef || typeof epDef !== "object") {
         throw new Error(
-          `Invalid endpoint "${fullName}". ` +
-          `Endpoints must be created with query({ ... }) or mutation({ ... }).`
+          `Invalid endpoint "${fullName}". Endpoints must be created with query({ ... }) or mutation({ ... }).`,
         );
       }
 
-      if (!epDef.type || (epDef.type !== 'query' && epDef.type !== 'mutation')) {
+      if (
+        !epDef.type ||
+        (epDef.type !== "query" && epDef.type !== "mutation")
+      ) {
         throw new Error(
           `Invalid endpoint type for "${fullName}". ` +
-          `Type must be "query" or "mutation", got: ${epDef.type}`
+            `Type must be "query" or "mutation", got: ${epDef.type}`,
         );
       }
 
       if (!epDef.input) {
         throw new Error(
           `Endpoint "${fullName}" is missing input schema. ` +
-          `Use: ${epDef.type}({ input: z.object({ ... }), output: z.object({ ... }) })`
+            `Use: ${epDef.type}({ input: z.object({ ... }), output: z.object({ ... }) })`,
         );
       }
 
       if (!epDef.output) {
         throw new Error(
           `Endpoint "${fullName}" is missing output schema. ` +
-          `Use: ${epDef.type}({ input: z.object({ ... }), output: z.object({ ... }) })`
+            `Use: ${epDef.type}({ input: z.object({ ... }), output: z.object({ ... }) })`,
         );
       }
 
       try {
         // Extract input type from actual Zod schema
         const inputType = extractTypeInfo(epDef.input);
-        const inputTypeName = generateTypeName(groupName, endpointName) + 'Input';
+        const inputTypeName = `${generateTypeName(groupName, endpointName)}Input`;
         addTypeDefinition(typeMap, inputTypeName, inputType);
 
         // Extract output type from actual Zod schema
         const outputType = extractTypeInfo(epDef.output);
-        const outputTypeName = generateTypeName(groupName, endpointName) + 'Output';
+        const outputTypeName = `${generateTypeName(groupName, endpointName)}Output`;
         addTypeDefinition(typeMap, outputTypeName, outputType);
 
         const endpoint: Endpoint = {
@@ -248,7 +268,7 @@ function buildContractDefinition(
       } catch (error) {
         if (error instanceof Error) {
           throw new Error(
-            `Failed to extract type information for endpoint "${fullName}": ${error.message}`
+            `Failed to extract type information for endpoint "${fullName}": ${error.message}`,
           );
         }
         throw error;
@@ -257,8 +277,7 @@ function buildContractDefinition(
 
     if (endpointGroup.endpoints.length === 0) {
       throw new Error(
-        `Endpoint group "${groupName}" has no endpoints. ` +
-        `Add endpoints using: createEndpoint({ endpointName: query({ ... }) })`
+        `Endpoint group "${groupName}" has no endpoints. Add endpoints using: createEndpoint({ endpointName: query({ ... }) })`,
       );
     }
 
@@ -267,8 +286,8 @@ function buildContractDefinition(
 
   if (router.endpointGroups.length === 0) {
     throw new Error(
-      'Router has no endpoint groups. ' +
-      'Add endpoint groups using: createRouter({ groupName: createEndpoint({ ... }) })'
+      "Router has no endpoint groups. " +
+        "Add endpoint groups using: createRouter({ groupName: createEndpoint({ ... }) })",
     );
   }
 
@@ -278,14 +297,15 @@ function buildContractDefinition(
     routers,
     types: Array.from(typeMap.values()),
     endpoints,
-    middleware: middlewareDefinitions.length > 0 ? middlewareDefinitions : undefined,
+    middleware:
+      middlewareDefinitions.length > 0 ? middlewareDefinitions : undefined,
   };
 }
 
 function addTypeDefinition(
   typeMap: Map<string, TypeDefinition>,
   name: string,
-  typeRef: any
+  typeRef: any,
 ): void {
   if (typeMap.has(name)) {
     return;
@@ -310,7 +330,7 @@ function addTypeDefinition(
     }
   }
 
-  if (typeRef.elementType && typeRef.elementType.name && !typeMap.has(typeRef.elementType.name)) {
+  if (typeRef.elementType?.name && !typeMap.has(typeRef.elementType.name)) {
     addTypeDefinition(typeMap, typeRef.elementType.name, typeRef.elementType);
   }
 }

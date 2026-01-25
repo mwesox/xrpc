@@ -15,10 +15,10 @@ Type-safe, cross-platform RPC framework that generates clients and servers from 
 4. Generated code is self-contained (no runtime dependencies)
 
 **Key Packages**:
-- `@xrpckit/schema` - DSL for defining API contracts (router, endpoint, query, mutation)
+- `xrpckit` - DSL for defining API contracts (router, endpoint, query, mutation)
 - `@xrpckit/sdk` - SDK for building target generators (parser + codegen utilities)
 - `@xrpckit/target-go-server` - Go server code generator
-- `@xrpckit/target-react-client` - React client code generator
+- `@xrpckit/target-ts-client` - TypeScript client code generator
 - `@xrpckit/cli` - Command-line interface
 
 ## Commands
@@ -28,7 +28,7 @@ Type-safe, cross-platform RPC framework that generates clients and servers from 
 npm install -g @xrpckit/cli
 
 # Generate code for targets
-xrpc generate -i src/contract.ts -t go-server,react-client -o generated
+xrpc generate -i src/contract.ts -t go-server,ts-client -o generated
 
 # Or during development (from monorepo root)
 bun run xrpc generate -i <file> -t <targets> -o <output>
@@ -45,7 +45,7 @@ bun run build
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
 const greeting = createEndpoint({
   greet: query({
@@ -114,7 +114,7 @@ packages/
   schema/            - Contract DSL library (users define contracts)
   sdk/               - SDK for target authors (parser + codegen utilities)
   target-go-server/  - Go server generator
-  target-react-client/ - React client generator
+  target-ts-client/ - TypeScript client generator
   cli/               - CLI interface (users generate code)
 examples/
   x-rpc-todo-app/    - Full-stack TODO app (Go + React)
@@ -124,7 +124,7 @@ examples/
 
 Targets follow the pattern `{language}-{client|server}`:
 - `go-server` - Go server code generator
-- `react-client` - React client code generator
+- `ts-client` - TypeScript client code generator
 - Future: `go-client`, `python-server`, `swift-client`, etc.
 
 ## Important Notes

@@ -39,7 +39,7 @@ export interface PackageJsonConfig {
  */
 export function generateContractTemplate(): string {
   return `import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
 // =============================================================================
 // SAMPLE ENDPOINT
@@ -88,14 +88,14 @@ export const router = createRouter({
  * ```toml
  * contract = "./path/to/contract.ts"
  * go-server = "./apps/backend"
- * react-client = "./apps/web"
+ * ts-client = "./apps/web"
  * ```
  */
 export function generateTomlTemplate(config: TomlConfig): string {
   const lines: string[] = [
-    '# xRPC Configuration',
+    "# xRPC Configuration",
     '# Run "xrpc generate" to generate type-safe code for your targets',
-    '',
+    "",
     `contract = "${config.contractPath}"`,
   ];
 
@@ -103,8 +103,8 @@ export function generateTomlTemplate(config: TomlConfig): string {
     lines.push(`${target.name} = "${target.outputPath}"`);
   }
 
-  lines.push('');
-  return lines.join('\n');
+  lines.push("");
+  return lines.join("\n");
 }
 
 /**
@@ -121,19 +121,21 @@ export function generateTomlTemplate(config: TomlConfig): string {
  * go-server = "apps/backend/orders"
  * ```
  */
-export function generateMultiModuleTomlTemplate(config: MultiModuleTomlConfig): string {
+export function generateMultiModuleTomlTemplate(
+  config: MultiModuleTomlConfig,
+): string {
   const lines: string[] = [
-    '# xRPC Configuration',
+    "# xRPC Configuration",
     '# Run "xrpc generate" to generate all modules',
     '# Run "xrpc generate <module>" to generate a specific module',
-    '',
+    "",
   ];
 
   for (let i = 0; i < config.modules.length; i++) {
     const module = config.modules[i];
 
     if (i > 0) {
-      lines.push(''); // Blank line between modules
+      lines.push(""); // Blank line between modules
     }
 
     lines.push(`[${module.name}]`);
@@ -144,8 +146,8 @@ export function generateMultiModuleTomlTemplate(config: MultiModuleTomlConfig): 
     }
   }
 
-  lines.push('');
-  return lines.join('\n');
+  lines.push("");
+  return lines.join("\n");
 }
 
 // =============================================================================
@@ -158,20 +160,20 @@ export function generateMultiModuleTomlTemplate(config: MultiModuleTomlConfig): 
 export function generatePackageJsonTemplate(config: PackageJsonConfig): string {
   const pkg = {
     name: config.name,
-    version: '0.0.1',
+    version: "0.0.1",
     private: config.isPrivate ?? true,
-    type: 'module',
-    main: './src/contract.ts',
+    type: "module",
+    main: "./src/contract.ts",
     exports: {
-      '.': './src/contract.ts',
+      ".": "./src/contract.ts",
     },
     dependencies: {
-      '@xrpckit/schema': '^0.0.2',
-      zod: '^3.25.42',
+      xrpckit: "^0.0.1",
+      zod: "^3.25.42",
     },
   };
 
-  return JSON.stringify(pkg, null, 2) + '\n';
+  return `${JSON.stringify(pkg, null, 2)}\n`;
 }
 
 // =============================================================================
@@ -184,19 +186,19 @@ export function generatePackageJsonTemplate(config: PackageJsonConfig): string {
 export function generateTsconfigTemplate(): string {
   const config = {
     compilerOptions: {
-      target: 'ES2022',
-      module: 'ESNext',
-      moduleResolution: 'bundler',
+      target: "ES2022",
+      module: "ESNext",
+      moduleResolution: "bundler",
       strict: true,
       esModuleInterop: true,
       skipLibCheck: true,
       declaration: true,
-      outDir: './dist',
+      outDir: "./dist",
     },
-    include: ['src/**/*'],
+    include: ["src/**/*"],
   };
 
-  return JSON.stringify(config, null, 2) + '\n';
+  return `${JSON.stringify(config, null, 2)}\n`;
 }
 
 // =============================================================================
@@ -215,28 +217,28 @@ export interface FileToCreate {
 export function generateMonorepoApiPackageFiles(
   packagePath: string,
   packageName: string,
-  tomlConfig: TomlConfig
+  tomlConfig: TomlConfig,
 ): FileToCreate[] {
   return [
     {
       path: `${packagePath}/package.json`,
       content: generatePackageJsonTemplate({ name: packageName }),
-      description: 'Package configuration',
+      description: "Package configuration",
     },
     {
       path: `${packagePath}/tsconfig.json`,
       content: generateTsconfigTemplate(),
-      description: 'TypeScript configuration',
+      description: "TypeScript configuration",
     },
     {
       path: `${packagePath}/src/contract.ts`,
       content: generateContractTemplate(),
-      description: 'API contract definition',
+      description: "API contract definition",
     },
     {
-      path: 'xrpc.toml',
+      path: "xrpc.toml",
       content: generateTomlTemplate(tomlConfig),
-      description: 'xRPC configuration',
+      description: "xRPC configuration",
     },
   ];
 }
@@ -246,18 +248,18 @@ export function generateMonorepoApiPackageFiles(
  */
 export function generateSingleProjectFiles(
   contractPath: string,
-  tomlConfig: TomlConfig
+  tomlConfig: TomlConfig,
 ): FileToCreate[] {
   return [
     {
       path: contractPath,
       content: generateContractTemplate(),
-      description: 'API contract definition',
+      description: "API contract definition",
     },
     {
-      path: 'xrpc.toml',
+      path: "xrpc.toml",
       content: generateTomlTemplate(tomlConfig),
-      description: 'xRPC configuration',
+      description: "xRPC configuration",
     },
   ];
 }

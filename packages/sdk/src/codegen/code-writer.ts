@@ -1,7 +1,7 @@
 export class CodeWriter {
   private lines: string[] = [];
   private indentLevel = 0;
-  private indentString = '    '; // 4 spaces
+  private indentString = "    "; // 4 spaces
 
   // Main methods
   writeLine(text: string): this {
@@ -12,7 +12,7 @@ export class CodeWriter {
 
   write(text: string): this {
     if (this.lines.length === 0) {
-      this.lines.push('');
+      this.lines.push("");
     }
     const lastLine = this.lines[this.lines.length - 1];
     this.lines[this.lines.length - 1] = lastLine + text;
@@ -30,16 +30,16 @@ export class CodeWriter {
   }
 
   newLine(): this {
-    this.lines.push('');
+    this.lines.push("");
     return this;
   }
 
   block(fn: () => void): this {
-    this.writeLine('{');
+    this.writeLine("{");
     this.indent();
     fn();
     this.unindent();
-    this.writeLine('}');
+    this.writeLine("}");
     return this;
   }
 
@@ -67,7 +67,7 @@ export class CodeWriter {
 
   // Template literal support
   template(strings: TemplateStringsArray, ...values: unknown[]): this {
-    let result = '';
+    let result = "";
     for (let i = 0; i < strings.length; i++) {
       result += strings[i];
       if (i < values.length) {
@@ -78,7 +78,7 @@ export class CodeWriter {
   }
 
   toString(): string {
-    return this.lines.join('\n');
+    return this.lines.join("\n");
   }
 
   reset(): this {

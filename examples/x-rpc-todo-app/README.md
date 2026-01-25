@@ -54,7 +54,7 @@ Let's walk through `packages/api/src/contract.ts` line by line. This is the most
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 ```
 
 Two imports:
@@ -171,7 +171,7 @@ type Todo struct {
 
 **validation.go** - Input validation functions
 
-### React Client (`packages/api/generated/react-client/`)
+### React Client (`packages/api/generated/ts-client/`)
 
 **types.ts** - TypeScript types inferred from Zod schemas
 
@@ -196,7 +196,7 @@ x-rpc-todo-app/
 │       │   └── contract.ts       # Your API definition (34 lines!)
 │       └── generated/            # Generated code (don't edit)
 │           ├── go-server/        # Go types, router, validation
-│           └── react-client/     # TS types, hooks, client
+│           └── ts-client/     # TS types, hooks, client
 ├── apps/
 │   ├── go-backend/               # Go server implementation
 │   │   ├── main.go               # Uses generated types

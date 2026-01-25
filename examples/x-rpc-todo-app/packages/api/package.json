@@ -10,7 +10,7 @@
   },
   "scripts": {},
   "dependencies": {
-    "@xrpckit/schema": "workspace:*",
+    "xrpckit": "workspace:*",
     "zod": "^4.0.0"
   },
   "devDependencies": {

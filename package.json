@@ -17,11 +17,17 @@
     "dev": "bun run --filter='./packages/cli' dev",
     "generate": "bun run packages/cli/src/index.ts generate",
     "xrpc": "bun run packages/cli/src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check packages",
+    "lint:fix": "biome check --write packages",
+    "format": "biome format --write packages",
     "test": "bun test",
     "test:parser": "bun test packages/parser/src",
-    "test:e2e": "bun test tests/e2e"
+    "test:e2e": "bun test tests/e2e",
+    "check": "bun run build && bun run typecheck && bun run lint && bun run test"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@types/bun": "^1.2.5",
     "@types/node": "^25.0.10",
     "knip": "^5.82.1",

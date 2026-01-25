@@ -6,7 +6,7 @@ The xRPC monorepo is organized with individual packages for each component:
 
 ### Core Packages
 
-- **`@xrpckit/schema`** - DSL library for defining API contracts
+- **`xrpckit`** - DSL library for defining API contracts
 - **`@xrpckit/parser`** - Extracts API contracts from TypeScript/Zod files
 - **`@xrpckit/codegen`** - Code generation utilities and target registry
 - **`@xrpckit/cli`** - Command-line interface
@@ -16,7 +16,7 @@ The xRPC monorepo is organized with individual packages for each component:
 Each target language/framework has its own package following the naming convention `@xrpckit/target-{language}-{client|server}`:
 
 - **`@xrpckit/target-go-server`** - Go server code generator
-- **`@xrpckit/target-react-client`** - React client code generator
+- **`@xrpckit/target-ts-client`** - TypeScript client code generator
 - **`@xrpckit/target-go-client`** - (Future) Go client generator
 - **`@xrpckit/target-python-server`** - (Future) Python/FastAPI server generator
 - **`@xrpckit/target-swift-client`** - (Future) Swift/iOS client generator

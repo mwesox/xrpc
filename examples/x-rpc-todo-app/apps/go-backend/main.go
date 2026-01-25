@@ -28,11 +28,7 @@ func main() {
 		TaskDelete(handleTaskDelete).
 		// Subtask endpoints
 		SubtaskAdd(handleSubtaskAdd).
-		SubtaskToggle(handleSubtaskToggle).
-		SubtaskDelete(handleSubtaskDelete).
-		// Tag endpoints
-		TagAdd(handleTagAdd).
-		TagRemove(handleTagRemove)
+		SubtaskToggle(handleSubtaskToggle)
 
 	// Wrap with CORS middleware
 	http.Handle("/api", corsMiddleware(router))
@@ -66,30 +62,29 @@ func handleTaskList(ctx *xrpc.Context, input xrpc.TaskListInput) (xrpc.TaskListO
 		return xrpc.TaskListOutput{}, err
 	}
 
-	// Convert to output format
-	outputTasks := make([]interface{}, len(tasks))
+	// Convert to output format using properly typed structs
+	outputTasks := make([]xrpc.TaskListOutputTasksItem, len(tasks))
 	for i, t := range tasks {
-		task := map[string]interface{}{
-			"id":                    t.Id,
-			"title":                 t.Title,
-			"status":                t.Status,
-			"priority":              t.Priority,
-			"createdAt":             t.CreatedAt,
-			"tagCount":              float64(t.TagCount),
-			"subtaskCount":          float64(t.SubtaskCount),
-			"subtaskCompletedCount": float64(t.SubtaskCompletedCount),
-			"position":              float64(t.Position),
+		item := xrpc.TaskListOutputTasksItem{
+			Id:                    t.Id,
+			Title:                 t.Title,
+			Status:                t.Status,
+			Priority:              t.Priority,
+			CreatedAt:             t.CreatedAt,
+			SubtaskCount:          float64(t.SubtaskCount),
+			SubtaskCompletedCount: float64(t.SubtaskCompletedCount),
+			Position:              float64(t.Position),
 		}
 		if t.DueDate != nil {
-			task["dueDate"] = *t.DueDate
+			item.DueDate = *t.DueDate
 		}
 		if t.CompletedAt != nil {
-			task["completedAt"] = *t.CompletedAt
+			item.CompletedAt = t.CompletedAt
 		}
 		if t.EstimatedHours != nil {
-			task["estimatedHours"] = *t.EstimatedHours
+			item.EstimatedHours = *t.EstimatedHours
 		}
-		outputTasks[i] = task
+		outputTasks[i] = item
 	}
 
 	return xrpc.TaskListOutput{
@@ -104,7 +99,7 @@ func handleTaskGet(ctx *xrpc.Context, input xrpc.TaskGetInput) (xrpc.TaskGetOutp
 		return xrpc.TaskGetOutput{}, err
 	}
 
-	return taskToOutput(task), nil
+	return taskToGetOutput(task), nil
 }
 
 func handleTaskCreate(ctx *xrpc.Context, input xrpc.TaskCreateInput) (xrpc.TaskCreateOutput, error) {
@@ -113,22 +108,7 @@ func handleTaskCreate(ctx *xrpc.Context, input xrpc.TaskCreateInput) (xrpc.TaskC
 		return xrpc.TaskCreateOutput{}, err
 	}
 
-	output := taskToOutput(task)
-	return xrpc.TaskCreateOutput{
-		Id:             output.Id,
-		Title:          output.Title,
-		Description:    output.Description,
-		Status:         output.Status,
-		Priority:       output.Priority,
-		DueDate:        output.DueDate,
-		CreatedAt:      output.CreatedAt,
-		CompletedAt:    output.CompletedAt,
-		Assignee:       output.Assignee,
-		Tags:           output.Tags,
-		Subtasks:       output.Subtasks,
-		EstimatedHours: output.EstimatedHours,
-		Position:       output.Position,
-	}, nil
+	return taskToCreateOutput(task), nil
 }
 
 func handleTaskUpdate(ctx *xrpc.Context, input xrpc.TaskUpdateInput) (xrpc.TaskUpdateOutput, error) {
@@ -137,22 +117,7 @@ func handleTaskUpdate(ctx *xrpc.Context, input xrpc.TaskUpdateInput) (xrpc.TaskU
 		return xrpc.TaskUpdateOutput{}, err
 	}
 
-	output := taskToOutput(task)
-	return xrpc.TaskUpdateOutput{
-		Id:             output.Id,
-		Title:          output.Title,
-		Description:    output.Description,
-		Status:         output.Status,
-		Priority:       output.Priority,
-		DueDate:        output.DueDate,
-		CreatedAt:      output.CreatedAt,
-		CompletedAt:    output.CompletedAt,
-		Assignee:       output.Assignee,
-		Tags:           output.Tags,
-		Subtasks:       output.Subtasks,
-		EstimatedHours: output.EstimatedHours,
-		Position:       output.Position,
-	}, nil
+	return taskToUpdateOutput(task), nil
 }
 
 func handleTaskDelete(ctx *xrpc.Context, input xrpc.TaskDeleteInput) (xrpc.TaskDeleteOutput, error) {
@@ -190,40 +155,11 @@ func handleSubtaskToggle(ctx *xrpc.Context, input xrpc.SubtaskToggleInput) (xrpc
 	}, nil
 }
 
-func handleSubtaskDelete(ctx *xrpc.Context, input xrpc.SubtaskDeleteInput) (xrpc.SubtaskDeleteOutput, error) {
-	if err := db.DeleteSubtask(input.TaskId, input.SubtaskId); err != nil {
-		return xrpc.SubtaskDeleteOutput{}, err
-	}
-	return xrpc.SubtaskDeleteOutput{Success: true}, nil
-}
-
-// =============================================================================
-// TAG HANDLERS
-// =============================================================================
-
-func handleTagAdd(ctx *xrpc.Context, input xrpc.TagAddInput) (xrpc.TagAddOutput, error) {
-	tag, err := db.AddTag(input.TaskId, input.Name, input.Color)
-	if err != nil {
-		return xrpc.TagAddOutput{}, err
-	}
-	return xrpc.TagAddOutput{
-		Name:  tag.Name,
-		Color: tag.Color,
-	}, nil
-}
-
-func handleTagRemove(ctx *xrpc.Context, input xrpc.TagRemoveInput) (xrpc.TagRemoveOutput, error) {
-	if err := db.RemoveTag(input.TaskId, input.TagName); err != nil {
-		return xrpc.TagRemoveOutput{}, err
-	}
-	return xrpc.TagRemoveOutput{Success: true}, nil
-}
-
 // =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
 
-func taskToOutput(task *FullTask) xrpc.TaskGetOutput {
+func taskToGetOutput(task *FullTask) xrpc.TaskGetOutput {
 	output := xrpc.TaskGetOutput{
 		Id:        task.Id,
 		Title:     task.Title,
@@ -246,23 +182,87 @@ func taskToOutput(task *FullTask) xrpc.TaskGetOutput {
 		output.EstimatedHours = *task.EstimatedHours
 	}
 
-	// Convert tags
-	tags := make([]interface{}, len(task.Tags))
-	for i, t := range task.Tags {
-		tags[i] = map[string]interface{}{
-			"name":  t.Name,
-			"color": t.Color,
+	// Convert subtasks using properly typed struct
+	subtasks := make([]xrpc.TaskGetOutputSubtasksItem, len(task.Subtasks))
+	for i, s := range task.Subtasks {
+		subtasks[i] = xrpc.TaskGetOutputSubtasksItem{
+			Id:        s.Id,
+			Title:     s.Title,
+			Completed: s.Completed,
 		}
 	}
-	output.Tags = tags
+	output.Subtasks = subtasks
 
-	// Convert subtasks
-	subtasks := make([]interface{}, len(task.Subtasks))
+	return output
+}
+
+func taskToCreateOutput(task *FullTask) xrpc.TaskCreateOutput {
+	output := xrpc.TaskCreateOutput{
+		Id:        task.Id,
+		Title:     task.Title,
+		Status:    task.Status,
+		Priority:  task.Priority,
+		CreatedAt: task.CreatedAt,
+		Position:  float64(task.Position),
+	}
+
+	if task.Description != nil {
+		output.Description = *task.Description
+	}
+	if task.DueDate != nil {
+		output.DueDate = *task.DueDate
+	}
+	if task.CompletedAt != nil {
+		output.CompletedAt = task.CompletedAt
+	}
+	if task.EstimatedHours != nil {
+		output.EstimatedHours = *task.EstimatedHours
+	}
+
+	// Convert subtasks using properly typed struct
+	subtasks := make([]xrpc.TaskCreateOutputSubtasksItem, len(task.Subtasks))
 	for i, s := range task.Subtasks {
-		subtasks[i] = map[string]interface{}{
-			"id":        s.Id,
-			"title":     s.Title,
-			"completed": s.Completed,
+		subtasks[i] = xrpc.TaskCreateOutputSubtasksItem{
+			Id:        s.Id,
+			Title:     s.Title,
+			Completed: s.Completed,
+		}
+	}
+	output.Subtasks = subtasks
+
+	return output
+}
+
+func taskToUpdateOutput(task *FullTask) xrpc.TaskUpdateOutput {
+	output := xrpc.TaskUpdateOutput{
+		Id:        task.Id,
+		Title:     task.Title,
+		Status:    task.Status,
+		Priority:  task.Priority,
+		CreatedAt: task.CreatedAt,
+		Position:  float64(task.Position),
+	}
+
+	if task.Description != nil {
+		output.Description = *task.Description
+	}
+	if task.DueDate != nil {
+		output.DueDate = *task.DueDate
+	}
+	if task.CompletedAt != nil {
+		output.CompletedAt = task.CompletedAt
+	}
+	if task.EstimatedHours != nil {
+		output.EstimatedHours = *task.EstimatedHours
+	}
+
+	// Convert subtasks using properly typed struct
+	subtasks := make([]xrpc.TaskUpdateOutputSubtasksItem, len(task.Subtasks))
+	for i, s := range task.Subtasks {
+		subtasks[i] = xrpc.TaskUpdateOutputSubtasksItem{
+			Id:        s.Id,
+			Title:     s.Title,
+			Completed: s.Completed,
 		}
 	}
 	output.Subtasks = subtasks

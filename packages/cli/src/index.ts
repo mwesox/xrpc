@@ -1,25 +1,25 @@
 #!/usr/bin/env node
 
-import ora from 'ora';
-import chalk from 'chalk';
-import { input, select, checkbox } from '@inquirer/prompts';
-import { showMenu } from './commands/menu';
-import { showHelp } from './commands/help';
-import { generateCommand } from './commands/generate';
-import { validateCommand } from './commands/validate';
-import { initCommand } from './commands/init';
-import { formatError } from './utils/tui';
+import { checkbox, input, select } from "@inquirer/prompts";
+import chalk from "chalk";
+import ora from "ora";
+import { generateCommand } from "./commands/generate";
+import { showHelp } from "./commands/help";
+import { initCommand } from "./commands/init";
+import { showMenu } from "./commands/menu";
+import { validateCommand } from "./commands/validate";
+import { formatError } from "./utils/tui";
 
 // Custom theme for xRPC prompts - fancier selection style
 const xrpcTheme = {
-  prefix: { idle: '', done: '' }, // Remove "?" prefix
+  prefix: { idle: "", done: "" }, // Remove "?" prefix
   icon: {
-    cursor: chalk.cyan('▶'), // Fancy cyan arrow instead of ❯
+    cursor: chalk.cyan("▶"), // Fancy cyan arrow instead of ❯
   },
   style: {
     message: (text: string) => chalk.cyan.bold(text), // Cyan + bold for prominent questions
     highlight: (text: string) => chalk.cyan.bold(text), // Cyan highlight for selected item
-    help: () => '', // Hide help text for cleaner look
+    help: () => "", // Hide help text for cleaner look
   },
 };
 
@@ -34,7 +34,10 @@ function createSpinner(message: string) {
 }
 
 // Wrapper for inquirer prompts to match expected interface
-async function prompt(message: string, options?: { default?: string }): Promise<string> {
+async function prompt(
+  message: string,
+  options?: { default?: string },
+): Promise<string> {
   return input({
     message,
     default: options?.default,
@@ -43,10 +46,10 @@ async function prompt(message: string, options?: { default?: string }): Promise<
 }
 
 // Add select method to prompt function
-prompt.select = async function (
+prompt.select = async (
   message: string,
-  options: { options: string[]; multiple?: boolean }
-): Promise<string | string[]> {
+  options: { options: string[]; multiple?: boolean },
+): Promise<string | string[]> => {
   if (options.multiple) {
     return checkbox({
       message,
@@ -62,31 +65,39 @@ prompt.select = async function (
 };
 
 // Simple argument parser
-function parseArgs(args: string[]): { command?: string; flags: Record<string, string>; positional: string[] } {
-  const result: { command?: string; flags: Record<string, string>; positional: string[] } = { flags: {}, positional: [] };
+function parseArgs(args: string[]): {
+  command?: string;
+  flags: Record<string, string>;
+  positional: string[];
+} {
+  const result: {
+    command?: string;
+    flags: Record<string, string>;
+    positional: string[];
+  } = { flags: {}, positional: [] };
   let i = 0;
 
   while (i < args.length) {
     const arg = args[i];
 
-    if (arg.startsWith('--')) {
+    if (arg.startsWith("--")) {
       const key = arg.slice(2);
       const value = args[i + 1];
-      if (value && !value.startsWith('-')) {
+      if (value && !value.startsWith("-")) {
         result.flags[key] = value;
         i += 2;
       } else {
-        result.flags[key] = 'true';
+        result.flags[key] = "true";
         i += 1;
       }
-    } else if (arg.startsWith('-')) {
+    } else if (arg.startsWith("-")) {
       const key = arg.slice(1);
       const value = args[i + 1];
-      if (value && !value.startsWith('-')) {
+      if (value && !value.startsWith("-")) {
         result.flags[key] = value;
         i += 2;
       } else {
-        result.flags[key] = 'true';
+        result.flags[key] = "true";
         i += 1;
       }
     } else if (!result.command) {
@@ -106,27 +117,32 @@ const args = process.argv.slice(2);
 const parsed = parseArgs(args);
 
 // If no arguments, show menu
-if (args.length === 0 || (!parsed.command && !parsed.flags.help && !parsed.flags.version)) {
+if (
+  args.length === 0 ||
+  (!parsed.command && !parsed.flags.help && !parsed.flags.version)
+) {
   await showMenu();
   process.exit(0);
 }
 
 // Handle help flag
-if (parsed.flags.help || parsed.flags.h || parsed.command === 'help') {
-  await showHelp(parsed.flags.command || parsed.flags.c || parsed.positional[0]);
+if (parsed.flags.help || parsed.flags.h || parsed.command === "help") {
+  await showHelp(
+    parsed.flags.command || parsed.flags.c || parsed.positional[0],
+  );
   process.exit(0);
 }
 
 // Handle version flag
 if (parsed.flags.version || parsed.flags.v) {
-  console.log('0.0.2');
+  console.log("0.0.2");
   process.exit(0);
 }
 
 // Route commands
 try {
   switch (parsed.command) {
-    case 'generate':
+    case "generate":
       await generateCommand({
         input: parsed.flags.input || parsed.flags.i,
         output: parsed.flags.output || parsed.flags.o,
@@ -136,20 +152,20 @@ try {
         spinner: createSpinner,
       });
       break;
-    case 'validate':
+    case "validate":
       await validateCommand({
         file: parsed.flags.file || parsed.flags.f || parsed.positional[0],
         prompt,
         spinner: createSpinner,
       });
       break;
-    case 'init':
+    case "init":
       await initCommand({
         prompt,
         spinner: createSpinner,
       });
       break;
-    case 'help':
+    case "help":
       await showHelp(parsed.flags.command || parsed.flags.c);
       break;
     default:
@@ -160,7 +176,9 @@ try {
       process.exit(1);
   }
 } catch (error) {
-  console.error(formatError(error instanceof Error ? error.message : String(error)));
+  console.error(
+    formatError(error instanceof Error ? error.message : String(error)),
+  );
   console.error('\nRun "xrpc --help" for usage information.');
   process.exit(1);
 }

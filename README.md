@@ -32,7 +32,7 @@ Define your API with the xRPC DSL:
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from '@xrpckit/schema';
+import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
 
 const users = createEndpoint({
   get: query({
@@ -58,7 +58,7 @@ export const router = createRouter({ users });
 Generate code for your targets:
 
 ```bash
-xrpc generate --input src/api.ts --targets go-server,react-client
+xrpc generate --input src/api.ts --targets go-server,ts-client
 ```
 
 That's it. You now have type-safe clients and servers with full validation logic, zero runtime dependencies, and idiomatic code that feels native to each language.

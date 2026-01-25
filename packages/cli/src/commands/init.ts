@@ -1,54 +1,60 @@
-import { existsSync } from 'node:fs';
-import { mkdir, writeFile } from 'node:fs/promises';
-import { join, dirname, relative, basename } from 'node:path';
-import { listTargets } from '../registry';
+import { existsSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import { basename, dirname, join, relative } from "node:path";
+import { listTargets } from "../registry";
 import {
-  detectProject,
-  detectApps,
-  detectExistingContracts,
-  getMonorepoLabel,
-  getAppTypeLabel,
-  type DetectedProject,
   type DetectedApp,
   type DetectedContract,
-} from '../utils/detection';
+  type DetectedProject,
+  detectApps,
+  detectExistingContracts,
+  detectProject,
+  getAppTypeLabel,
+  getMonorepoLabel,
+} from "../utils/detection";
 import {
+  type FileToCreate,
+  type TargetConfig,
   generateMonorepoApiPackageFiles,
   generateSingleProjectFiles,
   generateTomlTemplate,
-  type TargetConfig,
-  type FileToCreate,
-} from '../utils/templates';
+} from "../utils/templates";
 import {
-  formatSuccess,
-  formatError,
-  formatPath,
-  formatTarget,
-  formatInfo,
-  formatDetected,
-  formatFileToCreate,
-  formatMonorepoBadge,
-  formatHeader,
   createSeparator,
-  formatDescription,
+  drawBox,
+  formatBoxFooter,
   formatBoxHeader,
   formatBoxLine,
-  formatBoxFooter,
-  drawBox,
-  formatStep,
-  formatTreeItem,
+  formatDescription,
+  formatDetected,
+  formatError,
+  formatFileToCreate,
+  formatHeader,
+  formatInfo,
+  formatMonorepoBadge,
+  formatPath,
   formatSecondary,
+  formatStep,
+  formatSuccess,
+  formatTarget,
+  formatTreeItem,
   sectionBreak,
   subtleDivider,
-} from '../utils/tui';
+} from "../utils/tui";
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
-type PromptFunction = (message: string, options?: { default?: string }) => Promise<string>;
+type PromptFunction = (
+  message: string,
+  options?: { default?: string },
+) => Promise<string>;
 type PromptSelectFunction = {
-  select: (message: string, options: { options: string[]; multiple?: boolean }) => Promise<string | string[]>;
+  select: (
+    message: string,
+    options: { options: string[]; multiple?: boolean },
+  ) => Promise<string | string[]>;
 };
 type SpinnerInstance = {
   start: () => void;
@@ -85,11 +91,17 @@ export async function initCommand(options: InitOptions): Promise<void> {
   console.log();
 
   // Check if xrpc.toml already exists
-  if (existsSync(join(cwd, 'xrpc.toml'))) {
-    console.log(formatInfo('Found existing xrpc.toml configuration.'));
-    const overwrite = await prompt('Overwrite existing configuration?', { default: 'n' });
-    if (overwrite.toLowerCase() !== 'y' && overwrite.toLowerCase() !== 'yes') {
-      console.log(formatDescription('Setup cancelled. Run "xrpc generate" to use existing config.'));
+  if (existsSync(join(cwd, "xrpc.toml"))) {
+    console.log(formatInfo("Found existing xrpc.toml configuration."));
+    const overwrite = await prompt("Overwrite existing configuration?", {
+      default: "n",
+    });
+    if (overwrite.toLowerCase() !== "y" && overwrite.toLowerCase() !== "yes") {
+      console.log(
+        formatDescription(
+          'Setup cancelled. Run "xrpc generate" to use existing config.',
+        ),
+      );
       return;
     }
     console.log();
@@ -99,14 +111,14 @@ export async function initCommand(options: InitOptions): Promise<void> {
   // PHASE 1: DETECTION
   // ==========================================================================
 
-  const detectSpinner = spinner('Detecting project structure...');
+  const detectSpinner = spinner("Detecting project structure...");
   detectSpinner.start();
 
   const project = await detectProject(cwd);
   const apps = await detectApps(cwd, project);
   const contracts = await detectExistingContracts(cwd);
 
-  detectSpinner.succeed('Project analysis complete');
+  detectSpinner.succeed("Project analysis complete");
   console.log();
 
   // Display detection results
@@ -116,20 +128,22 @@ export async function initCommand(options: InitOptions): Promise<void> {
   // PHASE 2: CONTRACT SETUP
   // ==========================================================================
 
-  const { contractPath, createNewPackage, packageName, packageLocation } = await setupContract(
-    prompt,
-    project,
-    contracts
-  );
+  const { contractPath, createNewPackage, packageName, packageLocation } =
+    await setupContract(prompt, project, contracts);
 
   // ==========================================================================
   // PHASE 3: TARGET SELECTION
   // ==========================================================================
 
-  const selectedTargets = await selectTargets(prompt, apps, project, packageLocation);
+  const selectedTargets = await selectTargets(
+    prompt,
+    apps,
+    project,
+    packageLocation,
+  );
 
   if (selectedTargets.length === 0) {
-    console.log(formatError('No targets selected. Setup cancelled.'));
+    console.log(formatError("No targets selected. Setup cancelled."));
     return;
   }
 
@@ -154,7 +168,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
   // ==========================================================================
 
   console.log();
-  console.log(formatStep(3, 3, 'Confirmation'));
+  console.log(formatStep(3, 3, "Confirmation"));
   console.log();
 
   // Build file lines for the box
@@ -163,13 +177,17 @@ export async function initCommand(options: InitOptions): Promise<void> {
     return `${pathPart}  ${formatSecondary(file.description)}`;
   });
 
-  console.log(drawBox('Files to create', fileLines, 60));
+  console.log(drawBox("Files to create", fileLines, 60));
 
   console.log();
-  const confirm = await prompt('Proceed with setup?', { default: 'Y' });
+  const confirm = await prompt("Proceed with setup?", { default: "Y" });
 
-  if (confirm.toLowerCase() !== 'y' && confirm.toLowerCase() !== 'yes' && confirm !== '') {
-    console.log(formatDescription('Setup cancelled.'));
+  if (
+    confirm.toLowerCase() !== "y" &&
+    confirm.toLowerCase() !== "yes" &&
+    confirm !== ""
+  ) {
+    console.log(formatDescription("Setup cancelled."));
     return;
   }
 
@@ -178,7 +196,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
   // ==========================================================================
 
   console.log();
-  const writeSpinner = spinner('Creating files...');
+  const writeSpinner = spinner("Creating files...");
   writeSpinner.start();
 
   try {
@@ -191,12 +209,14 @@ export async function initCommand(options: InitOptions): Promise<void> {
         await mkdir(dir, { recursive: true });
       }
 
-      await writeFile(fullPath, file.content, 'utf-8');
+      await writeFile(fullPath, file.content, "utf-8");
     }
 
-    writeSpinner.succeed(`Created ${filesToCreate.length} file${filesToCreate.length !== 1 ? 's' : ''}`);
+    writeSpinner.succeed(
+      `Created ${filesToCreate.length} file${filesToCreate.length !== 1 ? "s" : ""}`,
+    );
   } catch (error) {
-    writeSpinner.fail('Failed to create files');
+    writeSpinner.fail("Failed to create files");
     throw error;
   }
 
@@ -207,14 +227,18 @@ export async function initCommand(options: InitOptions): Promise<void> {
   console.log();
   console.log(createSeparator());
   console.log();
-  console.log(formatSuccess('Setup complete!'));
+  console.log(formatSuccess("Setup complete!"));
   console.log();
-  console.log(formatBoxHeader('Next steps'));
-  console.log(formatBoxLine(''));
-  console.log(formatBoxLine(`1. Edit ${formatPath(contractPath)} to define your API`));
-  console.log(formatBoxLine(`2. Run ${formatPath('xrpc generate')} to generate code`));
-  console.log(formatBoxLine('3. Import generated code in your apps'));
-  console.log(formatBoxLine(''));
+  console.log(formatBoxHeader("Next steps"));
+  console.log(formatBoxLine(""));
+  console.log(
+    formatBoxLine(`1. Edit ${formatPath(contractPath)} to define your API`),
+  );
+  console.log(
+    formatBoxLine(`2. Run ${formatPath("xrpc generate")} to generate code`),
+  );
+  console.log(formatBoxLine("3. Import generated code in your apps"));
+  console.log(formatBoxLine(""));
   console.log(formatBoxFooter());
   console.log();
 }
@@ -226,44 +250,63 @@ export async function initCommand(options: InitOptions): Promise<void> {
 function displayDetectionResults(
   project: DetectedProject,
   apps: DetectedApp[],
-  contracts: DetectedContract[]
+  contracts: DetectedContract[],
 ): void {
   // Show monorepo type
-  console.log(formatBoxLine(''));
-  if (project.monorepoType !== 'none') {
-    console.log(formatBoxLine(`${formatMonorepoBadge(project.monorepoType)} monorepo`));
+  console.log(formatBoxLine(""));
+  if (project.monorepoType !== "none") {
+    console.log(
+      formatBoxLine(`${formatMonorepoBadge(project.monorepoType)} monorepo`),
+    );
   } else if (project.isExistingProject) {
-    console.log(formatBoxLine('Single project'));
+    console.log(formatBoxLine("Single project"));
   } else {
-    console.log(formatBoxLine(formatInfo('New project (no package.json found)')));
+    console.log(
+      formatBoxLine(formatInfo("New project (no package.json found)")),
+    );
   }
 
   // Show detected apps
   if (apps.length > 0) {
-    console.log(formatBoxLine(''));
-    console.log(formatBoxLine(formatSecondary('Detected apps:')));
+    console.log(formatBoxLine(""));
+    console.log(formatBoxLine(formatSecondary("Detected apps:")));
     for (let i = 0; i < apps.length; i++) {
       const app = apps[i];
-      const relativePath = relative(project.workspaceRoot, app.path) || '.';
+      const relativePath = relative(project.workspaceRoot, app.path) || ".";
       const typeLabel = getAppTypeLabel(app.type);
-      const roleLabel = app.isServer ? 'server' : 'frontend';
+      const roleLabel = app.isServer ? "server" : "frontend";
       const isLast = i === apps.length - 1;
-      console.log(formatBoxLine(formatTreeItem(`${formatPath(relativePath)} ${formatSecondary(`(${typeLabel} ${roleLabel})`)}`, isLast)));
+      console.log(
+        formatBoxLine(
+          formatTreeItem(
+            `${formatPath(relativePath)} ${formatSecondary(`(${typeLabel} ${roleLabel})`)}`,
+            isLast,
+          ),
+        ),
+      );
     }
   }
 
   // Show existing contracts
   if (contracts.length > 0) {
-    console.log(formatBoxLine(''));
-    console.log(formatBoxLine(formatSecondary(`Found ${contracts.length} existing contract${contracts.length !== 1 ? 's' : ''}:`)));
+    console.log(formatBoxLine(""));
+    console.log(
+      formatBoxLine(
+        formatSecondary(
+          `Found ${contracts.length} existing contract${contracts.length !== 1 ? "s" : ""}:`,
+        ),
+      ),
+    );
     for (let i = 0; i < contracts.length; i++) {
       const contract = contracts[i];
       const isLast = i === contracts.length - 1;
-      console.log(formatBoxLine(formatTreeItem(formatPath(contract.path), isLast)));
+      console.log(
+        formatBoxLine(formatTreeItem(formatPath(contract.path), isLast)),
+      );
     }
   }
 
-  console.log(formatBoxLine(''));
+  console.log(formatBoxLine(""));
   console.log(formatBoxFooter());
   console.log();
 }
@@ -282,53 +325,62 @@ interface ContractSetupResult {
 async function setupContract(
   prompt: PromptFunction & PromptSelectFunction,
   project: DetectedProject,
-  contracts: DetectedContract[]
+  contracts: DetectedContract[],
 ): Promise<ContractSetupResult> {
   // If existing contracts found, offer to use them
   if (contracts.length > 0) {
-    console.log(formatStep(1, 3, 'Contract Setup'));
+    console.log(formatStep(1, 3, "Contract Setup"));
     subtleDivider();
 
-    const choices = [
-      ...contracts.map((c) => c.path),
-      'Create new contract',
-    ];
+    const choices = [...contracts.map((c) => c.path), "Create new contract"];
 
-    const selected = await prompt.select('Select existing contract or create new:', {
-      options: choices,
-    });
+    const selected = await prompt.select(
+      "Select existing contract or create new:",
+      {
+        options: choices,
+      },
+    );
 
     subtleDivider();
 
-    if (selected !== 'Create new contract') {
+    if (selected !== "Create new contract") {
       return {
         contractPath: selected as string,
         createNewPackage: false,
-        packageName: '',
-        packageLocation: '',
+        packageName: "",
+        packageLocation: "",
       };
     }
   }
 
   // For monorepos, offer to create a new package
-  if (project.monorepoType !== 'none' && project.packagesDir) {
-    console.log(formatStep(1, 3, 'Contract Setup'));
+  if (project.monorepoType !== "none" && project.packagesDir) {
+    console.log(formatStep(1, 3, "Contract Setup"));
     subtleDivider();
 
-    const createPackage = await prompt('Create new API package?', { default: 'Y' });
+    const createPackage = await prompt("Create new API package?", {
+      default: "Y",
+    });
     const createNewPackage =
-      createPackage.toLowerCase() === 'y' || createPackage.toLowerCase() === 'yes' || createPackage === '';
+      createPackage.toLowerCase() === "y" ||
+      createPackage.toLowerCase() === "yes" ||
+      createPackage === "";
 
     if (createNewPackage) {
       subtleDivider();
       // Determine package name based on monorepo type
-      const defaultPackageName = project.monorepoType === 'nx' ? '@repo/api' : '@repo/api';
-      const packageName = await prompt('Package name:', { default: defaultPackageName });
+      const defaultPackageName =
+        project.monorepoType === "nx" ? "@repo/api" : "@repo/api";
+      const packageName = await prompt("Package name:", {
+        default: defaultPackageName,
+      });
 
       subtleDivider();
       // Determine package location
       const defaultLocation = `${project.packagesDir}/api`;
-      const packageLocation = await prompt('Package location:', { default: defaultLocation });
+      const packageLocation = await prompt("Package location:", {
+        default: defaultLocation,
+      });
 
       const contractPath = `${packageLocation}/src/contract.ts`;
 
@@ -343,18 +395,20 @@ async function setupContract(
   }
 
   // Single project or no package creation - ask for contract path
-  console.log(formatStep(1, 3, 'Contract Setup'));
+  console.log(formatStep(1, 3, "Contract Setup"));
   subtleDivider();
 
-  const defaultPath = 'src/contract.ts';
-  const contractPath = await prompt('Contract file location:', { default: defaultPath });
+  const defaultPath = "src/contract.ts";
+  const contractPath = await prompt("Contract file location:", {
+    default: defaultPath,
+  });
 
   sectionBreak();
   return {
     contractPath,
     createNewPackage: false,
-    packageName: '',
-    packageLocation: '',
+    packageName: "",
+    packageLocation: "",
   };
 }
 
@@ -366,9 +420,9 @@ async function selectTargets(
   prompt: PromptFunction & PromptSelectFunction,
   apps: DetectedApp[],
   project: DetectedProject,
-  packageLocation: string
+  packageLocation: string,
 ): Promise<TargetConfig[]> {
-  console.log(formatStep(2, 3, 'Target Selection'));
+  console.log(formatStep(2, 3, "Target Selection"));
   subtleDivider();
 
   const availableTargets = listTargets();
@@ -377,13 +431,14 @@ async function selectTargets(
   const targetOptions = availableTargets.map((target) => {
     const matchingApp = apps.find((app) => app.suggestedTarget === target);
     if (matchingApp) {
-      const relativePath = relative(project.workspaceRoot, matchingApp.path) || '.';
+      const relativePath =
+        relative(project.workspaceRoot, matchingApp.path) || ".";
       return `${target} (detected: ${relativePath})`;
     }
     return target;
   });
 
-  const selected = await prompt.select('Select targets to generate:', {
+  const selected = await prompt.select("Select targets to generate:", {
     options: targetOptions,
     multiple: true,
   });
@@ -391,7 +446,7 @@ async function selectTargets(
   const selectedArray = Array.isArray(selected) ? selected : [selected];
 
   // Extract target names (remove the "(detected: ...)" suffix)
-  const targetNames = selectedArray.map((s) => s.split(' (detected:')[0]);
+  const targetNames = selectedArray.map((s) => s.split(" (detected:")[0]);
 
   subtleDivider();
 
@@ -401,19 +456,22 @@ async function selectTargets(
   for (const targetName of targetNames) {
     // Find matching app for suggested output path
     const matchingApp = apps.find((app) => app.suggestedTarget === targetName);
-    let defaultOutput = '.';
+    let defaultOutput = ".";
 
     if (matchingApp) {
-      defaultOutput = relative(project.workspaceRoot, matchingApp.path) || '.';
+      defaultOutput = relative(project.workspaceRoot, matchingApp.path) || ".";
     } else if (project.appsDir) {
       // Suggest apps directory for unmatched targets
-      const targetType = targetName.includes('client') ? 'web' : 'backend';
+      const targetType = targetName.includes("client") ? "web" : "backend";
       defaultOutput = `${project.appsDir}/${targetType}`;
     }
 
-    const outputPath = await prompt(`Output directory for ${formatTarget(targetName)}:`, {
-      default: defaultOutput,
-    });
+    const outputPath = await prompt(
+      `Output directory for ${formatTarget(targetName)}:`,
+      {
+        default: defaultOutput,
+      },
+    );
     subtleDivider();
 
     targets.push({
@@ -430,7 +488,14 @@ async function selectTargets(
 // =============================================================================
 
 function generateFileList(state: WizardState): FileToCreate[] {
-  const { project, contractPath, createNewPackage, packageName, packageLocation, selectedTargets } = state;
+  const {
+    project,
+    contractPath,
+    createNewPackage,
+    packageName,
+    packageLocation,
+    selectedTargets,
+  } = state;
 
   const tomlConfig = {
     contractPath,
@@ -438,7 +503,11 @@ function generateFileList(state: WizardState): FileToCreate[] {
   };
 
   if (createNewPackage && packageLocation) {
-    return generateMonorepoApiPackageFiles(packageLocation, packageName, tomlConfig);
+    return generateMonorepoApiPackageFiles(
+      packageLocation,
+      packageName,
+      tomlConfig,
+    );
   }
 
   // Check if contract file already exists
@@ -448,9 +517,9 @@ function generateFileList(state: WizardState): FileToCreate[] {
     // Only create xrpc.toml
     return [
       {
-        path: 'xrpc.toml',
+        path: "xrpc.toml",
         content: generateTomlTemplate(tomlConfig),
-        description: 'xRPC configuration',
+        description: "xRPC configuration",
       },
     ];
   }

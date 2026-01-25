@@ -3,4 +3,4 @@
 
 contract = "packages/api/src/contract.ts"
 go-server = "apps/go-backend"
-react-client = "apps/web"
+ts-client = "apps/web"

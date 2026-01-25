@@ -33,7 +33,7 @@
     "@inquirer/prompts": "^7.0.0",
     "@xrpckit/sdk": "workspace:*",
     "@xrpckit/target-go-server": "workspace:*",
-    "@xrpckit/target-react-client": "workspace:*",
+    "@xrpckit/target-ts-client": "workspace:*",
     "chalk": "^5.3.0",
     "figlet": "^1.7.0",
     "ora": "^8.0.0",

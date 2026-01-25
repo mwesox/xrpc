@@ -1,5 +1,5 @@
-import chalk from 'chalk';
-import figlet from 'figlet';
+import chalk from "chalk";
+import figlet from "figlet";
 
 /**
  * TUI utility functions for formatting output with colors and styling
@@ -10,14 +10,14 @@ import figlet from 'figlet';
 // =============================================================================
 
 const BOX = {
-  topLeft: '╭',
-  topRight: '╮',
-  bottomLeft: '╰',
-  bottomRight: '╯',
-  horizontal: '─',
-  vertical: '│',
-  tee: '├',
-  corner: '└',
+  topLeft: "╭",
+  topRight: "╮",
+  bottomLeft: "╰",
+  bottomRight: "╯",
+  horizontal: "─",
+  vertical: "│",
+  tee: "├",
+  corner: "└",
 } as const;
 
 // =============================================================================
@@ -25,14 +25,14 @@ const BOX = {
 // =============================================================================
 
 const ICONS = {
-  dot: '●',
-  dotEmpty: '○',
-  check: '✔',
-  cross: '✖',
-  info: 'ℹ',
-  warning: '⚠',
-  pointer: '❯',
-  plus: '+',
+  dot: "●",
+  dotEmpty: "○",
+  check: "✔",
+  cross: "✖",
+  info: "ℹ",
+  warning: "⚠",
+  pointer: "❯",
+  plus: "+",
 } as const;
 
 // =============================================================================
@@ -71,22 +71,25 @@ export function showBanner(): void {
   // Using "Big" font - reliable, dense, and highly readable
   // Text: "xRPC" - lowercase x, uppercase RPC
   // horizontalLayout: 'fitted' makes it more compact and dense
-  const asciiText = figlet.textSync('xRPC', {
-    font: 'Big',
-    horizontalLayout: 'fitted', // Makes it more compact and dense
-    verticalLayout: 'default',
+  const asciiText = figlet.textSync("xRPC", {
+    font: "Big",
+    horizontalLayout: "fitted", // Makes it more compact and dense
+    verticalLayout: "default",
   });
 
   // Split into lines and calculate padding
-  const asciiLines = asciiText.split('\n');
-  const artWidth = Math.max(...asciiLines.map(line => line.length));
+  const asciiLines = asciiText.split("\n");
+  const artWidth = Math.max(...asciiLines.map((line) => line.length));
   const padding = Math.max(0, Math.floor((terminalWidth - artWidth) / 2));
-  const leftPadding = ' '.repeat(padding);
+  const leftPadding = " ".repeat(padding);
 
   // Create the banner with centered ASCII art
-  const tagline = 'Type-safe, Cross-platform RPC Framework';
-  const taglinePadding = Math.max(0, Math.floor((terminalWidth - tagline.length) / 2));
-  const taglineLeftPadding = ' '.repeat(taglinePadding);
+  const tagline = "Type-safe, Cross-platform RPC Framework";
+  const taglinePadding = Math.max(
+    0,
+    Math.floor((terminalWidth - tagline.length) / 2),
+  );
+  const taglineLeftPadding = " ".repeat(taglinePadding);
 
   // Bright white color for maximum contrast on dark backgrounds
   const brightText = (text: string) => {
@@ -98,8 +101,10 @@ export function showBanner(): void {
 
   // Apply color to each line and add padding
   // Filter out empty lines for cleaner output
-  const nonEmptyLines = asciiLines.filter(line => line.trim().length > 0);
-  const coloredLines = nonEmptyLines.map(line => `${leftPadding}${brightText(line)}`).join('\n');
+  const nonEmptyLines = asciiLines.filter((line) => line.trim().length > 0);
+  const coloredLines = nonEmptyLines
+    .map((line) => `${leftPadding}${brightText(line)}`)
+    .join("\n");
 
   const banner = `
 ${coloredLines}
@@ -145,13 +150,13 @@ export function formatFileToCreate(path: string): string {
 export function formatMonorepoBadge(type: string): string {
   // Use bright backgrounds and bold text for better contrast on dark terminals
   const badges: Record<string, string> = {
-    nx: chalk.bgCyan.black.bold(' Nx '),
-    turbo: chalk.bgMagentaBright.black.bold(' Turbo '),
-    bun: chalk.bgYellow.black.bold(' Bun '),
-    pnpm: chalk.bgRedBright.black.bold(' pnpm '),
-    npm: chalk.bgRed.white.bold(' npm '),
-    yarn: chalk.bgBlueBright.black.bold(' Yarn '),
-    lerna: chalk.bgWhite.black.bold(' Lerna '),
+    nx: chalk.bgCyan.black.bold(" Nx "),
+    turbo: chalk.bgMagentaBright.black.bold(" Turbo "),
+    bun: chalk.bgYellow.black.bold(" Bun "),
+    pnpm: chalk.bgRedBright.black.bold(" pnpm "),
+    npm: chalk.bgRed.white.bold(" npm "),
+    yarn: chalk.bgBlueBright.black.bold(" Yarn "),
+    lerna: chalk.bgWhite.black.bold(" Lerna "),
   };
   return badges[type] || chalk.inverse.bold(` ${type} `);
 }
@@ -184,7 +189,7 @@ export function formatBoxFooter(width = 50): string {
  * Example: │  Content here
  */
 export function formatBoxLine(content: string): string {
-  return chalk.dim(BOX.vertical) + '  ' + content;
+  return `${chalk.dim(BOX.vertical)}  ${content}`;
 }
 
 /**
@@ -196,35 +201,57 @@ export function drawBox(title: string, lines: string[], width = 50): string {
   // Top border with title
   const titlePart = `${BOX.topLeft}${BOX.horizontal} ${title} `;
   const topRemaining = width - titlePart.length - 1;
-  output.push(chalk.dim(titlePart + BOX.horizontal.repeat(Math.max(0, topRemaining)) + BOX.topRight));
+  output.push(
+    chalk.dim(
+      titlePart +
+        BOX.horizontal.repeat(Math.max(0, topRemaining)) +
+        BOX.topRight,
+    ),
+  );
 
   // Empty line
-  output.push(chalk.dim(BOX.vertical) + ' '.repeat(width - 2) + chalk.dim(BOX.vertical));
+  output.push(
+    chalk.dim(BOX.vertical) + " ".repeat(width - 2) + chalk.dim(BOX.vertical),
+  );
 
   // Content lines
   for (const line of lines) {
     const padding = width - 4 - stripAnsi(line).length;
-    output.push(chalk.dim(BOX.vertical) + '  ' + line + ' '.repeat(Math.max(0, padding)) + chalk.dim(BOX.vertical));
+    output.push(
+      `${chalk.dim(BOX.vertical)}  ${line}${" ".repeat(Math.max(0, padding))}${chalk.dim(BOX.vertical)}`,
+    );
   }
 
   // Empty line
-  output.push(chalk.dim(BOX.vertical) + ' '.repeat(width - 2) + chalk.dim(BOX.vertical));
+  output.push(
+    chalk.dim(BOX.vertical) + " ".repeat(width - 2) + chalk.dim(BOX.vertical),
+  );
 
   // Bottom border
-  output.push(chalk.dim(BOX.bottomLeft + BOX.horizontal.repeat(width - 2) + BOX.bottomRight));
+  output.push(
+    chalk.dim(
+      BOX.bottomLeft + BOX.horizontal.repeat(width - 2) + BOX.bottomRight,
+    ),
+  );
 
-  return output.join('\n');
+  return output.join("\n");
 }
 
 /**
  * Creates a step indicator for wizard progress
  * Example: ● ○ ○  Contract Setup
  */
-export function formatStep(current: number, total: number, label: string): string {
+export function formatStep(
+  current: number,
+  total: number,
+  label: string,
+): string {
   const dots = Array(total)
     .fill(null)
-    .map((_, i) => (i < current ? chalk.cyan(ICONS.dot) : chalk.dim(ICONS.dotEmpty)));
-  return dots.join(' ') + '  ' + chalk.bold(label);
+    .map((_, i) =>
+      i < current ? chalk.cyan(ICONS.dot) : chalk.dim(ICONS.dotEmpty),
+    );
+  return `${dots.join(" ")}  ${chalk.bold(label)}`;
 }
 
 /**
@@ -241,7 +268,7 @@ export function formatSecondary(text: string): string {
  */
 export function formatTreeItem(text: string, isLast: boolean): string {
   const prefix = isLast ? BOX.corner : BOX.tee;
-  return chalk.dim(prefix) + ' ' + text;
+  return `${chalk.dim(prefix)} ${text}`;
 }
 
 /**
@@ -260,7 +287,7 @@ export function formatStatusDot(active: boolean): string {
  */
 function stripAnsi(str: string): string {
   // eslint-disable-next-line no-control-regex
-  return str.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, '');
+  return str.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "");
 }
 
 // =============================================================================
@@ -287,7 +314,7 @@ export function formatAccent(text: string): string {
  * @param isAction - If true, uses action icon (✨), otherwise uses dim dot (○)
  */
 export function formatChoice(text: string, isAction = false): string {
-  const icon = isAction ? chalk.yellow('✨') : chalk.dim('○');
+  const icon = isAction ? chalk.yellow("✨") : chalk.dim("○");
   return `${icon} ${text}`;
 }
 

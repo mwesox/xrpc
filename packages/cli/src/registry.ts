@@ -1,24 +1,31 @@
-import type { ContractDefinition, GeneratorConfig, GeneratedFiles } from '@xrpckit/sdk';
-import { GoCodeGenerator } from '@xrpckit/target-go-server';
-import { ReactCodeGenerator } from '@xrpckit/target-react-client';
+import type {
+  ContractDefinition,
+  GeneratedFiles,
+  GeneratorConfig,
+} from "@xrpckit/sdk";
+import { GoCodeGenerator } from "@xrpckit/target-go-server";
+import { TsCodeGenerator } from "@xrpckit/target-ts-client";
 
 export type TargetGenerator = {
   name: string;
-  generate: (contract: ContractDefinition, config: GeneratorConfig) => GeneratedFiles;
+  generate: (
+    contract: ContractDefinition,
+    config: GeneratorConfig,
+  ) => GeneratedFiles;
 };
 
 const generators: Record<string, TargetGenerator> = {
-  'go-server': {
-    name: 'go-server',
+  "go-server": {
+    name: "go-server",
     generate: (contract, config) => {
       const generator = new GoCodeGenerator(config);
       return generator.generate(contract);
     },
   },
-  'react-client': {
-    name: 'react-client',
+  "ts-client": {
+    name: "ts-client",
     generate: (contract, config) => {
-      const generator = new ReactCodeGenerator(config);
+      const generator = new TsCodeGenerator(config);
       return generator.generate(contract);
     },
   },
@@ -31,7 +38,7 @@ const generators: Record<string, TargetGenerator> = {
 /**
  * Gets a code generator for the specified target language/platform.
  *
- * @param target - The target language/platform (e.g., 'go-server', 'react-client')
+ * @param target - The target language/platform (e.g., 'go-server', 'ts-client')
  * @returns The generator for the target, or undefined if not found
  *
  * @example

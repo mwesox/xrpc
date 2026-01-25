@@ -1,27 +1,44 @@
-import { parseContract, type ContractDefinition, type GeneratorConfig } from '@xrpckit/sdk';
-import { getGenerator, listTargets } from '../registry';
-import { loadConfig, extractTargets, extractModules, isMultiModule, type XrpcConfig, type ModuleConfig } from '../config';
-import { mkdir, writeFile } from 'node:fs/promises';
-import { join, resolve, dirname } from 'node:path';
-import { existsSync } from 'node:fs';
+import { existsSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
 import {
-  formatSuccess,
-  formatError,
-  formatWarning,
-  formatPath,
-  formatTarget,
-  formatInfo,
+  type ContractDefinition,
+  type GeneratorConfig,
+  parseContract,
+} from "@xrpckit/sdk";
+import {
+  type ModuleConfig,
+  type XrpcConfig,
+  extractModules,
+  extractTargets,
+  isMultiModule,
+  loadConfig,
+} from "../config";
+import { getGenerator, listTargets } from "../registry";
+import {
+  createSeparator,
+  formatBoxFooter,
   formatBoxHeader,
   formatBoxLine,
-  formatBoxFooter,
+  formatError,
+  formatInfo,
+  formatPath,
   formatSecondary,
-  createSeparator,
-} from '../utils/tui';
+  formatSuccess,
+  formatTarget,
+  formatWarning,
+} from "../utils/tui";
 
 // Minimal types for prompt and spinner functions
-type PromptFunction = (message: string, options?: { default?: string }) => Promise<string>;
+type PromptFunction = (
+  message: string,
+  options?: { default?: string },
+) => Promise<string>;
 type PromptSelectFunction = {
-  select: (message: string, options: { options: string[]; multiple?: boolean }) => Promise<string | string[]>;
+  select: (
+    message: string,
+    options: { options: string[]; multiple?: boolean },
+  ) => Promise<string | string[]>;
 };
 type SpinnerInstance = {
   start: () => void;
@@ -56,7 +73,9 @@ function validatePath(path: string, baseDir: string = process.cwd()): string {
   return resolved;
 }
 
-export async function generateCommand(options: GenerateOptions = {}): Promise<void> {
+export async function generateCommand(
+  options: GenerateOptions = {},
+): Promise<void> {
   const { prompt, spinner: createSpinner } = options;
 
   // Load config file if present
@@ -75,28 +94,44 @@ export async function generateCommand(options: GenerateOptions = {}): Promise<vo
 /**
  * Generate code for a multi-module config.
  */
-async function generateMultiModule(config: XrpcConfig, options: GenerateOptions): Promise<void> {
-  const { prompt, spinner: createSpinner, module: requestedModule, targets: targetFilter } = options;
+async function generateMultiModule(
+  config: XrpcConfig,
+  options: GenerateOptions,
+): Promise<void> {
+  const {
+    prompt,
+    spinner: createSpinner,
+    module: requestedModule,
+    targets: targetFilter,
+  } = options;
 
   const modules = extractModules(config);
   const moduleNames = Object.keys(modules);
 
   if (moduleNames.length === 0) {
-    throw new Error('No valid modules found in xrpc.toml. Each module must have a "contract" field.');
+    throw new Error(
+      'No valid modules found in xrpc.toml. Each module must have a "contract" field.',
+    );
   }
 
   // Filter to specific module if requested
   let modulesToGenerate: string[];
   if (requestedModule) {
     if (!modules[requestedModule]) {
-      throw new Error(`Module "${requestedModule}" not found in xrpc.toml. Available modules: ${moduleNames.join(', ')}`);
+      throw new Error(
+        `Module "${requestedModule}" not found in xrpc.toml. Available modules: ${moduleNames.join(", ")}`,
+      );
     }
     modulesToGenerate = [requestedModule];
   } else {
     modulesToGenerate = moduleNames;
   }
 
-  console.log(formatInfo(`Generating ${modulesToGenerate.length} module${modulesToGenerate.length !== 1 ? 's' : ''}...`));
+  console.log(
+    formatInfo(
+      `Generating ${modulesToGenerate.length} module${modulesToGenerate.length !== 1 ? "s" : ""}...`,
+    ),
+  );
   console.log();
 
   for (const moduleName of modulesToGenerate) {
@@ -104,10 +139,18 @@ async function generateMultiModule(config: XrpcConfig, options: GenerateOptions)
     console.log(formatBoxHeader(`Module: ${moduleName}`));
 
     try {
-      await generateModule(moduleName, moduleConfig, targetFilter, createSpinner, options.output);
+      await generateModule(
+        moduleName,
+        moduleConfig,
+        targetFilter,
+        createSpinner,
+        options.output,
+      );
       console.log(formatBoxFooter());
     } catch (error) {
-      console.error(formatError(error instanceof Error ? error.message : String(error)));
+      console.error(
+        formatError(error instanceof Error ? error.message : String(error)),
+      );
       throw error;
     }
   }
@@ -115,7 +158,7 @@ async function generateMultiModule(config: XrpcConfig, options: GenerateOptions)
   console.log();
   console.log(createSeparator());
   console.log();
-  console.log(formatSuccess('Generation complete!'));
+  console.log(formatSuccess("Generation complete!"));
   console.log();
 }
 
@@ -127,21 +170,27 @@ async function generateModule(
   moduleConfig: ModuleConfig,
   targetFilter: string | undefined,
   createSpinner?: SpinnerFunction,
-  outputOverride?: string
+  outputOverride?: string,
 ): Promise<void> {
   const input = validatePath(moduleConfig.contract);
   if (!existsSync(input)) {
     throw new Error(`Contract file not found: ${input}`);
   }
 
-  const genSpinner = createSpinner ? createSpinner('Parsing contract...') : null;
-  if (genSpinner && 'start' in genSpinner) genSpinner.start();
+  const genSpinner = createSpinner
+    ? createSpinner("Parsing contract...")
+    : null;
+  if (genSpinner && "start" in genSpinner) genSpinner.start();
 
   const contract = await parseContract(input);
-  if (genSpinner && 'succeed' in genSpinner) {
-    genSpinner.succeed(`Found ${contract.endpoints.length} endpoint${contract.endpoints.length !== 1 ? 's' : ''}`);
+  if (genSpinner && "succeed" in genSpinner) {
+    genSpinner.succeed(
+      `Found ${contract.endpoints.length} endpoint${contract.endpoints.length !== 1 ? "s" : ""}`,
+    );
   } else {
-    console.log(`Found ${contract.endpoints.length} endpoint${contract.endpoints.length !== 1 ? 's' : ''}`);
+    console.log(
+      `Found ${contract.endpoints.length} endpoint${contract.endpoints.length !== 1 ? "s" : ""}`,
+    );
   }
 
   // Get targets from module config
@@ -150,11 +199,13 @@ async function generateModule(
   // Filter targets if requested
   let targets: string[];
   if (targetFilter) {
-    targets = targetFilter.split(',').map((t) => t.trim());
+    targets = targetFilter.split(",").map((t) => t.trim());
     // Validate that requested targets exist in module config
     for (const target of targets) {
       if (!moduleTargets[target]) {
-        throw new Error(`Target "${target}" not configured for module "${moduleName}"`);
+        throw new Error(
+          `Target "${target}" not configured for module "${moduleName}"`,
+        );
       }
     }
   } else {
@@ -162,7 +213,9 @@ async function generateModule(
   }
 
   if (targets.length === 0) {
-    console.log(formatWarning(`No targets configured for module "${moduleName}"`));
+    console.log(
+      formatWarning(`No targets configured for module "${moduleName}"`),
+    );
     return;
   }
 
@@ -170,22 +223,33 @@ async function generateModule(
   const availableTargets = listTargets();
   const invalidTargets = targets.filter((t) => !availableTargets.includes(t));
   if (invalidTargets.length > 0) {
-    throw new Error(`Unknown targets: ${invalidTargets.join(', ')}. Available targets: ${availableTargets.join(', ')}`);
+    throw new Error(
+      `Unknown targets: ${invalidTargets.join(", ")}. Available targets: ${availableTargets.join(", ")}`,
+    );
   }
 
   for (const target of targets) {
-    const targetSpinner = createSpinner ? createSpinner(`Generating ${formatTarget(target)} code...`) : null;
-    if (targetSpinner && 'start' in targetSpinner) targetSpinner.start();
+    const targetSpinner = createSpinner
+      ? createSpinner(`Generating ${formatTarget(target)} code...`)
+      : null;
+    if (targetSpinner && "start" in targetSpinner) targetSpinner.start();
 
     const targetBaseDir = outputOverride || moduleTargets[target];
 
     try {
-      await generateForTarget(target, contract, targetBaseDir, input, createSpinner, moduleName);
-      if (targetSpinner && 'succeed' in targetSpinner) {
+      await generateForTarget(
+        target,
+        contract,
+        targetBaseDir,
+        input,
+        createSpinner,
+        moduleName,
+      );
+      if (targetSpinner && "succeed" in targetSpinner) {
         targetSpinner.succeed(`Generated ${formatTarget(target)} code`);
       }
     } catch (error) {
-      if (targetSpinner && 'fail' in targetSpinner) {
+      if (targetSpinner && "fail" in targetSpinner) {
         targetSpinner.fail(`Failed to generate ${formatTarget(target)} code`);
       }
       throw error;
@@ -196,7 +260,10 @@ async function generateModule(
 /**
  * Generate code for a single contract config (original behavior).
  */
-async function generateSingleContract(config: XrpcConfig | null, options: GenerateOptions): Promise<void> {
+async function generateSingleContract(
+  config: XrpcConfig | null,
+  options: GenerateOptions,
+): Promise<void> {
   const { prompt, spinner: createSpinner } = options;
 
   // Extract targets from config for later use
@@ -207,11 +274,13 @@ async function generateSingleContract(config: XrpcConfig | null, options: Genera
   if (!input && config?.contract) {
     input = config.contract;
   } else if (!input && prompt) {
-    input = await prompt('API contract file path:', {
-      default: 'src/api.ts',
+    input = await prompt("API contract file path:", {
+      default: "src/api.ts",
     });
   } else if (!input) {
-    throw new Error('Input file path is required. Use -i/--input, xrpc.toml, or run in interactive mode.');
+    throw new Error(
+      "Input file path is required. Use -i/--input, xrpc.toml, or run in interactive mode.",
+    );
   }
 
   // Validate and normalize input path
@@ -223,18 +292,20 @@ async function generateSingleContract(config: XrpcConfig | null, options: Genera
   // Determine targets
   let targets: string[] = [];
   if (options.targets) {
-    targets = options.targets.split(',').map((t) => t.trim());
+    targets = options.targets.split(",").map((t) => t.trim());
   } else if (Object.keys(configTargets).length > 0) {
     targets = Object.keys(configTargets);
   } else if (prompt) {
     const availableTargets = listTargets();
-    const selected = await prompt.select('Select targets to generate:', {
+    const selected = await prompt.select("Select targets to generate:", {
       options: availableTargets,
       multiple: true,
     });
     targets = Array.isArray(selected) ? selected : [selected];
   } else {
-    throw new Error('Targets are required. Use -t/--targets, xrpc.toml, or run in interactive mode.');
+    throw new Error(
+      "Targets are required. Use -t/--targets, xrpc.toml, or run in interactive mode.",
+    );
   }
 
   // Validate targets
@@ -244,27 +315,35 @@ async function generateSingleContract(config: XrpcConfig | null, options: Genera
   if (invalidTargets.length > 0) {
     console.error(
       formatError(
-        `Unknown targets: ${invalidTargets.join(', ')}. Available targets: ${availableTargets.join(', ')}`
-      )
+        `Unknown targets: ${invalidTargets.join(", ")}. Available targets: ${availableTargets.join(", ")}`,
+      ),
     );
     process.exit(1);
   }
 
   // Start generation with progress tracking
-  const genSpinner = createSpinner ? createSpinner('Parsing contract...') : null;
-  if (genSpinner && 'start' in genSpinner) genSpinner.start();
+  const genSpinner = createSpinner
+    ? createSpinner("Parsing contract...")
+    : null;
+  if (genSpinner && "start" in genSpinner) genSpinner.start();
 
   try {
     const contract = await parseContract(input);
-    if (genSpinner && 'succeed' in genSpinner) {
-      genSpinner.succeed(`Found ${contract.endpoints.length} endpoint${contract.endpoints.length !== 1 ? 's' : ''}`);
+    if (genSpinner && "succeed" in genSpinner) {
+      genSpinner.succeed(
+        `Found ${contract.endpoints.length} endpoint${contract.endpoints.length !== 1 ? "s" : ""}`,
+      );
     } else {
-      console.log(`Found ${contract.endpoints.length} endpoint${contract.endpoints.length !== 1 ? 's' : ''}`);
+      console.log(
+        `Found ${contract.endpoints.length} endpoint${contract.endpoints.length !== 1 ? "s" : ""}`,
+      );
     }
 
     for (const target of targets) {
-      const targetSpinner = createSpinner ? createSpinner(`Generating ${formatTarget(target)} code...`) : null;
-      if (targetSpinner && 'start' in targetSpinner) targetSpinner.start();
+      const targetSpinner = createSpinner
+        ? createSpinner(`Generating ${formatTarget(target)} code...`)
+        : null;
+      if (targetSpinner && "start" in targetSpinner) targetSpinner.start();
 
       // Determine output directory for this target
       // Priority: CLI arg > config file > current directory
@@ -274,19 +353,27 @@ async function generateSingleContract(config: XrpcConfig | null, options: Genera
       } else if (configTargets[target]) {
         targetBaseDir = configTargets[target];
       } else {
-        targetBaseDir = '.';
+        targetBaseDir = ".";
       }
 
       try {
-        await generateForTarget(target, contract, targetBaseDir, input, createSpinner);
-        if (targetSpinner && 'succeed' in targetSpinner) {
+        await generateForTarget(
+          target,
+          contract,
+          targetBaseDir,
+          input,
+          createSpinner,
+        );
+        if (targetSpinner && "succeed" in targetSpinner) {
           targetSpinner.succeed(`Generated ${formatTarget(target)} code`);
         }
       } catch (error) {
-        if (targetSpinner && 'fail' in targetSpinner) {
+        if (targetSpinner && "fail" in targetSpinner) {
           targetSpinner.fail(`Failed to generate ${formatTarget(target)} code`);
         }
-        console.error(formatError(error instanceof Error ? error.message : String(error)));
+        console.error(
+          formatError(error instanceof Error ? error.message : String(error)),
+        );
         throw error;
       }
     }
@@ -294,11 +381,14 @@ async function generateSingleContract(config: XrpcConfig | null, options: Genera
     console.log();
     console.log(createSeparator());
     console.log();
-    console.log(formatSuccess('Generation complete!'));
+    console.log(formatSuccess("Generation complete!"));
     console.log();
   } catch (error) {
-    if (genSpinner && 'fail' in genSpinner) genSpinner.fail('Generation failed');
-    console.error(formatError(error instanceof Error ? error.message : String(error)));
+    if (genSpinner && "fail" in genSpinner)
+      genSpinner.fail("Generation failed");
+    console.error(
+      formatError(error instanceof Error ? error.message : String(error)),
+    );
     process.exit(1);
   }
 }
@@ -308,8 +398,12 @@ async function generateForTarget(
   contract: ContractDefinition,
   outputDir: string,
   inputPath: string,
-  createSpinner?: (message: string) => { start: () => void; succeed: (msg?: string) => void; fail: (msg?: string) => void },
-  moduleName?: string
+  createSpinner?: (message: string) => {
+    start: () => void;
+    succeed: (msg?: string) => void;
+    fail: (msg?: string) => void;
+  },
+  moduleName?: string,
 ): Promise<void> {
   const generator = getGenerator(target);
   if (!generator) {
@@ -322,16 +416,16 @@ async function generateForTarget(
   // All targets output to an 'xrpc' subdirectory
   // In multi-module mode with non-default module, add module name subdirectory
   let targetOutputDir: string;
-  if (moduleName && moduleName !== 'default') {
-    targetOutputDir = join(validatedOutputDir, 'xrpc', moduleName);
+  if (moduleName && moduleName !== "default") {
+    targetOutputDir = join(validatedOutputDir, "xrpc", moduleName);
   } else {
-    targetOutputDir = join(validatedOutputDir, 'xrpc');
+    targetOutputDir = join(validatedOutputDir, "xrpc");
   }
   await mkdir(targetOutputDir, { recursive: true });
 
   const config: GeneratorConfig = {
     outputDir: targetOutputDir,
-    packageName: 'xrpc',
+    packageName: "xrpc",
     options: {
       contractPath: inputPath, // Pass contract path for client targets
     },
@@ -340,17 +434,18 @@ async function generateForTarget(
   const files = generator.generate(contract, config);
 
   // Write generated files with progress indication
-  const fileSpinner = createSpinner ? createSpinner('Writing files...') : null;
-  if (fileSpinner && 'start' in fileSpinner) fileSpinner.start();
+  const fileSpinner = createSpinner ? createSpinner("Writing files...") : null;
+  if (fileSpinner && "start" in fileSpinner) fileSpinner.start();
 
   const writtenFiles: string[] = [];
 
   // Determine file extensions based on target
-  const isTypeScriptTarget = target.startsWith('react-') || target.startsWith('typescript-');
-  const typesExt = isTypeScriptTarget ? '.ts' : '.go';
-  const serverExt = isTypeScriptTarget ? '.ts' : '.go';
-  const clientExt = isTypeScriptTarget ? '.ts' : '.go';
-  const validationExt = isTypeScriptTarget ? '.ts' : '.go';
+  const isTypeScriptTarget =
+    target.startsWith("ts-") || target.startsWith("typescript-");
+  const typesExt = isTypeScriptTarget ? ".ts" : ".go";
+  const serverExt = isTypeScriptTarget ? ".ts" : ".go";
+  const clientExt = isTypeScriptTarget ? ".ts" : ".go";
+  const validationExt = isTypeScriptTarget ? ".ts" : ".go";
 
   if (files.types) {
     const typesPath = join(targetOutputDir, `types${typesExt}`);
@@ -376,12 +471,14 @@ async function generateForTarget(
     writtenFiles.push(validationPath);
   }
 
-  if (fileSpinner && 'succeed' in fileSpinner) {
-    fileSpinner.succeed(`Wrote ${writtenFiles.length} file${writtenFiles.length !== 1 ? 's' : ''}`);
+  if (fileSpinner && "succeed" in fileSpinner) {
+    fileSpinner.succeed(
+      `Wrote ${writtenFiles.length} file${writtenFiles.length !== 1 ? "s" : ""}`,
+    );
   }
 
   // Show generated files
   for (const file of writtenFiles) {
-    console.log(`    ${formatSecondary('→')} ${formatPath(file)}`);
+    console.log(`    ${formatSecondary("→")} ${formatPath(file)}`);
   }
 }

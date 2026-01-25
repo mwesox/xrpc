@@ -79,7 +79,6 @@ type TaskSummary struct {
 	DueDate               *string
 	CreatedAt             string
 	CompletedAt           *string
-	TagCount              int
 	SubtaskCount          int
 	SubtaskCompletedCount int
 	EstimatedHours        *float64
@@ -92,7 +91,6 @@ func (db *DB) ListTasks(status, priority *string, limit *int) ([]TaskSummary, in
 		SELECT
 			t.id, t.title, t.status, t.priority, t.due_date, t.created_at,
 			t.completed_at, t.estimated_hours, t.position,
-			(SELECT COUNT(*) FROM tags WHERE task_id = t.id) as tag_count,
 			(SELECT COUNT(*) FROM subtasks WHERE task_id = t.id) as subtask_count,
 			(SELECT COUNT(*) FROM subtasks WHERE task_id = t.id AND completed = 1) as subtask_completed_count
 		FROM tasks t
@@ -127,7 +125,7 @@ func (db *DB) ListTasks(status, priority *string, limit *int) ([]TaskSummary, in
 		err := rows.Scan(
 			&t.Id, &t.Title, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt,
 			&t.CompletedAt, &t.EstimatedHours, &t.Position,
-			&t.TagCount, &t.SubtaskCount, &t.SubtaskCompletedCount,
+			&t.SubtaskCount, &t.SubtaskCompletedCount,
 		)
 		if err != nil {
 			return nil, 0, err
@@ -166,13 +164,7 @@ type FullTask struct {
 	CompletedAt    *string
 	EstimatedHours *float64
 	Position       int
-	Tags           []Tag
 	Subtasks       []Subtask
-}
-
-type Tag struct {
-	Name  string
-	Color string
 }
 
 type Subtask struct {
@@ -193,20 +185,6 @@ func (db *DB) GetTask(id string) (*FullTask, error) {
 	)
 	if err != nil {
 		return nil, err
-	}
-
-	// Load tags
-	tagRows, err := db.conn.Query("SELECT name, color FROM tags WHERE task_id = ?", id)
-	if err != nil {
-		return nil, err
-	}
-	defer tagRows.Close()
-	for tagRows.Next() {
-		var tag Tag
-		if err := tagRows.Scan(&tag.Name, &tag.Color); err != nil {
-			return nil, err
-		}
-		task.Tags = append(task.Tags, tag)
 	}
 
 	// Load subtasks
@@ -245,24 +223,6 @@ func (db *DB) CreateTask(input xrpc.TaskCreateInput) (*FullTask, error) {
 	`, id, input.Title, input.Description, input.Priority, input.DueDate, createdAt, input.EstimatedHours, position)
 	if err != nil {
 		return nil, err
-	}
-
-	// Add tags if provided
-	if input.Tags != nil {
-		for _, tag := range input.Tags {
-			tagMap, ok := tag.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			name, _ := tagMap["name"].(string)
-			color, _ := tagMap["color"].(string)
-			if name != "" && color != "" {
-				_, err = db.conn.Exec("INSERT INTO tags (task_id, name, color) VALUES (?, ?, ?)", id, name, color)
-				if err != nil {
-					// Ignore duplicate tag errors
-				}
-			}
-		}
 	}
 
 	return db.GetTask(id)
@@ -392,31 +352,3 @@ func (db *DB) ToggleSubtask(taskId, subtaskId string) (*Subtask, error) {
 	return &st, nil
 }
 
-func (db *DB) DeleteSubtask(taskId, subtaskId string) error {
-	_, err := db.conn.Exec("DELETE FROM subtasks WHERE id = ? AND task_id = ?", subtaskId, taskId)
-	return err
-}
-
-// =============================================================================
-// TAG OPERATIONS
-// =============================================================================
-
-func (db *DB) AddTag(taskId, name, color string) (*Tag, error) {
-	_, err := db.conn.Exec(
-		"INSERT OR REPLACE INTO tags (task_id, name, color) VALUES (?, ?, ?)",
-		taskId, name, color,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Tag{
-		Name:  name,
-		Color: color,
-	}, nil
-}
-
-func (db *DB) RemoveTag(taskId, tagName string) error {
-	_, err := db.conn.Exec("DELETE FROM tags WHERE task_id = ? AND name = ?", taskId, tagName)
-	return err
-}

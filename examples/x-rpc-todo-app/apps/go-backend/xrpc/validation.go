@@ -4,6 +4,7 @@ import (
     "fmt"
     "strings"
     "regexp"
+    "net/mail"
 )
 
 type ValidationError struct {
@@ -78,6 +79,18 @@ func ValidateTaskListOutput(input TaskListOutput) error {
             Field:   "tasks",
             Message: "is required",
         })
+    }
+    for i, item := range input.Tasks {
+        if err := ValidateTaskListOutputTasksItem(item); err != nil {
+            if nestedErrs, ok := err.(ValidationErrors); ok {
+                for _, nestedErr := range nestedErrs {
+                    errs = append(errs, &ValidationError{
+                        Field:   fmt.Sprintf("tasks[%%d].%%s", i, nestedErr.Field),
+                        Message: nestedErr.Message,
+                    })
+                }
+            }
+        }
     }
     // Validate total
     if input.Total < 0 {
@@ -203,19 +216,6 @@ func ValidateTaskGetOutput(input TaskGetOutput) error {
         })
     }
     // Validate completedAt (skipped - pointer type)
-    // Validate tags
-    if input.Tags == nil {
-        errs = append(errs, &ValidationError{
-            Field:   "tags",
-            Message: "is required",
-        })
-    }
-    if input.Tags != nil && len(input.Tags) > 5 {
-        errs = append(errs, &ValidationError{
-            Field:   "tags",
-            Message: fmt.Sprintf("must have at most %d item(s)", 5),
-        })
-    }
     // Validate subtasks
     if input.Subtasks == nil {
         errs = append(errs, &ValidationError{
@@ -228,6 +228,18 @@ func ValidateTaskGetOutput(input TaskGetOutput) error {
             Field:   "subtasks",
             Message: fmt.Sprintf("must have at most %d item(s)", 20),
         })
+    }
+    for i, item := range input.Subtasks {
+        if err := ValidateTaskGetOutputSubtasksItem(item); err != nil {
+            if nestedErrs, ok := err.(ValidationErrors); ok {
+                for _, nestedErr := range nestedErrs {
+                    errs = append(errs, &ValidationError{
+                        Field:   fmt.Sprintf("subtasks[%%d].%%s", i, nestedErr.Field),
+                        Message: nestedErr.Message,
+                    })
+                }
+            }
+        }
     }
     if input.EstimatedHours > 100 {
         errs = append(errs, &ValidationError{
@@ -269,10 +281,10 @@ func ValidateTaskCreateInput(input TaskCreateInput) error {
             Message: "is required",
         })
     }
-    if input.Title != "" && len(input.Title) < 1 {
+    if input.Title != "" && len(input.Title) < 3 {
         errs = append(errs, &ValidationError{
             Field:   "title",
-            Message: fmt.Sprintf("must be at least %d character(s)", 1),
+            Message: fmt.Sprintf("must be at least %d character(s)", 3),
         })
     }
     if len(input.Title) > 200 {
@@ -400,19 +412,6 @@ func ValidateTaskCreateOutput(input TaskCreateOutput) error {
         })
     }
     // Validate completedAt (skipped - pointer type)
-    // Validate tags
-    if input.Tags == nil {
-        errs = append(errs, &ValidationError{
-            Field:   "tags",
-            Message: "is required",
-        })
-    }
-    if input.Tags != nil && len(input.Tags) > 5 {
-        errs = append(errs, &ValidationError{
-            Field:   "tags",
-            Message: fmt.Sprintf("must have at most %d item(s)", 5),
-        })
-    }
     // Validate subtasks
     if input.Subtasks == nil {
         errs = append(errs, &ValidationError{
@@ -425,6 +424,18 @@ func ValidateTaskCreateOutput(input TaskCreateOutput) error {
             Field:   "subtasks",
             Message: fmt.Sprintf("must have at most %d item(s)", 20),
         })
+    }
+    for i, item := range input.Subtasks {
+        if err := ValidateTaskCreateOutputSubtasksItem(item); err != nil {
+            if nestedErrs, ok := err.(ValidationErrors); ok {
+                for _, nestedErr := range nestedErrs {
+                    errs = append(errs, &ValidationError{
+                        Field:   fmt.Sprintf("subtasks[%%d].%%s", i, nestedErr.Field),
+                        Message: nestedErr.Message,
+                    })
+                }
+            }
+        }
     }
     if input.EstimatedHours > 100 {
         errs = append(errs, &ValidationError{
@@ -591,19 +602,6 @@ func ValidateTaskUpdateOutput(input TaskUpdateOutput) error {
         })
     }
     // Validate completedAt (skipped - pointer type)
-    // Validate tags
-    if input.Tags == nil {
-        errs = append(errs, &ValidationError{
-            Field:   "tags",
-            Message: "is required",
-        })
-    }
-    if input.Tags != nil && len(input.Tags) > 5 {
-        errs = append(errs, &ValidationError{
-            Field:   "tags",
-            Message: fmt.Sprintf("must have at most %d item(s)", 5),
-        })
-    }
     // Validate subtasks
     if input.Subtasks == nil {
         errs = append(errs, &ValidationError{
@@ -616,6 +614,18 @@ func ValidateTaskUpdateOutput(input TaskUpdateOutput) error {
             Field:   "subtasks",
             Message: fmt.Sprintf("must have at most %d item(s)", 20),
         })
+    }
+    for i, item := range input.Subtasks {
+        if err := ValidateTaskUpdateOutputSubtasksItem(item); err != nil {
+            if nestedErrs, ok := err.(ValidationErrors); ok {
+                for _, nestedErr := range nestedErrs {
+                    errs = append(errs, &ValidationError{
+                        Field:   fmt.Sprintf("subtasks[%%d].%%s", i, nestedErr.Field),
+                        Message: nestedErr.Message,
+                    })
+                }
+            }
+        }
     }
     if input.EstimatedHours > 100 {
         errs = append(errs, &ValidationError{
@@ -858,41 +868,128 @@ func ValidateSubtaskToggleOutput(input SubtaskToggleOutput) error {
     return nil
 }
 
-func ValidateSubtaskDeleteInput(input SubtaskDeleteInput) error {
+func ValidateTaskListOutputTasksItem(input TaskListOutputTasksItem) error {
     var errs ValidationErrors
-    // Validate taskId
-    if input.TaskId == "" {
+    // Validate id
+    if input.Id == "" {
         errs = append(errs, &ValidationError{
-            Field:   "taskId",
+            Field:   "id",
             Message: "is required",
         })
     }
-    if input.TaskId != "" {
-        matched, _ := regexp.MatchString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", input.TaskId)
+    if input.Id != "" {
+        matched, _ := regexp.MatchString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", input.Id)
 
         if !matched {
             errs = append(errs, &ValidationError{
-                Field:   "taskId",
+                Field:   "id",
                 Message: "must be a valid UUID",
             })
         }
     }
-    // Validate subtaskId
-    if input.SubtaskId == "" {
+    // Validate title
+    if input.Title == "" {
         errs = append(errs, &ValidationError{
-            Field:   "subtaskId",
+            Field:   "title",
             Message: "is required",
         })
     }
-    if input.SubtaskId != "" {
-        matched, _ := regexp.MatchString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", input.SubtaskId)
-
-        if !matched {
-            errs = append(errs, &ValidationError{
-                Field:   "subtaskId",
-                Message: "must be a valid UUID",
-            })
-        }
+    if input.Title != "" && len(input.Title) < 1 {
+        errs = append(errs, &ValidationError{
+            Field:   "title",
+            Message: fmt.Sprintf("must be at least %d character(s)", 1),
+        })
+    }
+    if len(input.Title) > 200 {
+        errs = append(errs, &ValidationError{
+            Field:   "title",
+            Message: fmt.Sprintf("must be at most %d character(s)", 200),
+        })
+    }
+    // Validate status
+    if input.Status == "" {
+        errs = append(errs, &ValidationError{
+            Field:   "status",
+            Message: "is required",
+        })
+    }
+    if input.Status != "" && input.Status != "pending" && input.Status != "in_progress" && input.Status != "completed" && input.Status != "cancelled" {
+        errs = append(errs, &ValidationError{
+            Field:   "status",
+            Message: "must be one of: pending, in_progress, completed, cancelled",
+        })
+    }
+    // Validate priority
+    if input.Priority == "" {
+        errs = append(errs, &ValidationError{
+            Field:   "priority",
+            Message: "is required",
+        })
+    }
+    if input.Priority != "" && input.Priority != "low" && input.Priority != "medium" && input.Priority != "high" && input.Priority != "urgent" {
+        errs = append(errs, &ValidationError{
+            Field:   "priority",
+            Message: "must be one of: low, medium, high, urgent",
+        })
+    }
+    // Validate createdAt
+    if input.CreatedAt == "" {
+        errs = append(errs, &ValidationError{
+            Field:   "createdAt",
+            Message: "is required",
+        })
+    }
+    // Validate completedAt (skipped - pointer type)
+    // Validate subtaskCount
+    if input.SubtaskCount < 0 {
+        errs = append(errs, &ValidationError{
+            Field:   "subtaskCount",
+            Message: fmt.Sprintf("must be at least %v", 0),
+        })
+    }
+    if float64(input.SubtaskCount) != float64(int64(input.SubtaskCount)) {
+        errs = append(errs, &ValidationError{
+            Field:   "subtaskCount",
+            Message: "must be an integer",
+        })
+    }
+    // Validate subtaskCompletedCount
+    if input.SubtaskCompletedCount < 0 {
+        errs = append(errs, &ValidationError{
+            Field:   "subtaskCompletedCount",
+            Message: fmt.Sprintf("must be at least %v", 0),
+        })
+    }
+    if float64(input.SubtaskCompletedCount) != float64(int64(input.SubtaskCompletedCount)) {
+        errs = append(errs, &ValidationError{
+            Field:   "subtaskCompletedCount",
+            Message: "must be an integer",
+        })
+    }
+    if input.EstimatedHours > 100 {
+        errs = append(errs, &ValidationError{
+            Field:   "estimatedHours",
+            Message: fmt.Sprintf("must be at most %v", 100),
+        })
+    }
+    if input.EstimatedHours <= 0 {
+        errs = append(errs, &ValidationError{
+            Field:   "estimatedHours",
+            Message: "must be positive",
+        })
+    }
+    // Validate position
+    if input.Position < 0 {
+        errs = append(errs, &ValidationError{
+            Field:   "position",
+            Message: fmt.Sprintf("must be at least %v", 0),
+        })
+    }
+    if float64(input.Position) != float64(int64(input.Position)) {
+        errs = append(errs, &ValidationError{
+            Field:   "position",
+            Message: "must be an integer",
+        })
     }
     if len(errs) > 0 {
         return errs
@@ -900,30 +997,21 @@ func ValidateSubtaskDeleteInput(input SubtaskDeleteInput) error {
     return nil
 }
 
-func ValidateSubtaskDeleteOutput(input SubtaskDeleteOutput) error {
+func ValidateTaskGetOutputAssignee(input TaskGetOutputAssignee) error {
     var errs ValidationErrors
-    // Validate success
-    if len(errs) > 0 {
-        return errs
-    }
-    return nil
-}
-
-func ValidateTagAddInput(input TagAddInput) error {
-    var errs ValidationErrors
-    // Validate taskId
-    if input.TaskId == "" {
+    // Validate id
+    if input.Id == "" {
         errs = append(errs, &ValidationError{
-            Field:   "taskId",
+            Field:   "id",
             Message: "is required",
         })
     }
-    if input.TaskId != "" {
-        matched, _ := regexp.MatchString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", input.TaskId)
+    if input.Id != "" {
+        matched, _ := regexp.MatchString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", input.Id)
 
         if !matched {
             errs = append(errs, &ValidationError{
-                Field:   "taskId",
+                Field:   "id",
                 Message: "must be a valid UUID",
             })
         }
@@ -935,42 +1023,30 @@ func ValidateTagAddInput(input TagAddInput) error {
             Message: "is required",
         })
     }
-    if input.Name != "" && len(input.Name) < 1 {
+    if input.Name != "" && len(input.Name) < 2 {
         errs = append(errs, &ValidationError{
             Field:   "name",
-            Message: fmt.Sprintf("must be at least %d character(s)", 1),
+            Message: fmt.Sprintf("must be at least %d character(s)", 2),
         })
     }
-    if len(input.Name) > 30 {
+    if len(input.Name) > 100 {
         errs = append(errs, &ValidationError{
             Field:   "name",
-            Message: fmt.Sprintf("must be at most %d character(s)", 30),
+            Message: fmt.Sprintf("must be at most %d character(s)", 100),
         })
     }
-    if input.Name != "" {
-        matched, _ := regexp.MatchString("^[a-z0-9-]+$", input.Name)
-
-        if !matched {
-            errs = append(errs, &ValidationError{
-                Field:   "name",
-                Message: "must match the required pattern",
-            })
-        }
-    }
-    // Validate color
-    if input.Color == "" {
+    // Validate email
+    if input.Email == "" {
         errs = append(errs, &ValidationError{
-            Field:   "color",
+            Field:   "email",
             Message: "is required",
         })
     }
-    if input.Color != "" {
-        matched, _ := regexp.MatchString("^#[0-9A-Fa-f]{6}$", input.Color)
-
-        if !matched {
+    if input.Email != "" {
+        if _, err := mail.ParseAddress(input.Email); err != nil {
             errs = append(errs, &ValidationError{
-                Field:   "color",
-                Message: "must match the required pattern",
+                Field:   "email",
+                Message: "must be a valid email address",
             })
         }
     }
@@ -980,8 +1056,70 @@ func ValidateTagAddInput(input TagAddInput) error {
     return nil
 }
 
-func ValidateTagAddOutput(input TagAddOutput) error {
+func ValidateTaskGetOutputSubtasksItem(input TaskGetOutputSubtasksItem) error {
     var errs ValidationErrors
+    // Validate id
+    if input.Id == "" {
+        errs = append(errs, &ValidationError{
+            Field:   "id",
+            Message: "is required",
+        })
+    }
+    if input.Id != "" {
+        matched, _ := regexp.MatchString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", input.Id)
+
+        if !matched {
+            errs = append(errs, &ValidationError{
+                Field:   "id",
+                Message: "must be a valid UUID",
+            })
+        }
+    }
+    // Validate title
+    if input.Title == "" {
+        errs = append(errs, &ValidationError{
+            Field:   "title",
+            Message: "is required",
+        })
+    }
+    if input.Title != "" && len(input.Title) < 1 {
+        errs = append(errs, &ValidationError{
+            Field:   "title",
+            Message: fmt.Sprintf("must be at least %d character(s)", 1),
+        })
+    }
+    if len(input.Title) > 200 {
+        errs = append(errs, &ValidationError{
+            Field:   "title",
+            Message: fmt.Sprintf("must be at most %d character(s)", 200),
+        })
+    }
+    // Validate completed
+    if len(errs) > 0 {
+        return errs
+    }
+    return nil
+}
+
+func ValidateTaskCreateOutputAssignee(input TaskCreateOutputAssignee) error {
+    var errs ValidationErrors
+    // Validate id
+    if input.Id == "" {
+        errs = append(errs, &ValidationError{
+            Field:   "id",
+            Message: "is required",
+        })
+    }
+    if input.Id != "" {
+        matched, _ := regexp.MatchString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", input.Id)
+
+        if !matched {
+            errs = append(errs, &ValidationError{
+                Field:   "id",
+                Message: "must be a valid UUID",
+            })
+        }
+    }
     // Validate name
     if input.Name == "" {
         errs = append(errs, &ValidationError{
@@ -989,42 +1127,30 @@ func ValidateTagAddOutput(input TagAddOutput) error {
             Message: "is required",
         })
     }
-    if input.Name != "" && len(input.Name) < 1 {
+    if input.Name != "" && len(input.Name) < 2 {
         errs = append(errs, &ValidationError{
             Field:   "name",
-            Message: fmt.Sprintf("must be at least %d character(s)", 1),
+            Message: fmt.Sprintf("must be at least %d character(s)", 2),
         })
     }
-    if len(input.Name) > 30 {
+    if len(input.Name) > 100 {
         errs = append(errs, &ValidationError{
             Field:   "name",
-            Message: fmt.Sprintf("must be at most %d character(s)", 30),
+            Message: fmt.Sprintf("must be at most %d character(s)", 100),
         })
     }
-    if input.Name != "" {
-        matched, _ := regexp.MatchString("^[a-z0-9-]+$", input.Name)
-
-        if !matched {
-            errs = append(errs, &ValidationError{
-                Field:   "name",
-                Message: "must match the required pattern",
-            })
-        }
-    }
-    // Validate color
-    if input.Color == "" {
+    // Validate email
+    if input.Email == "" {
         errs = append(errs, &ValidationError{
-            Field:   "color",
+            Field:   "email",
             Message: "is required",
         })
     }
-    if input.Color != "" {
-        matched, _ := regexp.MatchString("^#[0-9A-Fa-f]{6}$", input.Color)
-
-        if !matched {
+    if input.Email != "" {
+        if _, err := mail.ParseAddress(input.Email); err != nil {
             errs = append(errs, &ValidationError{
-                Field:   "color",
-                Message: "must match the required pattern",
+                Field:   "email",
+                Message: "must be a valid email address",
             })
         }
     }
@@ -1034,43 +1160,103 @@ func ValidateTagAddOutput(input TagAddOutput) error {
     return nil
 }
 
-func ValidateTagRemoveInput(input TagRemoveInput) error {
+func ValidateTaskCreateOutputSubtasksItem(input TaskCreateOutputSubtasksItem) error {
     var errs ValidationErrors
-    // Validate taskId
-    if input.TaskId == "" {
+    // Validate id
+    if input.Id == "" {
         errs = append(errs, &ValidationError{
-            Field:   "taskId",
+            Field:   "id",
             Message: "is required",
         })
     }
-    if input.TaskId != "" {
-        matched, _ := regexp.MatchString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", input.TaskId)
+    if input.Id != "" {
+        matched, _ := regexp.MatchString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", input.Id)
 
         if !matched {
             errs = append(errs, &ValidationError{
-                Field:   "taskId",
+                Field:   "id",
                 Message: "must be a valid UUID",
             })
         }
     }
-    // Validate tagName
-    if input.TagName == "" {
+    // Validate title
+    if input.Title == "" {
         errs = append(errs, &ValidationError{
-            Field:   "tagName",
+            Field:   "title",
             Message: "is required",
         })
     }
-    if input.TagName != "" && len(input.TagName) < 1 {
+    if input.Title != "" && len(input.Title) < 1 {
         errs = append(errs, &ValidationError{
-            Field:   "tagName",
+            Field:   "title",
             Message: fmt.Sprintf("must be at least %d character(s)", 1),
         })
     }
-    if len(input.TagName) > 30 {
+    if len(input.Title) > 200 {
         errs = append(errs, &ValidationError{
-            Field:   "tagName",
-            Message: fmt.Sprintf("must be at most %d character(s)", 30),
+            Field:   "title",
+            Message: fmt.Sprintf("must be at most %d character(s)", 200),
         })
+    }
+    // Validate completed
+    if len(errs) > 0 {
+        return errs
+    }
+    return nil
+}
+
+func ValidateTaskUpdateOutputAssignee(input TaskUpdateOutputAssignee) error {
+    var errs ValidationErrors
+    // Validate id
+    if input.Id == "" {
+        errs = append(errs, &ValidationError{
+            Field:   "id",
+            Message: "is required",
+        })
+    }
+    if input.Id != "" {
+        matched, _ := regexp.MatchString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", input.Id)
+
+        if !matched {
+            errs = append(errs, &ValidationError{
+                Field:   "id",
+                Message: "must be a valid UUID",
+            })
+        }
+    }
+    // Validate name
+    if input.Name == "" {
+        errs = append(errs, &ValidationError{
+            Field:   "name",
+            Message: "is required",
+        })
+    }
+    if input.Name != "" && len(input.Name) < 2 {
+        errs = append(errs, &ValidationError{
+            Field:   "name",
+            Message: fmt.Sprintf("must be at least %d character(s)", 2),
+        })
+    }
+    if len(input.Name) > 100 {
+        errs = append(errs, &ValidationError{
+            Field:   "name",
+            Message: fmt.Sprintf("must be at most %d character(s)", 100),
+        })
+    }
+    // Validate email
+    if input.Email == "" {
+        errs = append(errs, &ValidationError{
+            Field:   "email",
+            Message: "is required",
+        })
+    }
+    if input.Email != "" {
+        if _, err := mail.ParseAddress(input.Email); err != nil {
+            errs = append(errs, &ValidationError{
+                Field:   "email",
+                Message: "must be a valid email address",
+            })
+        }
     }
     if len(errs) > 0 {
         return errs
@@ -1078,9 +1264,45 @@ func ValidateTagRemoveInput(input TagRemoveInput) error {
     return nil
 }
 
-func ValidateTagRemoveOutput(input TagRemoveOutput) error {
+func ValidateTaskUpdateOutputSubtasksItem(input TaskUpdateOutputSubtasksItem) error {
     var errs ValidationErrors
-    // Validate success
+    // Validate id
+    if input.Id == "" {
+        errs = append(errs, &ValidationError{
+            Field:   "id",
+            Message: "is required",
+        })
+    }
+    if input.Id != "" {
+        matched, _ := regexp.MatchString("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", input.Id)
+
+        if !matched {
+            errs = append(errs, &ValidationError{
+                Field:   "id",
+                Message: "must be a valid UUID",
+            })
+        }
+    }
+    // Validate title
+    if input.Title == "" {
+        errs = append(errs, &ValidationError{
+            Field:   "title",
+            Message: "is required",
+        })
+    }
+    if input.Title != "" && len(input.Title) < 1 {
+        errs = append(errs, &ValidationError{
+            Field:   "title",
+            Message: fmt.Sprintf("must be at least %d character(s)", 1),
+        })
+    }
+    if len(input.Title) > 200 {
+        errs = append(errs, &ValidationError{
+            Field:   "title",
+            Message: fmt.Sprintf("must be at most %d character(s)", 200),
+        })
+    }
+    // Validate completed
     if len(errs) > 0 {
         return errs
     }
