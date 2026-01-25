@@ -163,7 +163,9 @@ export type TypeHandler<T> = (ctx: TypeContext) => TypeResult<T>;
 /**
  * Handler function for mapping a specific validation rule.
  */
-export type ValidationHandler<V> = (ctx: ValidationContext) => ValidationResult<V>;
+export type ValidationHandler<V> = (
+  ctx: ValidationContext,
+) => ValidationResult<V>;
 
 /**
  * Complete mapping of all type kinds to handlers.

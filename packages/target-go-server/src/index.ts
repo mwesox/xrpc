@@ -1,4 +1,4 @@
-export { GoCodeGenerator } from "./generator";
+export { goTarget } from "./generator";
 export { GoTypeGenerator } from "./type-generator";
 export { GoServerGenerator } from "./server-generator";
 export { GoValidationGenerator } from "./validation-generator";

@@ -1,16 +1,21 @@
-import { describe, expect, it, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import type { TypeReference } from "../parser/contract";
+import { TypeMapperBase } from "./type-mapper";
 import {
   TYPE_KINDS,
   VALIDATION_KINDS,
+  getValidationsForType,
   isTypeKind,
   isValidationKind,
-  getValidationsForType,
 } from "./types";
-import type { TypeMapping, ValidationMapping, TypeContext, ValidationContext } from "./types";
-import { TypeMapperBase } from "./type-mapper";
-import { ValidationMapperBase } from "./validation-mapper";
+import type {
+  TypeContext,
+  TypeMapping,
+  ValidationContext,
+  ValidationMapping,
+} from "./types";
 import { UtilityCollector } from "./utility-collector";
+import { ValidationMapperBase } from "./validation-mapper";
 
 describe("framework types", () => {
   describe("TYPE_KINDS", () => {
@@ -402,4 +407,3 @@ describe("ValidationMapperBase", () => {
     }).toThrow("Unknown validation kind");
   });
 });
-

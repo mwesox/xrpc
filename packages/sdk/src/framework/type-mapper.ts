@@ -59,7 +59,7 @@ export abstract class TypeMapperBase<T> {
       depth?: number;
       parentName?: string;
       fieldName?: string;
-    } = {}
+    } = {},
   ): TypeResult<T> {
     const ctx: TypeContext = {
       typeRef,
@@ -73,7 +73,7 @@ export abstract class TypeMapperBase<T> {
     if (!isTypeKind(typeRef.kind)) {
       throw new Error(
         `Unknown type kind: "${typeRef.kind}". ` +
-          `Valid kinds are: ${TYPE_KINDS.join(", ")}`
+          `Valid kinds are: ${TYPE_KINDS.join(", ")}`,
       );
     }
 
@@ -83,8 +83,7 @@ export abstract class TypeMapperBase<T> {
     // This should never happen if typeMapping is properly typed
     if (!handler) {
       throw new Error(
-        `Missing handler for type kind: "${typeRef.kind}". ` +
-          `All type kinds must be handled by the type mapper.`
+        `Missing handler for type kind: "${typeRef.kind}". All type kinds must be handled by the type mapper.`,
       );
     }
 
@@ -131,7 +130,7 @@ export abstract class TypeMapperBase<T> {
   protected mapNestedType(
     typeRef: TypeReference,
     parentName?: string,
-    fieldName?: string
+    fieldName?: string,
   ): TypeResult<T> {
     return this.mapType(typeRef, {
       name: typeRef.name,
@@ -176,7 +175,7 @@ export abstract class TypeMapperBase<T> {
 
     if (missingKinds.length > 0) {
       throw new Error(
-        `Type mapper is incomplete. Missing handlers for: ${missingKinds.join(", ")}`
+        `Type mapper is incomplete. Missing handlers for: ${missingKinds.join(", ")}`,
       );
     }
   }
@@ -193,7 +192,7 @@ export abstract class TypeMapperBase<T> {
 export function createUnsupportedTypeHandler<T>(
   kind: TypeKind,
   fallbackType: T,
-  warningFn?: (message: string) => void
+  warningFn?: (message: string) => void,
 ): TypeHandler<T> {
   return (ctx: TypeContext): TypeResult<T> => {
     const message = `Type kind "${kind}" is not fully supported. Using fallback type.`;

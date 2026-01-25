@@ -1,8 +1,8 @@
 import {
-  type ValidationMapping,
-  type ValidationResult,
   type ValidationContext,
   ValidationMapperBase,
+  type ValidationMapping,
+  type ValidationResult,
 } from "@xrpckit/sdk";
 
 /**
@@ -51,7 +51,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
 
   // --- String validation handlers ---
 
-  private handleMinLength(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleMinLength(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath, value, isRequired } = ctx;
     // For required fields, skip check if empty (already caught by required check)
     const condition = isRequired
@@ -68,7 +70,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
     };
   }
 
-  private handleMaxLength(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleMaxLength(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath, value } = ctx;
     return {
       validation: {
@@ -79,7 +83,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
     };
   }
 
-  private handleEmail(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleEmail(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath, isRequired } = ctx;
     // Use mail.ParseAddress for email validation
     const condition = `func() bool { _, err := mail.ParseAddress(${fieldPath}); return err != nil }()`;
@@ -94,7 +100,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
     };
   }
 
-  private handleUrl(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleUrl(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath, isRequired } = ctx;
     // Use url.Parse with scheme/host validation
     const condition = `func() bool { u, err := url.Parse(${fieldPath}); return err != nil || u.Scheme == "" || u.Host == "" }()`;
@@ -109,9 +117,12 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
     };
   }
 
-  private handleUuid(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleUuid(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath, isRequired } = ctx;
-    const uuidRegex = `^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`;
+    const uuidRegex =
+      "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$";
     const condition = `func() bool { matched, _ := regexp.MatchString("${uuidRegex}", ${fieldPath}); return !matched }()`;
 
     return {
@@ -124,7 +135,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
     };
   }
 
-  private handleRegex(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleRegex(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath, value, isRequired, allRules } = ctx;
 
     // Skip if email/url/uuid is set (they have dedicated validators)
@@ -155,7 +168,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
 
   // --- Number validation handlers ---
 
-  private handleMin(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleMin(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath, value } = ctx;
     return {
       validation: {
@@ -166,7 +181,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
     };
   }
 
-  private handleMax(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleMax(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath, value } = ctx;
     return {
       validation: {
@@ -177,7 +194,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
     };
   }
 
-  private handleInt(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleInt(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath } = ctx;
     return {
       validation: {
@@ -187,7 +206,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
     };
   }
 
-  private handlePositive(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handlePositive(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath } = ctx;
     return {
       validation: {
@@ -197,7 +218,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
     };
   }
 
-  private handleNegative(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleNegative(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath } = ctx;
     return {
       validation: {
@@ -209,7 +232,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
 
   // --- Array validation handlers ---
 
-  private handleMinItems(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleMinItems(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath, value } = ctx;
     return {
       validation: {
@@ -220,7 +245,9 @@ export class GoValidationMapper extends ValidationMapperBase<GoValidationCode> {
     };
   }
 
-  private handleMaxItems(ctx: ValidationContext): ValidationResult<GoValidationCode> {
+  private handleMaxItems(
+    ctx: ValidationContext,
+  ): ValidationResult<GoValidationCode> {
     const { fieldPath, value } = ctx;
     return {
       validation: {

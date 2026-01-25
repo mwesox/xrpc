@@ -14,11 +14,6 @@ export type {
 
 // Codegen exports
 export { CodeWriter } from "./codegen/code-writer";
-export {
-  BaseCodeGenerator,
-  type GeneratorConfig,
-  type GeneratedFiles,
-} from "./codegen/base-generator";
 export { toPascalCase, toCamelCase, toSnakeCase } from "./codegen/utils";
 
 // Framework exports - for building target generators
@@ -36,14 +31,25 @@ export {
   // Base classes
   TypeMapperBase,
   ValidationMapperBase,
-  TargetGeneratorBase,
   UtilityCollector,
   // Helpers
   createUnsupportedTypeHandler,
   createNoOpValidationHandler,
   createUnsupportedValidationHandler,
-  createCapabilities,
 } from "./framework";
+
+// Target API (simple interface for code generation)
+export {
+  type Diagnostic,
+  type GeneratedFile,
+  type TargetInput,
+  type TargetOutput,
+  type Target,
+  type TargetSupport,
+  type ContractUsage,
+  collectContractUsage,
+  validateSupport,
+} from "./target";
 
 // Framework types
 export type {
@@ -58,7 +64,6 @@ export type {
   ValidationHandler,
   TypeMapping,
   ValidationMapping,
-  TargetCapabilities,
   ContractIssue,
   ContractValidationResult,
 } from "./framework";

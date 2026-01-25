@@ -1,7 +1,7 @@
 import {
+  ValidationMapperBase,
   type ValidationMapping,
   type ValidationResult,
-  ValidationMapperBase,
   createNoOpValidationHandler,
 } from "@xrpckit/sdk";
 

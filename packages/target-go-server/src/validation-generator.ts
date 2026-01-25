@@ -146,7 +146,7 @@ export class GoValidationGenerator {
 
       if (type.properties) {
         for (const prop of type.properties) {
-          this.generatePropertyValidation(prop, "input", type, b);
+          this.generatePropertyValidation(prop, "input", b);
         }
       }
 
@@ -160,48 +160,59 @@ export class GoValidationGenerator {
   private generatePropertyValidation(
     prop: Property,
     prefix: string,
-    parentType: TypeDefinition,
     w: GoBuilder,
   ): void {
     const fieldName = toPascalCase(prop.name);
     const fieldPath = `${prefix}.${fieldName}`;
     const fieldPathStr = prop.name;
-
-    // Get the actual base type (unwrap optional/nullable)
-    const actualType = this.getActualType(prop.type);
-    const isString = actualType === "string";
-    const isNumber = actualType === "number";
-    const isArray = prop.type.kind === "array";
-
-    // Check if this is a pointer type (optional+nullable or nullable+optional)
-    // These become *type in Go and require special handling
+    const unwrappedType = this.unwrapOptionalNullable(prop.type);
     const isPointerType = this.isPointerType(prop.type);
 
-    // Skip validation for pointer types - they require different handling
-    // that is beyond the scope of the current validation generator
     if (isPointerType) {
-      w.comment(`Validate ${prop.name} (skipped - pointer type)`);
+      w.comment(`Validate ${prop.name} when present`);
+      w.if(`${fieldPath} != nil`, (b) => {
+        this.generatePropertyValidationForValue(
+          prop,
+          `*${fieldPath}`,
+          fieldPathStr,
+          unwrappedType,
+          b,
+          false,
+        );
+      });
       return;
     }
 
-    // Check if this is an enum type
-    const enumValues = this.getEnumValues(prop.type);
+    this.generatePropertyValidationForValue(
+      prop,
+      fieldPath,
+      fieldPathStr,
+      unwrappedType,
+      w,
+      prop.required,
+    );
+  }
+
+  private generatePropertyValidationForValue(
+    prop: Property,
+    valuePath: string,
+    fieldPathStr: string,
+    typeRef: TypeReference,
+    w: GoBuilder,
+    isRequired: boolean,
+  ): void {
+    const actualType = this.getActualType(typeRef);
+    const isString = actualType === "string";
+    const isNumber = actualType === "number";
+    const isArray = typeRef.kind === "array";
+
+    const enumValues = this.getEnumValues(typeRef);
     const isEnum = enumValues !== null;
 
-    if (prop.required) {
+    if (isRequired) {
       w.comment(`Validate ${prop.name}`);
-      if (isEnum) {
-        // Enum required check - empty string is invalid
-        w.if(`${fieldPath} == ""`, (b) => {
-          b.l("errs = append(errs, &ValidationError{")
-            .i()
-            .l(`Field:   "${fieldPathStr}",`)
-            .l(`Message: "is required",`)
-            .u()
-            .l("})");
-        });
-      } else if (isString) {
-        w.if(`${fieldPath} == ""`, (b) => {
+      if (isEnum || isString) {
+        w.if(`${valuePath} == ""`, (b) => {
           b.l("errs = append(errs, &ValidationError{")
             .i()
             .l(`Field:   "${fieldPathStr}",`)
@@ -213,7 +224,7 @@ export class GoValidationGenerator {
         // For numbers, we can't easily check if zero is valid, so we skip required check
         // The validation rules (min/max) will handle it
       } else if (isArray) {
-        w.if(`${fieldPath} == nil`, (b) => {
+        w.if(`${valuePath} == nil`, (b) => {
           b.l("errs = append(errs, &ValidationError{")
             .i()
             .l(`Field:   "${fieldPathStr}",`)
@@ -224,52 +235,34 @@ export class GoValidationGenerator {
       }
     }
 
-    // Enum validation - check if value is one of the allowed options
     if (isEnum && enumValues) {
       const enumValuesStr = enumValues.join(", ");
       const enumConditions = enumValues
-        .map((v) => `${fieldPath} != "${v}"`)
+        .map((v) => `${valuePath} != "${v}"`)
         .join(" && ");
-
-      if (prop.required) {
-        // For required fields, only validate if not empty (empty already caught above)
-        w.if(`${fieldPath} != "" && ${enumConditions}`, (b) => {
-          b.l("errs = append(errs, &ValidationError{")
-            .i()
-            .l(`Field:   "${fieldPathStr}",`)
-            .l(`Message: "must be one of: ${enumValuesStr}",`)
-            .u()
-            .l("})");
-        });
-      } else {
-        // For optional fields, only validate if provided
-        w.if(`${fieldPath} != "" && ${enumConditions}`, (b) => {
-          b.l("errs = append(errs, &ValidationError{")
-            .i()
-            .l(`Field:   "${fieldPathStr}",`)
-            .l(`Message: "must be one of: ${enumValuesStr}",`)
-            .u()
-            .l("})");
-        });
-      }
+      w.if(`${valuePath} != "" && ${enumConditions}`, (b) => {
+        b.l("errs = append(errs, &ValidationError{")
+          .i()
+          .l(`Field:   "${fieldPathStr}",`)
+          .l(`Message: "must be one of: ${enumValuesStr}",`)
+          .u()
+          .l("})");
+      });
     }
 
-    // Check both prop.validation and prop.type.validation (for arrays, validation is on the type)
     const validationRules = prop.validation || prop.type.validation;
 
     if (validationRules) {
-      // For optional fields, only validate if field is not empty/nil
-      if (!prop.required) {
+      if (!isRequired) {
         if (isString) {
-          w.if(`${fieldPath} != ""`, (b) => {
-            // Create a type reference with the actual base type for validation
+          w.if(`${valuePath} != ""`, (b) => {
             const validationTypeRef: TypeReference = {
               kind: "primitive",
               baseType: actualType,
             };
             this.generateValidationRules(
               validationRules,
-              fieldPath,
+              valuePath,
               fieldPathStr,
               validationTypeRef,
               b,
@@ -277,26 +270,25 @@ export class GoValidationGenerator {
             );
           });
         } else if (isNumber) {
-          // Numbers are always present (zero value), so validate directly
           const validationTypeRef: TypeReference = {
             kind: "primitive",
             baseType: actualType,
           };
           this.generateValidationRules(
             validationRules,
-            fieldPath,
+            valuePath,
             fieldPathStr,
             validationTypeRef,
             w,
             false,
           );
         } else if (isArray) {
-          w.if(`${fieldPath} != nil`, (b) => {
+          w.if(`${valuePath} != nil`, (b) => {
             this.generateValidationRules(
               validationRules,
-              fieldPath,
+              valuePath,
               fieldPathStr,
-              prop.type,
+              typeRef,
               b,
               false,
             );
@@ -304,84 +296,76 @@ export class GoValidationGenerator {
         } else {
           this.generateValidationRules(
             validationRules,
-            fieldPath,
+            valuePath,
             fieldPathStr,
-            prop.type,
+            typeRef,
             w,
             false,
           );
         }
+      } else if (isArray) {
+        this.generateValidationRules(
+          validationRules,
+          valuePath,
+          fieldPathStr,
+          typeRef,
+          w,
+          true,
+        );
       } else {
-        // Required fields - validate directly, but skip length checks if empty
-        if (isArray) {
-          // For arrays, use the type reference directly
-          this.generateValidationRules(
-            validationRules,
-            fieldPath,
-            fieldPathStr,
-            prop.type,
-            w,
-            prop.required,
-          );
-        } else {
-          const validationTypeRef: TypeReference = {
-            kind: "primitive",
-            baseType: actualType,
-          };
-          this.generateValidationRules(
-            validationRules,
-            fieldPath,
-            fieldPathStr,
-            validationTypeRef,
-            w,
-            prop.required,
-          );
-        }
+        const validationTypeRef: TypeReference = {
+          kind: "primitive",
+          baseType: actualType,
+        };
+        this.generateValidationRules(
+          validationRules,
+          valuePath,
+          fieldPathStr,
+          validationTypeRef,
+          w,
+          true,
+        );
       }
     }
 
-    // Handle nested objects - only call validation function if type has a name
-    // Note: Inline objects are typed as interface{} in Go and cannot be validated at field level
-    if (prop.type.kind === "object" && prop.type.name) {
-      const nestedTypeName = toPascalCase(prop.type.name);
+    if (typeRef.kind === "object" && typeRef.name) {
+      const nestedTypeName = toPascalCase(typeRef.name);
       const nestedFuncName = `Validate${nestedTypeName}`;
-      w.if(`${fieldPath} != nil`, (b) => {
-        b.l(`if err := ${nestedFuncName}(${fieldPath}); err != nil {`)
-          .i()
-          .l("if nestedErrs, ok := err.(ValidationErrors); ok {")
-          .i()
-          .l("errs = append(errs, nestedErrs...)")
-          .u()
-          .l("} else {")
-          .i()
-          .l("errs = append(errs, &ValidationError{")
-          .i()
-          .l(`Field:   "${fieldPathStr}",`)
-          .l("Message: err.Error(),")
-          .u()
-          .l("})")
-          .u()
-          .l("}")
-          .u()
-          .l("}");
-      });
+      w.l(`if err := ${nestedFuncName}(${valuePath}); err != nil {`)
+        .i()
+        .l("if nestedErrs, ok := err.(ValidationErrors); ok {")
+        .i()
+        .l("errs = append(errs, nestedErrs...)")
+        .u()
+        .l("} else {")
+        .i()
+        .l("errs = append(errs, &ValidationError{")
+        .i()
+        .l(`Field:   "${fieldPathStr}",`)
+        .l("Message: err.Error(),")
+        .u()
+        .l("})")
+        .u()
+        .l("}")
+        .u()
+        .l("}");
     }
-    // Skip inline object validation - Go types these as interface{}
 
-    // Handle arrays with element validation
-    // Note: Only validate array elements when element type has a name (generates proper Go type)
-    // Inline objects in arrays are typed as []interface{} in Go and cannot be validated at field level
-    if (prop.type.kind === "array" && prop.type.elementType) {
-      if (
-        prop.type.elementType.kind === "object" &&
-        prop.type.elementType.name
-      ) {
-        const elementTypeName = toPascalCase(prop.type.elementType.name);
+    if (typeRef.kind === "array" && typeRef.elementType) {
+      const elementTypeRef = this.unwrapOptionalNullable(typeRef.elementType);
+      if (elementTypeRef.kind === "object" && elementTypeRef.name) {
+        const elementTypeName = toPascalCase(elementTypeRef.name);
         const elementFuncName = `Validate${elementTypeName}`;
-        w.l(`for i, item := range ${fieldPath} {`)
-          .i()
-          .l(`if err := ${elementFuncName}(item); err != nil {`)
-          .i()
+        const isElementPointer = this.isPointerType(typeRef.elementType);
+
+        w.l(`for i, item := range ${valuePath} {`).i();
+        if (isElementPointer) {
+          w.l("if item == nil { continue }");
+          w.l(`if err := ${elementFuncName}(*item); err != nil {`);
+        } else {
+          w.l(`if err := ${elementFuncName}(item); err != nil {`);
+        }
+        w.i()
           .l("if nestedErrs, ok := err.(ValidationErrors); ok {")
           .i()
           .l("for _, nestedErr := range nestedErrs {")
@@ -402,8 +386,8 @@ export class GoValidationGenerator {
           .l("}")
           .u()
           .l("}");
+        w.u().l("}");
       }
-      // Skip inline object array validation - Go types these as []interface{}
     }
   }
 
@@ -785,36 +769,50 @@ export class GoValidationGenerator {
     // For now, we use standard library functions directly
   }
 
-  private getActualType(typeRef: TypeReference): string {
-    // Unwrap optional/nullable to get actual base type
+  private unwrapOptionalNullable(typeRef: TypeReference): TypeReference {
     if (typeRef.kind === "optional" || typeRef.kind === "nullable") {
       if (typeRef.baseType) {
         if (typeof typeRef.baseType === "string") {
-          return typeRef.baseType;
+          return { kind: "primitive", baseType: typeRef.baseType };
         }
-        return this.getActualType(typeRef.baseType);
+        return this.unwrapOptionalNullable(typeRef.baseType);
       }
     }
-    if (typeof typeRef.baseType === "string") {
-      return typeRef.baseType;
+
+    if (typeRef.kind === "union" && typeRef.unionTypes) {
+      const nonNullVariants = typeRef.unionTypes.filter(
+        (variant) =>
+          !(variant.kind === "literal" && variant.literalValue === null),
+      );
+      if (nonNullVariants.length === 1) {
+        return this.unwrapOptionalNullable(nonNullVariants[0]);
+      }
     }
-    if (typeRef.baseType) {
-      return this.getActualType(typeRef.baseType);
+
+    return typeRef;
+  }
+
+  private getActualType(typeRef: TypeReference): string {
+    const unwrapped = this.unwrapOptionalNullable(typeRef);
+    if (
+      unwrapped.kind === "primitive" &&
+      typeof unwrapped.baseType === "string"
+    ) {
+      return unwrapped.baseType;
+    }
+    if (typeof unwrapped.baseType === "string") {
+      return unwrapped.baseType;
+    }
+    if (unwrapped.baseType) {
+      return this.getActualType(unwrapped.baseType);
     }
     return "unknown";
   }
 
   private getEnumValues(typeRef: TypeReference): string[] | null {
-    // Unwrap optional/nullable to find enum type
-    if (typeRef.kind === "optional" || typeRef.kind === "nullable") {
-      if (typeRef.baseType && typeof typeRef.baseType !== "string") {
-        return this.getEnumValues(typeRef.baseType);
-      }
-    }
-
-    // Check if this is an enum type
-    if (typeRef.kind === "enum" && typeRef.enumValues) {
-      return typeRef.enumValues.filter(
+    const unwrapped = this.unwrapOptionalNullable(typeRef);
+    if (unwrapped.kind === "enum" && unwrapped.enumValues) {
+      return unwrapped.enumValues.filter(
         (v): v is string => typeof v === "string",
       );
     }
@@ -834,20 +832,20 @@ export class GoValidationGenerator {
 
     if (typeRef.kind === "optional") {
       if (typeRef.baseType && typeof typeRef.baseType !== "string") {
-        // optional wrapping nullable = pointer
-        if (typeRef.baseType.kind === "nullable") {
-          return true;
-        }
+        return this.isPointerType(typeRef.baseType);
+      }
+    }
+
+    if (typeRef.kind === "union" && typeRef.unionTypes) {
+      const nonNullVariants = typeRef.unionTypes.filter(
+        (variant) =>
+          !(variant.kind === "literal" && variant.literalValue === null),
+      );
+      if (nonNullVariants.length === 1) {
+        return true;
       }
     }
 
     return false;
-  }
-
-  private toPascalCase(str: string): string {
-    return str
-      .split(/[-_]/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join("");
   }
 }

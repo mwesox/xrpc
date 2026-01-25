@@ -1,103 +1,84 @@
 import {
-  type ContractDefinition,
-  type GeneratedFiles,
-  type GeneratorConfig,
-  TargetGeneratorBase,
-  createCapabilities,
   TYPE_KINDS,
+  type Target,
+  type TargetInput,
+  type TargetOutput,
+  type TargetSupport,
   VALIDATION_KINDS,
-  type TargetCapabilities,
+  validateSupport,
 } from "@xrpckit/sdk";
 import { TsClientGenerator } from "./client-generator";
 import { TsTypeGenerator } from "./type-generator";
-import { TsTypeMapper } from "./type-mapper";
-import { TsValidationMapper } from "./validation-mapper";
 
 /**
  * TypeScript client code generator that produces type-safe RPC clients from xRPC contracts.
  *
- * Extends TargetGeneratorBase to use the framework's type and validation mapping system.
  * Generates two files:
  * - types.ts: Type exports using Zod's InferInput/InferOutput
  * - client.ts: RPC client with typed methods
  *
- * Note: This target relies on Zod for runtime validation, so the validation mapper
- * is a no-op that delegates to Zod schemas.
+ * Note: This target relies on Zod for runtime validation and schema inference.
  */
-export class TsCodeGenerator extends TargetGeneratorBase<string, null> {
-  readonly name = "ts-client";
+const support: TargetSupport = {
+  supportedTypes: [...TYPE_KINDS],
+  supportedValidations: [...VALIDATION_KINDS],
+  notes: [
+    "Uses Zod for type inference and runtime validation",
+    "Generates fully typed RPC client functions",
+    "Requires the original contract file for schema imports",
+  ],
+};
 
-  readonly typeMapper: TsTypeMapper;
-  readonly validationMapper: TsValidationMapper;
-
-  readonly capabilities: TargetCapabilities = createCapabilities("ts-client", {
-    supportedTypes: [...TYPE_KINDS],
-    unsupportedTypes: [
-      // All types are supported through Zod
-    ],
-    supportedValidations: [...VALIDATION_KINDS],
-    unsupportedValidations: [
-      // All validations are supported through Zod
-    ],
-    notes: [
-      "Uses Zod for type inference and runtime validation",
-      "Generates fully typed RPC client functions",
-      "Requires the original contract file for schema imports",
-    ],
-  });
-
-  private typeGenerator: TsTypeGenerator;
-  private clientGenerator: TsClientGenerator;
-  private contractPath: string;
-
-  constructor(config: GeneratorConfig) {
-    super(config);
-
-    // Get contract path from config (required for ts-client target)
-    const contractPath =
-      (config.options?.contractPath as string) || config.outputDir;
-    if (!contractPath) {
-      throw new Error(
-        "contractPath is required for ts-client target. Pass it via GeneratorConfig.options.contractPath"
-      );
-    }
-
-    // Initialize framework mappers
-    this.typeMapper = new TsTypeMapper();
-    this.validationMapper = new TsValidationMapper();
-
-    // Initialize existing generators
-    this.contractPath = contractPath;
-    this.typeGenerator = new TsTypeGenerator(contractPath, config.outputDir);
-    this.clientGenerator = new TsClientGenerator();
+function getContractPath(
+  options?: Record<string, unknown>,
+): string | undefined {
+  if (
+    options &&
+    typeof options.contractPath === "string" &&
+    options.contractPath
+  ) {
+    return options.contractPath;
   }
-
-  generate(contract: ContractDefinition): GeneratedFiles {
-    // Reset mappers for new generation run
-    this.resetMappers();
-
-    // Validate contract against capabilities
-    const validation = this.validateContract(contract);
-    if (!validation.valid) {
-      const errors = validation.issues
-        .filter((i) => i.severity === "error")
-        .map((i) => i.message);
-      throw new Error(
-        `Contract validation failed for ${this.name}:\n${errors.join("\n")}`
-      );
-    }
-
-    // Log warnings if any
-    const warnings = validation.issues.filter((i) => i.severity === "warning");
-    if (warnings.length > 0) {
-      for (const warning of warnings) {
-        console.warn(`[${this.name}] ${warning.message}`);
-      }
-    }
-
-    return {
-      types: this.typeGenerator.generateTypes(contract),
-      client: this.clientGenerator.generateClient(contract),
-    };
-  }
+  return undefined;
 }
+
+function generateTsClient(input: TargetInput): TargetOutput {
+  const { contract, outputDir } = input;
+  const diagnostics = validateSupport(contract, support, "ts-client");
+
+  const contractPath = getContractPath(input.options);
+  if (!contractPath) {
+    diagnostics.push({
+      severity: "error",
+      message:
+        "contractPath is required for ts-client target. Pass it via target options.",
+    });
+  }
+
+  const hasErrors = diagnostics.some((issue) => issue.severity === "error");
+  if (hasErrors) {
+    return { files: [], diagnostics };
+  }
+
+  const typeGenerator = new TsTypeGenerator(contractPath!, outputDir);
+  const clientGenerator = new TsClientGenerator();
+
+  return {
+    files: [
+      {
+        path: "types.ts",
+        content: typeGenerator.generateTypes(contract),
+      },
+      {
+        path: "client.ts",
+        content: clientGenerator.generateClient(contract),
+      },
+    ],
+    diagnostics,
+  };
+}
+
+export const tsClientTarget: Target = {
+  name: "ts-client",
+  generate: generateTsClient,
+};

@@ -1,8 +1,10 @@
-import type { ContractDefinition, TypeReference } from "../parser/contract";
-import type { GeneratedFiles, GeneratorConfig } from "../codegen/base-generator";
+import type {
+  GeneratedFiles,
+  GeneratorConfig,
+} from "../codegen/base-generator";
 import { BaseCodeGenerator } from "../codegen/base-generator";
+import type { ContractDefinition, TypeReference } from "../parser/contract";
 import type { TypeMapperBase } from "./type-mapper";
-import type { ValidationMapperBase } from "./validation-mapper";
 import type {
   ContractIssue,
   ContractValidationResult,
@@ -11,6 +13,7 @@ import type {
   ValidationKind,
 } from "./types";
 import { TYPE_KINDS, VALIDATION_KINDS } from "./types";
+import type { ValidationMapperBase } from "./validation-mapper";
 
 /**
  * Abstract base class for target code generators that extends BaseCodeGenerator
@@ -50,7 +53,7 @@ import { TYPE_KINDS, VALIDATION_KINDS } from "./types";
  */
 export abstract class TargetGeneratorBase<
   TypeOut,
-  ValidationOut
+  ValidationOut,
 > extends BaseCodeGenerator {
   /**
    * The name of this target (e.g., "go-server", "ts-client").
@@ -72,10 +75,6 @@ export abstract class TargetGeneratorBase<
    * If provided, used for contract validation and warnings.
    */
   readonly capabilities?: TargetCapabilities;
-
-  constructor(config: GeneratorConfig) {
-    super(config);
-  }
 
   /**
    * Validate a contract against this target's capabilities.
@@ -101,7 +100,7 @@ export abstract class TargetGeneratorBase<
         type,
         usedTypes,
         usedValidations,
-        type.name
+        type.name,
       );
     }
 
@@ -110,13 +109,13 @@ export abstract class TargetGeneratorBase<
         endpoint.input,
         usedTypes,
         usedValidations,
-        `${endpoint.fullName}.input`
+        `${endpoint.fullName}.input`,
       );
       this.collectTypesAndValidations(
         endpoint.output,
         usedTypes,
         usedValidations,
-        `${endpoint.fullName}.output`
+        `${endpoint.fullName}.output`,
       );
     }
 
@@ -125,7 +124,7 @@ export abstract class TargetGeneratorBase<
     for (const usedType of usedTypes) {
       if (!supportedTypes.has(usedType)) {
         const unsupported = this.capabilities.unsupportedTypes?.find(
-          (u) => u.kind === usedType
+          (u) => u.kind === usedType,
         );
         if (unsupported) {
           issues.push({
@@ -145,11 +144,13 @@ export abstract class TargetGeneratorBase<
     }
 
     // Check for unsupported validations
-    const supportedValidations = new Set(this.capabilities.supportedValidations);
+    const supportedValidations = new Set(
+      this.capabilities.supportedValidations,
+    );
     for (const usedValidation of usedValidations) {
       if (!supportedValidations.has(usedValidation)) {
         const unsupported = this.capabilities.unsupportedValidations?.find(
-          (u) => u.kind === usedValidation
+          (u) => u.kind === usedValidation,
         );
         if (unsupported) {
           issues.push({
@@ -181,7 +182,7 @@ export abstract class TargetGeneratorBase<
     typeRef: TypeReference | undefined,
     usedTypes: Set<TypeKind>,
     usedValidations: Set<ValidationKind>,
-    path: string
+    path: string,
   ): void {
     if (!typeRef) return;
 
@@ -193,7 +194,8 @@ export abstract class TargetGeneratorBase<
       for (const key of Object.keys(typeRef.validation)) {
         if (
           VALIDATION_KINDS.includes(key as ValidationKind) &&
-          typeRef.validation[key as keyof typeof typeRef.validation] !== undefined
+          typeRef.validation[key as keyof typeof typeRef.validation] !==
+            undefined
         ) {
           usedValidations.add(key as ValidationKind);
         }
@@ -207,7 +209,7 @@ export abstract class TargetGeneratorBase<
           prop.type,
           usedTypes,
           usedValidations,
-          `${path}.${prop.name}`
+          `${path}.${prop.name}`,
         );
 
         // Collect validations from property
@@ -230,7 +232,7 @@ export abstract class TargetGeneratorBase<
         typeRef.elementType,
         usedTypes,
         usedValidations,
-        `${path}[]`
+        `${path}[]`,
       );
     }
 
@@ -240,7 +242,7 @@ export abstract class TargetGeneratorBase<
         typeRef.baseType,
         usedTypes,
         usedValidations,
-        path
+        path,
       );
     }
 
@@ -251,7 +253,7 @@ export abstract class TargetGeneratorBase<
           typeRef.unionTypes[i],
           usedTypes,
           usedValidations,
-          `${path}[${i}]`
+          `${path}[${i}]`,
         );
       }
     }
@@ -263,7 +265,7 @@ export abstract class TargetGeneratorBase<
           typeRef.tupleElements[i],
           usedTypes,
           usedValidations,
-          `${path}[${i}]`
+          `${path}[${i}]`,
         );
       }
     }
@@ -274,7 +276,7 @@ export abstract class TargetGeneratorBase<
         typeRef.valueType,
         usedTypes,
         usedValidations,
-        `${path}.value`
+        `${path}.value`,
       );
     }
   }
@@ -304,13 +306,15 @@ export abstract class TargetGeneratorBase<
  */
 export function createCapabilities(
   name: string,
-  options?: Partial<Omit<TargetCapabilities, "name">>
+  options?: Partial<Omit<TargetCapabilities, "name">>,
 ): TargetCapabilities {
   return {
     name,
     supportedTypes: options?.supportedTypes ?? [...TYPE_KINDS],
     unsupportedTypes: options?.unsupportedTypes,
-    supportedValidations: options?.supportedValidations ?? [...VALIDATION_KINDS],
+    supportedValidations: options?.supportedValidations ?? [
+      ...VALIDATION_KINDS,
+    ],
     unsupportedValidations: options?.unsupportedValidations,
     notes: options?.notes,
   };

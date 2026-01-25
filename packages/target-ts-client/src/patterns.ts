@@ -21,7 +21,7 @@ import { type GeneratedUtility, toPascalCase } from "@xrpckit/sdk";
  */
 export function createTsEnumPattern(
   name: string,
-  values: (string | number)[]
+  values: (string | number)[],
 ): GeneratedUtility {
   const stringValues = values.filter((v): v is string => typeof v === "string");
   const numberValues = values.filter((v): v is number => typeof v === "number");
@@ -58,7 +58,7 @@ export function is${name}(value: unknown): value is ${name} {
   } else {
     // Mixed enum - use union type
     const allValues = values.map((v) =>
-      typeof v === "string" ? `"${v}"` : String(v)
+      typeof v === "string" ? `"${v}"` : String(v),
     );
 
     code = `export type ${name} = ${allValues.join(" | ")};
@@ -96,7 +96,7 @@ export function is${name}(value: unknown): value is ${name} {
  */
 export function createTsUnionPattern(
   name: string,
-  variants: Array<{ type: string; valueType: string }>
+  variants: Array<{ type: string; valueType: string }>,
 ): GeneratedUtility {
   const unionTypes = variants.map((v) => `${name}${toPascalCase(v.type)}`);
   const typeGuards = variants.map((v) => {
@@ -137,7 +137,7 @@ ${typeGuards.join("\n\n")}`;
  */
 export function createTsTuplePattern(
   name: string,
-  elements: string[]
+  elements: string[],
 ): GeneratedUtility {
   const tupleType = `[${elements.join(", ")}]`;
 
@@ -176,7 +176,7 @@ export function is${name}(value: unknown): value is ${name} {
 export function createTsBrandedType(
   name: string,
   baseType: string,
-  validator?: string
+  validator?: string,
 ): GeneratedUtility {
   const brandSymbol = `__${name.toLowerCase()}Brand`;
 
@@ -222,7 +222,7 @@ export function create${name}(value: ${baseType}): ${name} {
 export function createTsRecordPattern(
   name: string,
   keyType: string,
-  valueType: string
+  valueType: string,
 ): GeneratedUtility {
   const code = `export type ${name} = Record<${keyType}, ${valueType}>;
 
@@ -241,4 +241,3 @@ export function is${name}(value: unknown): value is ${name} {
     priority: 60,
   };
 }
-

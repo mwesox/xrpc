@@ -1,6 +1,6 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { parseContract } from '../../packages/sdk/src/parser/index.js';
-import { GoCodeGenerator } from '../../packages/target-go-server/src/index.js';
+import { goTarget } from '../../packages/target-go-server/src/index.js';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
@@ -115,22 +115,25 @@ describe('Go Server E2E', () => {
     const targetOutputDir = join(outputDir, 'go', 'server');
     await mkdir(targetOutputDir, { recursive: true });
 
-    const generator = new GoCodeGenerator({
+    const result = goTarget.generate({
+      contract,
       outputDir: targetOutputDir,
-      packageName: 'server',
-      options: {},
+      options: { packageName: 'server' },
     });
-    const files = generator.generate(contract);
+    const errors = (result.diagnostics ?? []).filter(
+      (issue) => issue.severity === 'error',
+    );
+    if (errors.length > 0) {
+      throw new Error(
+        `Go target failed:\n${errors
+          .map((issue) => issue.message)
+          .join('\n')}`,
+      );
+    }
 
     // Write generated files
-    if (files.types) {
-      await Bun.write(join(targetOutputDir, 'types.go'), files.types);
-    }
-    if (files.server) {
-      await Bun.write(join(targetOutputDir, 'router.go'), files.server);
-    }
-    if (files.validation) {
-      await Bun.write(join(targetOutputDir, 'validation.go'), files.validation);
+    for (const file of result.files) {
+      await Bun.write(join(targetOutputDir, file.path), file.content);
     }
 
     // Create Go module in test directory

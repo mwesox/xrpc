@@ -40,11 +40,5 @@ export {
   createUnsupportedValidationHandler,
 } from "./validation-mapper";
 
-// Target generator
-export {
-  TargetGeneratorBase,
-  createCapabilities,
-} from "./target-generator";
-
 // Utility collection
 export { UtilityCollector } from "./utility-collector";

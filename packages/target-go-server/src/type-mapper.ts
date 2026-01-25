@@ -1,9 +1,9 @@
 import {
-  type TypeReference,
-  type TypeMapping,
-  type TypeResult,
   type TypeContext,
   TypeMapperBase,
+  type TypeMapping,
+  type TypeReference,
+  type TypeResult,
   toPascalCase,
 } from "@xrpckit/sdk";
 import { createGoTuplePattern, createGoUnionPattern } from "./patterns";
@@ -95,7 +95,7 @@ export class GoTypeMapper extends TypeMapperBase<string> {
     // Inline object without name - this should be rare after type collection
     console.warn(
       "[GoTypeMapper] Object without name - falling back to map[string]interface{}:",
-      typeRef
+      typeRef,
     );
     return { type: "map[string]interface{}" };
   }
@@ -172,7 +172,8 @@ export class GoTypeMapper extends TypeMapperBase<string> {
       this.unionTypes.set(goName, typeRef);
 
       // Generate union utility
-      const variants = typeRef.unionTypes?.map((v) => this.mapType(v).type) ?? [];
+      const variants =
+        typeRef.unionTypes?.map((v) => this.mapType(v).type) ?? [];
       const utility = createGoUnionPattern(goName, variants);
 
       return {
@@ -185,14 +186,16 @@ export class GoTypeMapper extends TypeMapperBase<string> {
     // For anonymous unions, try to determine if all variants are the same type
     if (typeRef.unionTypes && typeRef.unionTypes.length > 0) {
       const variantTypes = typeRef.unionTypes.map((v) => this.mapType(v));
-      const allSameType = variantTypes.every((v) => v.type === variantTypes[0].type);
+      const allSameType = variantTypes.every(
+        (v) => v.type === variantTypes[0].type,
+      );
       if (allSameType) {
         return variantTypes[0];
       }
 
       // Check if it's a nullable union (e.g., string | null)
       const nonNullVariants = typeRef.unionTypes.filter(
-        (v) => !(v.kind === "literal" && v.literalValue === null)
+        (v) => !(v.kind === "literal" && v.literalValue === null),
       );
       if (nonNullVariants.length === 1) {
         const base = this.mapType(nonNullVariants[0]);
@@ -206,7 +209,7 @@ export class GoTypeMapper extends TypeMapperBase<string> {
     // Heterogeneous anonymous union - use interface{}
     console.warn(
       "[GoTypeMapper] Anonymous heterogeneous union - using interface{}:",
-      typeRef
+      typeRef,
     );
     return { type: "interface{}" };
   }
@@ -263,7 +266,8 @@ export class GoTypeMapper extends TypeMapperBase<string> {
       this.tupleTypes.set(goName, typeRef);
 
       // Generate tuple struct utility
-      const elements = typeRef.tupleElements?.map((e) => this.mapType(e).type) ?? [];
+      const elements =
+        typeRef.tupleElements?.map((e) => this.mapType(e).type) ?? [];
       const utility = createGoTuplePattern(goName, elements);
 
       return {
@@ -276,7 +280,9 @@ export class GoTypeMapper extends TypeMapperBase<string> {
     // For anonymous tuples, try to determine if all elements are the same type
     if (typeRef.tupleElements && typeRef.tupleElements.length > 0) {
       const elementTypes = typeRef.tupleElements.map((e) => this.mapType(e));
-      const allSameType = elementTypes.every((e) => e.type === elementTypes[0].type);
+      const allSameType = elementTypes.every(
+        (e) => e.type === elementTypes[0].type,
+      );
       if (allSameType) {
         return { type: `[]${elementTypes[0].type}` };
       }
@@ -285,7 +291,7 @@ export class GoTypeMapper extends TypeMapperBase<string> {
     // Heterogeneous anonymous tuple - best we can do is []interface{}
     console.warn(
       "[GoTypeMapper] Anonymous heterogeneous tuple - using []interface{}:",
-      typeRef
+      typeRef,
     );
     return { type: "[]interface{}" };
   }

@@ -59,12 +59,15 @@ export abstract class ValidationMapperBase<V> {
    * @param ctx - The validation context
    * @returns The validation result with code, utilities, and imports
    */
-  mapValidation(rule: ValidationKind, ctx: ValidationContext): ValidationResult<V> {
+  mapValidation(
+    rule: ValidationKind,
+    ctx: ValidationContext,
+  ): ValidationResult<V> {
     // Validate that the rule is known
     if (!isValidationKind(rule)) {
       throw new Error(
         `Unknown validation kind: "${rule}". ` +
-          `Valid kinds are: ${VALIDATION_KINDS.join(", ")}`
+          `Valid kinds are: ${VALIDATION_KINDS.join(", ")}`,
       );
     }
 
@@ -74,8 +77,7 @@ export abstract class ValidationMapperBase<V> {
     // This should never happen if validationMapping is properly typed
     if (!handler) {
       throw new Error(
-        `Missing handler for validation kind: "${rule}". ` +
-          `All validation kinds must be handled by the validation mapper.`
+        `Missing handler for validation kind: "${rule}". All validation kinds must be handled by the validation mapper.`,
       );
     }
 
@@ -107,7 +109,7 @@ export abstract class ValidationMapperBase<V> {
     fieldName: string,
     fieldPath: string,
     baseType: string,
-    isRequired: boolean
+    isRequired: boolean,
   ): ValidationResult<V>[] {
     const results: ValidationResult<V>[] = [];
 
@@ -196,7 +198,7 @@ export abstract class ValidationMapperBase<V> {
 
     if (missingKinds.length > 0) {
       throw new Error(
-        `Validation mapper is incomplete. Missing handlers for: ${missingKinds.join(", ")}`
+        `Validation mapper is incomplete. Missing handlers for: ${missingKinds.join(", ")}`,
       );
     }
   }
@@ -221,7 +223,7 @@ export function createNoOpValidationHandler(): ValidationHandler<null> {
 export function createUnsupportedValidationHandler<V>(
   kind: ValidationKind,
   defaultValue: V,
-  warningFn?: (message: string) => void
+  warningFn?: (message: string) => void,
 ): ValidationHandler<V> {
   return (ctx: ValidationContext): ValidationResult<V> => {
     const message = `Validation "${kind}" is not supported for this target.`;

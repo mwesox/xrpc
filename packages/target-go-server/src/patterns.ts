@@ -23,7 +23,7 @@ import { type GeneratedUtility, toPascalCase } from "@xrpckit/sdk";
  */
 export function createGoEnumPattern(
   name: string,
-  values: (string | number)[]
+  values: (string | number)[],
 ): GeneratedUtility {
   const stringValues = values.filter((v): v is string => typeof v === "string");
 
@@ -134,17 +134,19 @@ func (b *BigInt) UnmarshalJSON(data []byte) error {
  */
 export function createGoUnionPattern(
   name: string,
-  variants: string[]
+  variants: string[],
 ): GeneratedUtility {
-  const assertions = variants.map((v) => {
-    const methodName = `As${toPascalCase(v.replace(/[*[\]]/g, ""))}`;
+  const assertions = variants
+    .map((v) => {
+      const methodName = `As${toPascalCase(v.replace(/[*[\]]/g, ""))}`;
 
-    return `// ${methodName} returns the value as ${v}, or ok=false if not that type
+      return `// ${methodName} returns the value as ${v}, or ok=false if not that type
 func (u ${name}) ${methodName}() (${v}, bool) {
 \tval, ok := u.Value.(${v})
 \treturn val, ok
 }`;
-  }).join("\n\n");
+    })
+    .join("\n\n");
 
   const code = `// ${name} represents a union type that can hold one of several types
 type ${name} struct {
@@ -191,7 +193,7 @@ ${assertions}`;
  */
 export function createGoTuplePattern(
   name: string,
-  elements: string[]
+  elements: string[],
 ): GeneratedUtility {
   const fields = elements.map((el, i) => `\tV${i} ${el} \`json:"${i}"\``);
 

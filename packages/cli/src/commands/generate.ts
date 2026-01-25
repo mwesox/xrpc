@@ -3,7 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import {
   type ContractDefinition,
-  type GeneratorConfig,
+  type Diagnostic,
   parseContract,
 } from "@xrpckit/sdk";
 import {
@@ -423,52 +423,42 @@ async function generateForTarget(
   }
   await mkdir(targetOutputDir, { recursive: true });
 
-  const config: GeneratorConfig = {
+  const result = generator.generate({
+    contract,
     outputDir: targetOutputDir,
-    packageName: "xrpc",
     options: {
       contractPath: inputPath, // Pass contract path for client targets
+      packageName: "xrpc",
     },
-  };
+  });
 
-  const files = generator.generate(contract, config);
+  const diagnostics = result.diagnostics ?? [];
+  const warnings = diagnostics.filter((issue) => issue.severity === "warning");
+  for (const warning of warnings) {
+    console.warn(formatWarning(`[${target}] ${formatDiagnostic(warning)}`));
+  }
+
+  const errors = diagnostics.filter((issue) => issue.severity === "error");
+  if (errors.length > 0) {
+    throw new Error(
+      `Target ${target} cannot generate:\n${errors
+        .map(formatDiagnostic)
+        .join("\n")}`,
+    );
+  }
+
+  const files = result.files;
 
   // Write generated files with progress indication
   const fileSpinner = createSpinner ? createSpinner("Writing files...") : null;
   if (fileSpinner && "start" in fileSpinner) fileSpinner.start();
 
   const writtenFiles: string[] = [];
-
-  // Determine file extensions based on target
-  const isTypeScriptTarget =
-    target.startsWith("ts-") || target.startsWith("typescript-");
-  const typesExt = isTypeScriptTarget ? ".ts" : ".go";
-  const serverExt = isTypeScriptTarget ? ".ts" : ".go";
-  const clientExt = isTypeScriptTarget ? ".ts" : ".go";
-  const validationExt = isTypeScriptTarget ? ".ts" : ".go";
-
-  if (files.types) {
-    const typesPath = join(targetOutputDir, `types${typesExt}`);
-    await writeFile(typesPath, files.types);
-    writtenFiles.push(typesPath);
-  }
-
-  if (files.server) {
-    const serverPath = join(targetOutputDir, `router${serverExt}`);
-    await writeFile(serverPath, files.server);
-    writtenFiles.push(serverPath);
-  }
-
-  if (files.client) {
-    const clientPath = join(targetOutputDir, `client${clientExt}`);
-    await writeFile(clientPath, files.client);
-    writtenFiles.push(clientPath);
-  }
-
-  if (files.validation) {
-    const validationPath = join(targetOutputDir, `validation${validationExt}`);
-    await writeFile(validationPath, files.validation);
-    writtenFiles.push(validationPath);
+  for (const file of files) {
+    const outputPath = join(targetOutputDir, file.path);
+    await mkdir(dirname(outputPath), { recursive: true });
+    await writeFile(outputPath, file.content);
+    writtenFiles.push(outputPath);
   }
 
   if (fileSpinner && "succeed" in fileSpinner) {
@@ -481,4 +471,15 @@ async function generateForTarget(
   for (const file of writtenFiles) {
     console.log(`    ${formatSecondary("→")} ${formatPath(file)}`);
   }
+}
+
+function formatDiagnostic(issue: Diagnostic): string {
+  let message = issue.message;
+  if (issue.path) {
+    message += ` (at ${issue.path})`;
+  }
+  if (issue.hint) {
+    message += ` ${issue.hint}`;
+  }
+  return message;
 }

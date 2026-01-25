@@ -92,23 +92,24 @@ func ValidateTaskListOutput(input TaskListOutput) error {
             }
         }
     }
-    // Validate total
-    if input.Total < 0 {
-        errs = append(errs, &ValidationError{
-            Field:   "total",
-            Message: fmt.Sprintf("must be at least %v", 0),
-        })
-    }
-    if float64(input.Total) != float64(int64(input.Total)) {
-        errs = append(errs, &ValidationError{
-            Field:   "total",
-            Message: "must be an integer",
-        })
-    }
-    if len(errs) > 0 {
-        return errs
-    }
-    return nil
+}
+// Validate total
+if input.Total < 0 {
+    errs = append(errs, &ValidationError{
+        Field:   "total",
+        Message: fmt.Sprintf("must be at least %v", 0),
+    })
+}
+if float64(input.Total) != float64(int64(input.Total)) {
+    errs = append(errs, &ValidationError{
+        Field:   "total",
+        Message: "must be an integer",
+    })
+}
+if len(errs) > 0 {
+    return errs
+}
+return nil
 }
 
 func ValidateTaskGetInput(input TaskGetInput) error {
@@ -215,7 +216,19 @@ func ValidateTaskGetOutput(input TaskGetOutput) error {
             Message: "is required",
         })
     }
-    // Validate completedAt (skipped - pointer type)
+    // Validate completedAt when present
+    if input.CompletedAt != nil {
+    }
+    if err := ValidateTaskGetOutputAssignee(input.Assignee); err != nil {
+        if nestedErrs, ok := err.(ValidationErrors); ok {
+            errs = append(errs, nestedErrs...)
+        } else {
+            errs = append(errs, &ValidationError{
+                Field:   "assignee",
+                Message: err.Error(),
+            })
+        }
+    }
     // Validate subtasks
     if input.Subtasks == nil {
         errs = append(errs, &ValidationError{
@@ -241,35 +254,36 @@ func ValidateTaskGetOutput(input TaskGetOutput) error {
             }
         }
     }
-    if input.EstimatedHours > 100 {
-        errs = append(errs, &ValidationError{
-            Field:   "estimatedHours",
-            Message: fmt.Sprintf("must be at most %v", 100),
-        })
-    }
-    if input.EstimatedHours <= 0 {
-        errs = append(errs, &ValidationError{
-            Field:   "estimatedHours",
-            Message: "must be positive",
-        })
-    }
-    // Validate position
-    if input.Position < 0 {
-        errs = append(errs, &ValidationError{
-            Field:   "position",
-            Message: fmt.Sprintf("must be at least %v", 0),
-        })
-    }
-    if float64(input.Position) != float64(int64(input.Position)) {
-        errs = append(errs, &ValidationError{
-            Field:   "position",
-            Message: "must be an integer",
-        })
-    }
-    if len(errs) > 0 {
-        return errs
-    }
-    return nil
+}
+if input.EstimatedHours > 100 {
+    errs = append(errs, &ValidationError{
+        Field:   "estimatedHours",
+        Message: fmt.Sprintf("must be at most %v", 100),
+    })
+}
+if input.EstimatedHours <= 0 {
+    errs = append(errs, &ValidationError{
+        Field:   "estimatedHours",
+        Message: "must be positive",
+    })
+}
+// Validate position
+if input.Position < 0 {
+    errs = append(errs, &ValidationError{
+        Field:   "position",
+        Message: fmt.Sprintf("must be at least %v", 0),
+    })
+}
+if float64(input.Position) != float64(int64(input.Position)) {
+    errs = append(errs, &ValidationError{
+        Field:   "position",
+        Message: "must be an integer",
+    })
+}
+if len(errs) > 0 {
+    return errs
+}
+return nil
 }
 
 func ValidateTaskCreateInput(input TaskCreateInput) error {
@@ -411,7 +425,19 @@ func ValidateTaskCreateOutput(input TaskCreateOutput) error {
             Message: "is required",
         })
     }
-    // Validate completedAt (skipped - pointer type)
+    // Validate completedAt when present
+    if input.CompletedAt != nil {
+    }
+    if err := ValidateTaskCreateOutputAssignee(input.Assignee); err != nil {
+        if nestedErrs, ok := err.(ValidationErrors); ok {
+            errs = append(errs, nestedErrs...)
+        } else {
+            errs = append(errs, &ValidationError{
+                Field:   "assignee",
+                Message: err.Error(),
+            })
+        }
+    }
     // Validate subtasks
     if input.Subtasks == nil {
         errs = append(errs, &ValidationError{
@@ -437,35 +463,36 @@ func ValidateTaskCreateOutput(input TaskCreateOutput) error {
             }
         }
     }
-    if input.EstimatedHours > 100 {
-        errs = append(errs, &ValidationError{
-            Field:   "estimatedHours",
-            Message: fmt.Sprintf("must be at most %v", 100),
-        })
-    }
-    if input.EstimatedHours <= 0 {
-        errs = append(errs, &ValidationError{
-            Field:   "estimatedHours",
-            Message: "must be positive",
-        })
-    }
-    // Validate position
-    if input.Position < 0 {
-        errs = append(errs, &ValidationError{
-            Field:   "position",
-            Message: fmt.Sprintf("must be at least %v", 0),
-        })
-    }
-    if float64(input.Position) != float64(int64(input.Position)) {
-        errs = append(errs, &ValidationError{
-            Field:   "position",
-            Message: "must be an integer",
-        })
-    }
-    if len(errs) > 0 {
-        return errs
-    }
-    return nil
+}
+if input.EstimatedHours > 100 {
+    errs = append(errs, &ValidationError{
+        Field:   "estimatedHours",
+        Message: fmt.Sprintf("must be at most %v", 100),
+    })
+}
+if input.EstimatedHours <= 0 {
+    errs = append(errs, &ValidationError{
+        Field:   "estimatedHours",
+        Message: "must be positive",
+    })
+}
+// Validate position
+if input.Position < 0 {
+    errs = append(errs, &ValidationError{
+        Field:   "position",
+        Message: fmt.Sprintf("must be at least %v", 0),
+    })
+}
+if float64(input.Position) != float64(int64(input.Position)) {
+    errs = append(errs, &ValidationError{
+        Field:   "position",
+        Message: "must be an integer",
+    })
+}
+if len(errs) > 0 {
+    return errs
+}
+return nil
 }
 
 func ValidateTaskUpdateInput(input TaskUpdateInput) error {
@@ -501,7 +528,17 @@ func ValidateTaskUpdateInput(input TaskUpdateInput) error {
             })
         }
     }
-    // Validate description (skipped - pointer type)
+    // Validate description when present
+    if input.Description != nil {
+        if *input.Description != "" {
+            if len(*input.Description) > 2000 {
+                errs = append(errs, &ValidationError{
+                    Field:   "description",
+                    Message: fmt.Sprintf("must be at most %d character(s)", 2000),
+                })
+            }
+        }
+    }
     if input.Status != "" && input.Status != "pending" && input.Status != "in_progress" && input.Status != "completed" && input.Status != "cancelled" {
         errs = append(errs, &ValidationError{
             Field:   "status",
@@ -514,8 +551,24 @@ func ValidateTaskUpdateInput(input TaskUpdateInput) error {
             Message: "must be one of: low, medium, high, urgent",
         })
     }
-    // Validate dueDate (skipped - pointer type)
-    // Validate estimatedHours (skipped - pointer type)
+    // Validate dueDate when present
+    if input.DueDate != nil {
+    }
+    // Validate estimatedHours when present
+    if input.EstimatedHours != nil {
+        if *input.EstimatedHours > 100 {
+            errs = append(errs, &ValidationError{
+                Field:   "estimatedHours",
+                Message: fmt.Sprintf("must be at most %v", 100),
+            })
+        }
+        if *input.EstimatedHours <= 0 {
+            errs = append(errs, &ValidationError{
+                Field:   "estimatedHours",
+                Message: "must be positive",
+            })
+        }
+    }
     if len(errs) > 0 {
         return errs
     }
@@ -601,7 +654,19 @@ func ValidateTaskUpdateOutput(input TaskUpdateOutput) error {
             Message: "is required",
         })
     }
-    // Validate completedAt (skipped - pointer type)
+    // Validate completedAt when present
+    if input.CompletedAt != nil {
+    }
+    if err := ValidateTaskUpdateOutputAssignee(input.Assignee); err != nil {
+        if nestedErrs, ok := err.(ValidationErrors); ok {
+            errs = append(errs, nestedErrs...)
+        } else {
+            errs = append(errs, &ValidationError{
+                Field:   "assignee",
+                Message: err.Error(),
+            })
+        }
+    }
     // Validate subtasks
     if input.Subtasks == nil {
         errs = append(errs, &ValidationError{
@@ -627,35 +692,36 @@ func ValidateTaskUpdateOutput(input TaskUpdateOutput) error {
             }
         }
     }
-    if input.EstimatedHours > 100 {
-        errs = append(errs, &ValidationError{
-            Field:   "estimatedHours",
-            Message: fmt.Sprintf("must be at most %v", 100),
-        })
-    }
-    if input.EstimatedHours <= 0 {
-        errs = append(errs, &ValidationError{
-            Field:   "estimatedHours",
-            Message: "must be positive",
-        })
-    }
-    // Validate position
-    if input.Position < 0 {
-        errs = append(errs, &ValidationError{
-            Field:   "position",
-            Message: fmt.Sprintf("must be at least %v", 0),
-        })
-    }
-    if float64(input.Position) != float64(int64(input.Position)) {
-        errs = append(errs, &ValidationError{
-            Field:   "position",
-            Message: "must be an integer",
-        })
-    }
-    if len(errs) > 0 {
-        return errs
-    }
-    return nil
+}
+if input.EstimatedHours > 100 {
+    errs = append(errs, &ValidationError{
+        Field:   "estimatedHours",
+        Message: fmt.Sprintf("must be at most %v", 100),
+    })
+}
+if input.EstimatedHours <= 0 {
+    errs = append(errs, &ValidationError{
+        Field:   "estimatedHours",
+        Message: "must be positive",
+    })
+}
+// Validate position
+if input.Position < 0 {
+    errs = append(errs, &ValidationError{
+        Field:   "position",
+        Message: fmt.Sprintf("must be at least %v", 0),
+    })
+}
+if float64(input.Position) != float64(int64(input.Position)) {
+    errs = append(errs, &ValidationError{
+        Field:   "position",
+        Message: "must be an integer",
+    })
+}
+if len(errs) > 0 {
+    return errs
+}
+return nil
 }
 
 func ValidateTaskDeleteInput(input TaskDeleteInput) error {
@@ -939,7 +1005,9 @@ func ValidateTaskListOutputTasksItem(input TaskListOutputTasksItem) error {
             Message: "is required",
         })
     }
-    // Validate completedAt (skipped - pointer type)
+    // Validate completedAt when present
+    if input.CompletedAt != nil {
+    }
     // Validate subtaskCount
     if input.SubtaskCount < 0 {
         errs = append(errs, &ValidationError{

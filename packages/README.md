@@ -32,9 +32,9 @@ Each target language/framework has its own package following the naming conventi
 ## Adding a New Target
 
 1. Create a new package: `packages/target-{language}-{client|server}/`
-2. Implement the generator extending `BaseCodeGenerator` from `@xrpckit/codegen`
-3. Register it in `@xrpckit/codegen/src/registry.ts`
-4. Add it to the CLI validation
+2. Implement a `Target` from `@xrpckit/sdk` with `name` + `generate()`
+3. Register it in `packages/cli/src/registry.ts`
+4. Add any target-specific options to `xrpc.toml` templates if needed
 
 Example structure:
 ```

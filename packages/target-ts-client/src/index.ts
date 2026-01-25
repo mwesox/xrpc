@@ -1,4 +1,4 @@
-export { TsCodeGenerator } from "./generator";
+export { tsClientTarget } from "./generator";
 export { TsTypeGenerator } from "./type-generator";
 export { TsClientGenerator } from "./client-generator";
 export { TsTypeMapper } from "./type-mapper";

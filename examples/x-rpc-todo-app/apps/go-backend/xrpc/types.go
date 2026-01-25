@@ -9,24 +9,6 @@ type Context struct {
 }
 
 
-// GetUserId retrieves userId from context if set by middleware
-func GetUserId(ctx *Context) (string, bool) {
-    if val, ok := ctx.Data["userId"].(string); ok {
-        return val, true
-    }
-    return "", false
-}
-
-
-// GetSessionId retrieves sessionId from context if set by middleware
-func GetSessionId(ctx *Context) (string, bool) {
-    if val, ok := ctx.Data["sessionId"].(string); ok {
-        return val, true
-    }
-    return "", false
-}
-
-
 // MiddlewareFunc is a function that processes a request and extends context
 
 type MiddlewareFunc func(ctx *Context) *MiddlewareResult

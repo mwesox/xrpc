@@ -1,34 +1,10 @@
-import type {
-  ContractDefinition,
-  GeneratedFiles,
-  GeneratorConfig,
-} from "@xrpckit/sdk";
-import { GoCodeGenerator } from "@xrpckit/target-go-server";
-import { TsCodeGenerator } from "@xrpckit/target-ts-client";
+import type { Target } from "@xrpckit/sdk";
+import { goTarget } from "@xrpckit/target-go-server";
+import { tsClientTarget } from "@xrpckit/target-ts-client";
 
-export type TargetGenerator = {
-  name: string;
-  generate: (
-    contract: ContractDefinition,
-    config: GeneratorConfig,
-  ) => GeneratedFiles;
-};
-
-const generators: Record<string, TargetGenerator> = {
-  "go-server": {
-    name: "go-server",
-    generate: (contract, config) => {
-      const generator = new GoCodeGenerator(config);
-      return generator.generate(contract);
-    },
-  },
-  "ts-client": {
-    name: "ts-client",
-    generate: (contract, config) => {
-      const generator = new TsCodeGenerator(config);
-      return generator.generate(contract);
-    },
-  },
+const generators: Record<string, Target> = {
+  "go-server": goTarget,
+  "ts-client": tsClientTarget,
   // Future targets can be added here:
   // 'go-client': { ... },
   // 'python-server': { ... },
@@ -45,11 +21,11 @@ const generators: Record<string, TargetGenerator> = {
  * ```typescript
  * const generator = getGenerator('go-server');
  * if (generator) {
- *   const files = generator.generate(contract, config);
+ *   const result = generator.generate({ contract, outputDir });
  * }
  * ```
  */
-export function getGenerator(target: string): TargetGenerator | undefined {
+export function getGenerator(target: string): Target | undefined {
   return generators[target];
 }
 

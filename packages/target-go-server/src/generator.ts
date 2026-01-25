@@ -1,106 +1,204 @@
 import {
   type ContractDefinition,
-  type GeneratedFiles,
-  type GeneratorConfig,
-  TargetGeneratorBase,
-  createCapabilities,
+  type Property,
   TYPE_KINDS,
+  type Target,
+  type TargetInput,
+  type TargetOutput,
+  type TargetSupport,
+  type TypeDefinition,
+  type TypeReference,
   VALIDATION_KINDS,
-  type TargetCapabilities,
+  toPascalCase,
+  validateSupport,
 } from "@xrpckit/sdk";
 import { GoServerGenerator } from "./server-generator";
 import { GoTypeCollector } from "./type-collector";
 import { GoTypeGenerator } from "./type-generator";
 import { GoValidationGenerator } from "./validation-generator";
-import { GoTypeMapper } from "./type-mapper";
-import { GoValidationMapper } from "./validation-mapper";
 
 /**
  * Go server code generator that produces idiomatic Go HTTP handlers from xRPC contracts.
  *
- * Extends TargetGeneratorBase to use the framework's type and validation mapping system.
  * Generates three files:
  * - types.go: Struct definitions, handler types, middleware types
  * - router.go: HTTP routing and JSON handling
  * - validation.go: Input validation functions
  */
-export class GoCodeGenerator extends TargetGeneratorBase<string, import("./validation-mapper").GoValidationCode> {
-  readonly name = "go-server";
+const support: TargetSupport = {
+  supportedTypes: [...TYPE_KINDS],
+  supportedValidations: [...VALIDATION_KINDS],
+  notes: [
+    "Generates idiomatic Go code using standard library only",
+    "Uses net/http for HTTP handling",
+    "Uses encoding/json for JSON marshaling",
+    "Validation uses net/mail for email, net/url for URLs, regexp for patterns",
+  ],
+};
 
-  readonly typeMapper: GoTypeMapper;
-  readonly validationMapper: GoValidationMapper;
-
-  readonly capabilities: TargetCapabilities = createCapabilities("go-server", {
-    supportedTypes: [...TYPE_KINDS],
-    unsupportedTypes: [
-      // All types are supported, but some have fallbacks
-    ],
-    supportedValidations: [...VALIDATION_KINDS],
-    unsupportedValidations: [
-      // All validations are supported
-    ],
-    notes: [
-      "Generates idiomatic Go code using standard library only",
-      "Uses net/http for HTTP handling",
-      "Uses encoding/json for JSON marshaling",
-      "Validation uses net/mail for email, net/url for URLs, regexp for patterns",
-    ],
-  });
-
-  private typeGenerator: GoTypeGenerator;
-  private serverGenerator: GoServerGenerator;
-  private validationGenerator: GoValidationGenerator;
-  private typeCollector: GoTypeCollector;
-
-  constructor(config: GeneratorConfig) {
-    super(config);
-    const packageName = config.packageName || "server";
-
-    // Initialize framework mappers
-    this.typeMapper = new GoTypeMapper();
-    this.validationMapper = new GoValidationMapper();
-
-    // Initialize existing generators
-    this.typeCollector = new GoTypeCollector();
-    this.typeGenerator = new GoTypeGenerator(packageName);
-    this.serverGenerator = new GoServerGenerator(packageName);
-    this.validationGenerator = new GoValidationGenerator(packageName);
+function getPackageName(options?: Record<string, unknown>): string {
+  if (
+    options &&
+    typeof options.packageName === "string" &&
+    options.packageName
+  ) {
+    return options.packageName;
   }
-
-  generate(contract: ContractDefinition): GeneratedFiles {
-    // Reset mappers for new generation run
-    this.resetMappers();
-
-    // Validate contract against capabilities
-    const validation = this.validateContract(contract);
-    if (!validation.valid) {
-      const errors = validation.issues
-        .filter((i) => i.severity === "error")
-        .map((i) => i.message);
-      throw new Error(
-        `Contract validation failed for ${this.name}:\n${errors.join("\n")}`
-      );
-    }
-
-    // Log warnings if any
-    const warnings = validation.issues.filter((i) => i.severity === "warning");
-    if (warnings.length > 0) {
-      for (const warning of warnings) {
-        console.warn(`[${this.name}] ${warning.message}`);
-      }
-    }
-
-    // Run type collector once to discover and name all nested inline types
-    // This mutates the contract with assigned names that both generators will see
-    const collectedTypes = this.typeCollector.collectTypes(contract);
-
-    return {
-      types: this.typeGenerator.generateTypes(contract, collectedTypes),
-      server: this.serverGenerator.generateServer(contract),
-      validation: this.validationGenerator.generateValidation(
-        contract,
-        collectedTypes
-      ),
-    };
-  }
+  return "server";
 }
+
+function isNullableType(typeRef: TypeReference): boolean {
+  if (typeRef.kind === "nullable") {
+    return true;
+  }
+
+  if (typeRef.kind === "optional" && typeof typeRef.baseType === "object") {
+    return isNullableType(typeRef.baseType);
+  }
+
+  if (typeRef.kind === "union" && typeRef.unionTypes) {
+    const nonNullVariants = typeRef.unionTypes.filter(
+      (variant) =>
+        !(variant.kind === "literal" && variant.literalValue === null),
+    );
+    return nonNullVariants.length === 1;
+  }
+
+  return false;
+}
+
+function collectRequiredNullableFields(contract: ContractDefinition): string[] {
+  const results = new Set<string>();
+  const visited = new Set<string>();
+
+  const collectFromProperties = (
+    properties: Property[],
+    parentName: string,
+  ): void => {
+    for (const prop of properties) {
+      const propPath = `${parentName}.${prop.name}`;
+      if (prop.required && isNullableType(prop.type)) {
+        results.add(propPath);
+      }
+      collectFromTypeRef(prop.type, `${parentName}${toPascalCase(prop.name)}`);
+    }
+  };
+
+  const collectFromTypeRef = (
+    typeRef: TypeReference,
+    contextName: string,
+  ): void => {
+    if (typeRef.kind === "optional" || typeRef.kind === "nullable") {
+      if (typeof typeRef.baseType === "object") {
+        collectFromTypeRef(typeRef.baseType, contextName);
+      }
+      return;
+    }
+
+    if (typeRef.kind === "object" && typeRef.properties) {
+      const typeName = typeRef.name ? toPascalCase(typeRef.name) : contextName;
+      collectFromProperties(typeRef.properties, typeName);
+      return;
+    }
+
+    if (typeRef.kind === "array" && typeRef.elementType) {
+      collectFromTypeRef(typeRef.elementType, `${contextName}Item`);
+      return;
+    }
+
+    if (typeRef.kind === "record" && typeRef.valueType) {
+      collectFromTypeRef(typeRef.valueType, `${contextName}Value`);
+      return;
+    }
+
+    if (typeRef.kind === "tuple" && typeRef.tupleElements) {
+      typeRef.tupleElements.forEach((elem, index) => {
+        collectFromTypeRef(elem, `${contextName}V${index}`);
+      });
+      return;
+    }
+
+    if (typeRef.kind === "union" && typeRef.unionTypes) {
+      typeRef.unionTypes.forEach((variant, index) => {
+        collectFromTypeRef(variant, `${contextName}Variant${index}`);
+      });
+    }
+  };
+
+  const collectFromTypeDefinition = (
+    typeDef: TypeDefinition,
+    typeName: string,
+  ): void => {
+    if (visited.has(typeName)) return;
+    visited.add(typeName);
+
+    if (typeDef.properties) {
+      collectFromProperties(typeDef.properties, typeName);
+    }
+
+    if (typeDef.kind === "array" && typeDef.elementType) {
+      collectFromTypeRef(typeDef.elementType, `${typeName}Item`);
+    }
+  };
+
+  for (const type of contract.types) {
+    collectFromTypeDefinition(type, toPascalCase(type.name));
+  }
+
+  for (const endpoint of contract.endpoints) {
+    collectFromTypeRef(endpoint.input, `${endpoint.fullName}.input`);
+    collectFromTypeRef(endpoint.output, `${endpoint.fullName}.output`);
+  }
+
+  return Array.from(results);
+}
+
+function generateGoServer(input: TargetInput): TargetOutput {
+  const { contract } = input;
+  const diagnostics = validateSupport(contract, support, "go-server");
+  const requiredNullableFields = collectRequiredNullableFields(contract);
+  for (const field of requiredNullableFields) {
+    diagnostics.push({
+      severity: "warning",
+      message: `Field "${field}" is required and nullable. Go cannot distinguish missing values from null, so validation only runs when the value is present.`,
+    });
+  }
+  const hasErrors = diagnostics.some((issue) => issue.severity === "error");
+  if (hasErrors) {
+    return { files: [], diagnostics };
+  }
+
+  const packageName = getPackageName(input.options);
+  const typeCollector = new GoTypeCollector();
+  const collectedTypes = typeCollector.collectTypes(contract);
+
+  const typeGenerator = new GoTypeGenerator(packageName);
+  const serverGenerator = new GoServerGenerator(packageName);
+  const validationGenerator = new GoValidationGenerator(packageName);
+
+  return {
+    files: [
+      {
+        path: "types.go",
+        content: typeGenerator.generateTypes(contract, collectedTypes),
+      },
+      {
+        path: "router.go",
+        content: serverGenerator.generateServer(contract),
+      },
+      {
+        path: "validation.go",
+        content: validationGenerator.generateValidation(
+          contract,
+          collectedTypes,
+        ),
+      },
+    ],
+    diagnostics,
+  };
+}
+
+export const goTarget: Target = {
+  name: "go-server",
+  generate: generateGoServer,
+};

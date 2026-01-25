@@ -1,16 +1,20 @@
 import { describe, expect, it } from "bun:test";
 import {
+  createGoBigIntPattern,
+  createGoDatePattern,
   createGoEnumPattern,
   createGoTuplePattern,
   createGoUnionPattern,
-  createGoBigIntPattern,
-  createGoDatePattern,
 } from "./patterns";
 
 describe("Go patterns", () => {
   describe("createGoEnumPattern", () => {
     it("should generate valid Go enum code", () => {
-      const utility = createGoEnumPattern("Status", ["active", "inactive", "pending"]);
+      const utility = createGoEnumPattern("Status", [
+        "active",
+        "inactive",
+        "pending",
+      ]);
 
       expect(utility.id).toBe("enum_Status");
       expect(utility.code).toContain("type Status string");
@@ -18,7 +22,9 @@ describe("Go patterns", () => {
       expect(utility.code).toContain("StatusInactive");
       expect(utility.code).toContain("StatusPending");
       expect(utility.code).toContain("func (e Status) IsValid() bool");
-      expect(utility.code).toContain("func ParseStatus(s string) (Status, error)");
+      expect(utility.code).toContain(
+        "func ParseStatus(s string) (Status, error)",
+      );
       expect(utility.includeOnce).toBe(true);
     });
 
@@ -33,7 +39,10 @@ describe("Go patterns", () => {
 
   describe("createGoTuplePattern", () => {
     it("should generate valid Go tuple struct", () => {
-      const utility = createGoTuplePattern("Coordinate", ["float64", "float64"]);
+      const utility = createGoTuplePattern("Coordinate", [
+        "float64",
+        "float64",
+      ]);
 
       expect(utility.id).toBe("tuple_Coordinate");
       expect(utility.code).toContain("type Coordinate struct");

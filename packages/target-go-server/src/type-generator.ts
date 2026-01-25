@@ -85,32 +85,6 @@ export class GoTypeGenerator {
           .l("Data           map[string]interface{}");
       })
       .n();
-
-    // Generate helper functions for type-safe context access
-    // These can be extended by users for their specific middleware data
-    this.w
-      .comment("GetUserId retrieves userId from context if set by middleware")
-      .n()
-      .func("GetUserId(ctx *Context) (string, bool)", (b) => {
-        b.if('val, ok := ctx.Data["userId"].(string); ok', (b) => {
-          b.return("val, true");
-        });
-        b.return('"", false');
-      })
-      .n();
-
-    this.w
-      .comment(
-        "GetSessionId retrieves sessionId from context if set by middleware",
-      )
-      .n()
-      .func("GetSessionId(ctx *Context) (string, bool)", (b) => {
-        b.if('val, ok := ctx.Data["sessionId"].(string); ok', (b) => {
-          b.return("val, true");
-        });
-        b.return('"", false');
-      })
-      .n();
   }
 
   private generateMiddlewareTypes(): void {

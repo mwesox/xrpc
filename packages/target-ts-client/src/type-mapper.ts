@@ -1,8 +1,8 @@
 import {
-  type TypeMapping,
-  type TypeResult,
   type TypeContext,
   TypeMapperBase,
+  type TypeMapping,
+  type TypeResult,
   toPascalCase,
 } from "@xrpckit/sdk";
 import { createTsEnumPattern, createTsTuplePattern } from "./patterns";
@@ -83,9 +83,10 @@ export class TsTypeMapper extends TypeMapperBase<string> {
     }
     const element = this.mapType(typeRef.elementType);
     // Wrap complex types in parentheses for array syntax
-    const elementType = element.type.includes("|") || element.type.includes("&")
-      ? `(${element.type})`
-      : element.type;
+    const elementType =
+      element.type.includes("|") || element.type.includes("&")
+        ? `(${element.type})`
+        : element.type;
     return { type: `${elementType}[]` };
   }
 
@@ -164,7 +165,7 @@ export class TsTypeMapper extends TypeMapperBase<string> {
 
       // Anonymous enum - inline union
       const values = typeRef.enumValues.map((v) =>
-        typeof v === "string" ? `"${v}"` : String(v)
+        typeof v === "string" ? `"${v}"` : String(v),
       );
       return { type: values.join(" | ") };
     }
