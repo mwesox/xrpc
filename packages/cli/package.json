@@ -30,7 +30,7 @@
     "build": "tsup src/index.ts --format esm --dts --clean"
   },
   "dependencies": {
-    "@inquirer/prompts": "^7.0.0",
+    "@inquirer/prompts": "^8.2.0",
     "@xrpckit/sdk": "workspace:*",
     "@xrpckit/target-go-server": "workspace:*",
     "@xrpckit/target-swift-client": "workspace:*",
