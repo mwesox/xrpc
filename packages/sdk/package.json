@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "xrpckit": "workspace:*",
-    "typescript": "^5.0.0",
+    "typescript": "^5.9.3",
     "zod": "^4.0.0"
   },
   "devDependencies": {
