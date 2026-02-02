@@ -317,6 +317,12 @@ function addTypeDefinition(
     properties: typeRef.properties,
     elementType: typeRef.elementType,
     baseType: typeRef.baseType,
+    unionTypes: typeRef.unionTypes,
+    enumValues: typeRef.enumValues,
+    literalValue: typeRef.literalValue,
+    keyType: typeRef.keyType,
+    valueType: typeRef.valueType,
+    tupleElements: typeRef.tupleElements,
   };
 
   typeMap.set(name, typeDef);

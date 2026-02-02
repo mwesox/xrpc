@@ -3,6 +3,7 @@
 import { checkbox, input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import ora from "ora";
+import { createRequire } from "node:module";
 import { generateCommand } from "./commands/generate";
 import { showHelp } from "./commands/help";
 import { initCommand } from "./commands/init";
@@ -115,6 +116,8 @@ function parseArgs(args: string[]): {
 // Run CLI
 const args = process.argv.slice(2);
 const parsed = parseArgs(args);
+const require = createRequire(import.meta.url);
+const pkg = require("../package.json") as { version?: string };
 
 // If no arguments, show menu
 if (
@@ -135,7 +138,7 @@ if (parsed.flags.help || parsed.flags.h || parsed.command === "help") {
 
 // Handle version flag
 if (parsed.flags.version || parsed.flags.v) {
-  console.log("0.0.2");
+  console.log(pkg.version ?? "unknown");
   process.exit(0);
 }
 

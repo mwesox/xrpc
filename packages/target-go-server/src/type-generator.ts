@@ -143,7 +143,6 @@ export class GoTypeGenerator {
     if (this.generatedTypes.has(typeName)) {
       return;
     }
-    this.generatedTypes.add(typeName);
 
     // Handle array types - generate type alias instead of struct
     if (type.kind === "array" && type.elementType) {
@@ -157,25 +156,42 @@ export class GoTypeGenerator {
           this.generateTypeFromReference(elementTypeName, type.elementType);
         }
         // Generate type alias for the slice
+        this.generatedTypes.add(typeName);
         this.w.type(typeName, `[]${elementTypeName}`);
       } else {
         // For primitive element types, use the type mapper directly
         const elementGoType = this.typeMapper.mapType(type.elementType).type;
+        this.generatedTypes.add(typeName);
         this.w.type(typeName, `[]${elementGoType}`);
       }
       return;
     }
 
     // Handle object types - generate struct
-    this.w.struct(typeName, (b) => {
-      if (type.properties) {
-        for (const prop of type.properties) {
-          const goType = this.typeMapper.mapType(prop.type).type;
-          const jsonTag = this.generateJSONTag(prop);
-          b.l(`${toPascalCase(prop.name)} ${goType} \`${jsonTag}\``);
+    if (type.kind === "object") {
+      this.generatedTypes.add(typeName);
+      this.w.struct(typeName, (b) => {
+        if (type.properties) {
+          for (const prop of type.properties) {
+            const goType = this.typeMapper.mapType(prop.type).type;
+            const jsonTag = this.generateJSONTag(prop);
+            b.l(`${toPascalCase(prop.name)} ${goType} \`${jsonTag}\``);
+          }
         }
-      }
-    });
+      });
+      return;
+    }
+
+    // Handle named unions/tuples via wrapper generation
+    if (type.kind === "union" || type.kind === "tuple") {
+      this.typeMapper.mapType(type);
+      return;
+    }
+
+    // For all other kinds, generate a type alias
+    const goType = this.typeMapper.mapType(type).type;
+    this.generatedTypes.add(typeName);
+    this.w.type(typeName, goType);
   }
 
   /**
@@ -189,10 +205,10 @@ export class GoTypeGenerator {
     if (this.generatedTypes.has(typeName)) {
       return;
     }
-    this.generatedTypes.add(typeName);
 
     // Handle object types - generate struct
     if (typeRef.kind === "object" && typeRef.properties) {
+      this.generatedTypes.add(typeName);
       this.w.struct(typeName, (b) => {
         for (const prop of typeRef.properties!) {
           const goType = this.typeMapper.mapType(prop.type).type;
@@ -216,16 +232,24 @@ export class GoTypeGenerator {
         if (!this.generatedTypes.has(elementTypeName)) {
           this.generateTypeFromReference(elementTypeName, typeRef.elementType);
         }
+        this.generatedTypes.add(typeName);
         this.w.type(typeName, `[]${elementTypeName}`);
       } else {
         const elementGoType = this.typeMapper.mapType(typeRef.elementType).type;
+        this.generatedTypes.add(typeName);
         this.w.type(typeName, `[]${elementGoType}`);
       }
       return;
     }
 
+    if (typeRef.kind === "union" || typeRef.kind === "tuple") {
+      this.typeMapper.mapType(typeRef, { name: typeName });
+      return;
+    }
+
     // For other types, generate a type alias
     const goType = this.typeMapper.mapType(typeRef).type;
+    this.generatedTypes.add(typeName);
     this.w.type(typeName, goType);
   }
 

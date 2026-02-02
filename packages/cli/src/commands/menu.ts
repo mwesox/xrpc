@@ -1,5 +1,4 @@
 import {
-  createSeparator,
   formatBoxFooter,
   formatBoxHeader,
   formatBoxLine,
@@ -25,7 +24,12 @@ export async function showMenu(): Promise<void> {
     {
       command: "generate",
       description: "Generate type-safe clients and servers from API contracts",
-      example: "xrpc generate -i src/api.ts -o generated -t go",
+      example: "xrpc generate -i src/api.ts -o generated -t go-server",
+    },
+    {
+      command: "validate",
+      description: "Validate API contract for type safety and structure",
+      example: "xrpc validate src/api.ts",
     },
     {
       command: "help",

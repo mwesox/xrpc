@@ -17,9 +17,10 @@ Each target language/framework has its own package following the naming conventi
 
 - **`@xrpckit/target-go-server`** - Go server code generator
 - **`@xrpckit/target-ts-client`** - TypeScript client code generator
+- **`@xrpckit/target-ts-server`** - TypeScript server code generator
+- **`@xrpckit/target-swift-client`** - Swift/iOS client code generator
 - **`@xrpckit/target-go-client`** - (Future) Go client generator
 - **`@xrpckit/target-python-server`** - (Future) Python/FastAPI server generator
-- **`@xrpckit/target-swift-client`** - (Future) Swift/iOS client generator
 
 ## Benefits of Individual Target Packages
 

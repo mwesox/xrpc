@@ -1,15 +1,12 @@
 import { listTargets } from "../registry";
 import {
-  createSeparator,
   formatBoxFooter,
   formatBoxHeader,
   formatBoxLine,
   formatCode,
   formatCommand,
   formatDescription,
-  formatHeader,
   formatInfo,
-  formatPath,
   formatSecondary,
   formatTarget,
   formatTreeItem,
@@ -191,7 +188,7 @@ function showGenerateHelp(): void {
   console.log(
     formatBoxLine(
       formatSecondary(
-        "  Output directory for generated code (default: generated)",
+        "  Output directory for generated code (default: current directory)",
       ),
     ),
   );
@@ -411,10 +408,15 @@ function showInitHelp(): void {
   console.log(
     formatBoxLine(formatTreeItem("Next.js, React, Vite → ts-client", false)),
   );
+  console.log(
+    formatBoxLine(
+      formatTreeItem("Node.js (Express, Fastify, Koa, Hono) → ts-server", false),
+    ),
+  );
   console.log(formatBoxLine(formatTreeItem("Go → go-server", false)));
   console.log(
     formatBoxLine(
-      formatTreeItem("Python, Node.js (detected, no target yet)", true),
+      formatTreeItem("Python (detected, no target yet)", true),
     ),
   );
   console.log(formatBoxLine(""));

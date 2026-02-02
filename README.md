@@ -58,7 +58,7 @@ export const router = createRouter({ users });
 Generate code for your targets:
 
 ```bash
-xrpc generate --input src/api.ts --targets go-server,ts-client
+xrpc generate --input src/api.ts --targets go-server,ts-client,swift-client
 ```
 
 That's it. You now have type-safe clients and servers with full validation logic, zero runtime dependencies, and idiomatic code that feels native to each language.
@@ -69,6 +69,7 @@ xRPC generates production-ready code that follows each language's conventions:
 
 **Go** — Structs, HTTP handlers, and validation using only the standard library
 **TypeScript** — Full type inference with Zod schemas
+**Swift** — Codable models with an async URLSession client
 **Python** — Pydantic models with FastAPI integration *(coming soon)*
 **Rust** — Serde structs with Axum handlers *(coming soon)*
 

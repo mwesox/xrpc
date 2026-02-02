@@ -261,11 +261,15 @@ export function extractTypeInfo(schema: ZodType): TypeReference {
 
   // Handle tuples
   if (schema instanceof z.ZodTuple) {
+    const items =
+      (schema as any).items ??
+      (schema as any)._def?.items ??
+      (schema as any).def?.items;
+    const tupleItems = Array.isArray(items) ? items : [];
+
     return {
       kind: "tuple",
-      tupleElements: (schema as any).items.map((item: ZodType) =>
-        extractTypeInfo(item),
-      ),
+      tupleElements: tupleItems.map((item: ZodType) => extractTypeInfo(item)),
     };
   }
 

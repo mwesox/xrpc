@@ -262,7 +262,7 @@ async function detectAppType(
       type: "node",
       isClient: false,
       isServer: true,
-      suggestedTarget: null, // typescript-server not yet available
+      suggestedTarget: "ts-server",
     };
   }
 

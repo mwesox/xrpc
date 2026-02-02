@@ -1,20 +1,20 @@
 {
-  "name": "xrpckit",
-  "version": "0.0.2",
-  "description": "Type-safe, cross-platform RPC framework - define API contracts with Zod schemas",
+  "name": "@xrpckit/target-swift-client",
+  "version": "0.0.1",
+  "description": "Swift client code generator for xRPC - generates Codable models and API clients for iOS",
   "type": "module",
   "license": "MIT",
   "author": "mwesox",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mwesox/xrpc.git",
-    "directory": "packages/xrpckit"
+    "directory": "packages/target-swift-client"
   },
   "bugs": {
     "url": "https://github.com/mwesox/xrpc/issues"
   },
   "homepage": "https://github.com/mwesox/xrpc#readme",
-  "keywords": ["xrpc", "rpc", "typescript", "zod", "schema", "api", "type-safe", "contract"],
+  "keywords": ["xrpc", "rpc", "swift", "ios", "client", "codegen", "api", "type-safe"],
   "publishConfig": {
     "access": "public"
   },
@@ -32,12 +32,10 @@
     "src"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean",
-    "prepublishOnly": "npm run build",
-    "release": "npm publish --//registry.npmjs.org/:_authToken=$NPM_XRPC_APIKEY"
+    "build": "tsup src/index.ts --format esm --dts --clean"
   },
   "dependencies": {
-    "zod": "^4.0.0"
+    "@xrpckit/sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

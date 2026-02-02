@@ -96,7 +96,9 @@
         "@inquirer/prompts": "^7.0.0",
         "@xrpckit/sdk": "workspace:*",
         "@xrpckit/target-go-server": "workspace:*",
+        "@xrpckit/target-swift-client": "workspace:*",
         "@xrpckit/target-ts-client": "workspace:*",
+        "@xrpckit/target-ts-server": "workspace:*",
         "chalk": "^5.3.0",
         "figlet": "^1.7.0",
         "ora": "^8.0.0",
@@ -134,9 +136,33 @@
         "typescript": "^5.0.0",
       },
     },
+    "packages/target-swift-client": {
+      "name": "@xrpckit/target-swift-client",
+      "version": "0.0.1",
+      "dependencies": {
+        "@xrpckit/sdk": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^22.0.0",
+        "tsup": "^8.0.0",
+        "typescript": "^5.0.0",
+      },
+    },
     "packages/target-ts-client": {
       "name": "@xrpckit/target-ts-client",
       "version": "0.0.2",
+      "dependencies": {
+        "@xrpckit/sdk": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^22.0.0",
+        "tsup": "^8.0.0",
+        "typescript": "^5.0.0",
+      },
+    },
+    "packages/target-ts-server": {
+      "name": "@xrpckit/target-ts-server",
+      "version": "0.0.1",
       "dependencies": {
         "@xrpckit/sdk": "workspace:*",
       },
@@ -565,7 +591,11 @@
 
     "@xrpckit/target-go-server": ["@xrpckit/target-go-server@workspace:packages/target-go-server"],
 
+    "@xrpckit/target-swift-client": ["@xrpckit/target-swift-client@workspace:packages/target-swift-client"],
+
     "@xrpckit/target-ts-client": ["@xrpckit/target-ts-client@workspace:packages/target-ts-client"],
+
+    "@xrpckit/target-ts-server": ["@xrpckit/target-ts-server@workspace:packages/target-ts-server"],
 
     "acorn": ["acorn@8.15.0", "", { "bin": { "acorn": "bin/acorn" } }, "sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg=="],
 
@@ -1241,7 +1271,11 @@
 
     "@xrpckit/target-go-server/@types/node": ["@types/node@22.19.7", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw=="],
 
+    "@xrpckit/target-swift-client/@types/node": ["@types/node@22.19.7", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw=="],
+
     "@xrpckit/target-ts-client/@types/node": ["@types/node@22.19.7", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw=="],
+
+    "@xrpckit/target-ts-server/@types/node": ["@types/node@22.19.7", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw=="],
 
     "eslint/chalk": ["chalk@4.1.2", "", { "dependencies": { "ansi-styles": "^4.1.0", "supports-color": "^7.1.0" } }, "sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA=="],
 
@@ -1279,7 +1313,11 @@
 
     "@xrpckit/target-go-server/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
+    "@xrpckit/target-swift-client/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
+
     "@xrpckit/target-ts-client/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
+
+    "@xrpckit/target-ts-server/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
     "wrap-ansi/string-width/emoji-regex": ["emoji-regex@8.0.0", "", {}, "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A=="],
 

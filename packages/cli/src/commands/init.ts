@@ -252,6 +252,7 @@ function displayDetectionResults(
   apps: DetectedApp[],
   contracts: DetectedContract[],
 ): void {
+  console.log(formatBoxHeader("Project Summary"));
   // Show monorepo type
   console.log(formatBoxLine(""));
   if (project.monorepoType !== "none") {

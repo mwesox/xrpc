@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import {
   type ContractDefinition,
   type Diagnostic,
@@ -28,6 +28,10 @@ import {
   formatTarget,
   formatWarning,
 } from "../utils/tui";
+import {
+  generateTomlTemplate,
+  type TargetConfig as TomlTargetConfig,
+} from "../utils/templates";
 
 // Minimal types for prompt and spinner functions
 type PromptFunction = (
@@ -65,12 +69,54 @@ export interface GenerateOptions {
  * @throws Error if the path is outside the base directory
  */
 function validatePath(path: string, baseDir: string = process.cwd()): string {
-  const resolved = resolve(path);
   const base = resolve(baseDir);
-  if (!resolved.startsWith(base)) {
+  const resolved = resolve(baseDir, path);
+  const rel = relative(base, resolved);
+  if (rel.startsWith("..") || isAbsolute(rel)) {
     throw new Error(`Path must be within project directory: ${path}`);
   }
   return resolved;
+}
+
+function resolveSafeOutputPath(baseDir: string, filePath: string): string {
+  if (isAbsolute(filePath)) {
+    throw new Error(`Generated path must be relative: ${filePath}`);
+  }
+  const resolved = resolve(baseDir, filePath);
+  const rel = relative(baseDir, resolved);
+  if (rel.startsWith("..") || isAbsolute(rel)) {
+    throw new Error(`Generated path escapes output directory: ${filePath}`);
+  }
+  return resolved;
+}
+
+function normalizeTomlPath(baseDir: string, filePath: string): string {
+  const resolved = resolve(baseDir, filePath);
+  const rel = relative(baseDir, resolved);
+  if (!rel || rel === ".") {
+    return ".";
+  }
+  if (rel.startsWith(".")) {
+    return rel;
+  }
+  return `./${rel}`;
+}
+
+async function writeTomlConfig(
+  contractPath: string,
+  targets: TomlTargetConfig[],
+): Promise<void> {
+  const configPath = join(process.cwd(), "xrpc.toml");
+  if (existsSync(configPath)) {
+    return;
+  }
+
+  const content = generateTomlTemplate({
+    contractPath: normalizeTomlPath(process.cwd(), contractPath),
+    targets,
+  });
+
+  await writeFile(configPath, content);
 }
 
 export async function generateCommand(
@@ -339,6 +385,8 @@ async function generateSingleContract(
       );
     }
 
+    const targetConfigs: TomlTargetConfig[] = [];
+
     for (const target of targets) {
       const targetSpinner = createSpinner
         ? createSpinner(`Generating ${formatTarget(target)} code...`)
@@ -355,6 +403,11 @@ async function generateSingleContract(
       } else {
         targetBaseDir = ".";
       }
+
+      targetConfigs.push({
+        name: target,
+        outputPath: normalizeTomlPath(process.cwd(), targetBaseDir),
+      });
 
       try {
         await generateForTarget(
@@ -383,6 +436,14 @@ async function generateSingleContract(
     console.log();
     console.log(formatSuccess("Generation complete!"));
     console.log();
+
+    if (!config) {
+      await writeTomlConfig(input, targetConfigs);
+      if (existsSync(join(process.cwd(), "xrpc.toml"))) {
+        console.log(formatSuccess("Created xrpc.toml"));
+        console.log();
+      }
+    }
   } catch (error) {
     if (genSpinner && "fail" in genSpinner)
       genSpinner.fail("Generation failed");
@@ -455,7 +516,7 @@ async function generateForTarget(
 
   const writtenFiles: string[] = [];
   for (const file of files) {
-    const outputPath = join(targetOutputDir, file.path);
+    const outputPath = resolveSafeOutputPath(targetOutputDir, file.path);
     await mkdir(dirname(outputPath), { recursive: true });
     await writeFile(outputPath, file.content);
     writtenFiles.push(outputPath);

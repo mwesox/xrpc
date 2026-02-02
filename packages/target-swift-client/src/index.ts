@@ -1,0 +1,1 @@
+export { swiftClientTarget } from "./generator";
