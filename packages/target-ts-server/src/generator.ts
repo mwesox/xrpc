@@ -1,9 +1,9 @@
 import {
-  TYPE_KINDS,
   type Target,
   type TargetInput,
   type TargetOutput,
   type TargetSupport,
+  TYPE_KINDS,
   VALIDATION_KINDS,
   validateSupport,
 } from "@xrpckit/sdk";
@@ -29,7 +29,9 @@ const support: TargetSupport = {
   ],
 };
 
-function getContractPath(options?: Record<string, unknown>): string | undefined {
+function getContractPath(
+  options?: Record<string, unknown>,
+): string | undefined {
   if (
     options &&
     typeof options.contractPath === "string" &&

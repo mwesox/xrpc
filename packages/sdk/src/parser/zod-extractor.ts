@@ -1,25 +1,6 @@
+import type { ZodType } from "zod";
 import { z } from "zod";
-import type {
-  ZodArray,
-  ZodBoolean,
-  ZodDate,
-  ZodEnum,
-  ZodLiteral,
-  ZodNumber,
-  ZodObject,
-  ZodOptional,
-  ZodRecord,
-  ZodString,
-  ZodTuple,
-  ZodType,
-  ZodUnion,
-} from "zod";
-import type {
-  Property,
-  TypeDefinition,
-  TypeReference,
-  ValidationRules,
-} from "./contract";
+import type { Property, TypeReference, ValidationRules } from "./contract";
 
 // Safe integer bounds for JavaScript (used when Zod .int() is applied)
 const SAFE_INTEGER_MIN = Number.MIN_SAFE_INTEGER;
@@ -50,7 +31,7 @@ export function extractValidationRules(
   let jsonSchema: any;
   try {
     jsonSchema = baseSchema.toJSONSchema();
-  } catch (e) {
+  } catch (_e) {
     // If toJSONSchema fails, fall back to internal structure
     return undefined;
   }

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
+import { createRequire } from "node:module";
 import { checkbox, input, select } from "@inquirer/prompts";
 import chalk from "chalk";
 import ora from "ora";
-import { createRequire } from "node:module";
 import { generateCommand } from "./commands/generate";
 import { showHelp } from "./commands/help";
 import { initCommand } from "./commands/init";

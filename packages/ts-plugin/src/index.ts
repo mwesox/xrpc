@@ -1,8 +1,5 @@
 import type tsModule from "typescript/lib/tsserverlibrary";
-import {
-  findDeepestNodeAtPosition,
-  resolveXrpcDefinitions,
-} from "./core";
+import { findDeepestNodeAtPosition, resolveXrpcDefinitions } from "./core";
 
 function init(modules: { typescript: typeof tsModule }) {
   const ts = modules.typescript;
@@ -93,4 +90,9 @@ function init(modules: { typescript: typeof tsModule }) {
   return { create };
 }
 
-export = init;
+export default init;
+
+// TS Server loads plugins with `require(...)` and expects the module value to be the factory function.
+if (typeof module !== "undefined") {
+  module.exports = init;
+}

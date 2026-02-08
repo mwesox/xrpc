@@ -2,7 +2,7 @@ import type { ContractDefinition, Property, TypeReference } from "@xrpckit/sdk";
 import { toPascalCase } from "@xrpckit/sdk";
 import { SwiftBuilder } from "./swift-builder";
 import { SwiftTypeCollector } from "./type-collector";
-import { SwiftTypeMapper, isNullLiteral } from "./type-mapper";
+import { isNullLiteral, SwiftTypeMapper } from "./type-mapper";
 import { sanitizeSwiftIdentifier, toLowerCamelCase, uniqueName } from "./utils";
 
 export class SwiftTypeGenerator {
@@ -214,7 +214,7 @@ export class SwiftTypeGenerator {
         b.l("enum CodingKeys: String, CodingKey {");
         b.i();
         for (const key of codingKeys) {
-          b.l(`case ${key.name} = \"${key.original}\"`);
+          b.l(`case ${key.name} = "${key.original}"`);
         }
         b.u();
         b.l("}");
@@ -240,7 +240,7 @@ export class SwiftTypeGenerator {
       return {
         value,
         caseName,
-        literal: typeof value === "string" ? `\"${value}\"` : String(value),
+        literal: typeof value === "string" ? `"${value}"` : String(value),
       };
     });
 
@@ -282,10 +282,10 @@ export class SwiftTypeGenerator {
         b.i();
         caseInfos.forEach((info) => {
           if (typeof info.value !== "string") return;
-          b.l(`case \"${info.value}\": self = .${info.caseName}`);
+          b.l(`case "${info.value}": self = .${info.caseName}`);
         });
         b.l(
-          `default: throw DecodingError.typeMismatch(${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: \"Invalid enum value\"))`,
+          `default: throw DecodingError.typeMismatch(${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Invalid enum value"))`,
         );
         b.u();
         b.l("}");
@@ -304,7 +304,7 @@ export class SwiftTypeGenerator {
           b.l(`case ${info.value}: self = .${info.caseName}`);
         });
         b.l(
-          `default: throw DecodingError.typeMismatch(${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: \"Invalid enum value\"))`,
+          `default: throw DecodingError.typeMismatch(${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Invalid enum value"))`,
         );
         b.u();
         b.l("}");
@@ -315,7 +315,7 @@ export class SwiftTypeGenerator {
 
       b.l(
         "throw DecodingError.typeMismatch(" +
-          `${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: \"Invalid enum value\"))`,
+          `${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Invalid enum value"))`,
       );
       b.u();
       b.l("}");
@@ -394,7 +394,7 @@ export class SwiftTypeGenerator {
       }
       b.l(
         "throw DecodingError.typeMismatch(" +
-          `${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: \"Invalid union value\"))`,
+          `${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Invalid union value"))`,
       );
       b.u();
       b.l("}");

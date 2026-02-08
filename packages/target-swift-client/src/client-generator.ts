@@ -361,7 +361,7 @@ export class SwiftClientGenerator {
           `public func ${methodName}(_ input: ${inputType}) async throws -> ${outputType} {`,
         );
         b.i();
-        b.l(`try await client.call(\"${endpoint.fullName}\", params: input)`);
+        b.l(`try await client.call("${endpoint.fullName}", params: input)`);
         b.u();
         b.l("}");
         b.n();
@@ -408,7 +408,7 @@ export class SwiftClientGenerator {
             `public func ${methodName}(_ input: ${inputType}) async throws -> ${outputType} {`,
           );
           b.i();
-          b.l(`try await client.call(\"${endpoint.fullName}\", params: input)`);
+          b.l(`try await client.call("${endpoint.fullName}", params: input)`);
           b.u();
           b.l("}");
           b.n();
@@ -423,9 +423,10 @@ export class SwiftClientGenerator {
     });
   }
 
-  private bucketEndpoints(
-    contract: ContractDefinition,
-  ): { flat: Endpoint[]; groups: Record<string, Endpoint[]> } {
+  private bucketEndpoints(contract: ContractDefinition): {
+    flat: Endpoint[];
+    groups: Record<string, Endpoint[]>;
+  } {
     const flat: Endpoint[] = [];
     const groups: Record<string, Endpoint[]> = {};
 

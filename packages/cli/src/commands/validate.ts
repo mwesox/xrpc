@@ -8,7 +8,6 @@ import {
   formatInfo,
   formatPath,
   formatSuccess,
-  formatWarning,
 } from "../utils/tui";
 
 export interface ValidateOptions {

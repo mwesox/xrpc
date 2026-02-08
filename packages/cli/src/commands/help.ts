@@ -410,14 +410,15 @@ function showInitHelp(): void {
   );
   console.log(
     formatBoxLine(
-      formatTreeItem("Node.js (Express, Fastify, Koa, Hono) → ts-server", false),
+      formatTreeItem(
+        "Node.js (Express, Fastify, Koa, Hono) → ts-server",
+        false,
+      ),
     ),
   );
   console.log(formatBoxLine(formatTreeItem("Go → go-server", false)));
   console.log(
-    formatBoxLine(
-      formatTreeItem("Python (detected, no target yet)", true),
-    ),
+    formatBoxLine(formatTreeItem("Python (detected, no target yet)", true)),
   );
   console.log(formatBoxLine(""));
   console.log(formatBoxFooter());

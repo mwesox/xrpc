@@ -1,8 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import {
-  spawn,
-  type ChildProcessWithoutNullStreams,
-} from "node:child_process";
+import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { copyFile, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -14,7 +11,10 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function indexToLineOffset(text: string, index: number): {
+function indexToLineOffset(
+  text: string,
+  index: number,
+): {
   line: number;
   offset: number;
 } {
@@ -391,8 +391,16 @@ void handlers;
     await mkdir(join(fixtureRoot, "src/xrpc"), { recursive: true });
     await writeFile(contractPath, contractText, "utf-8");
     await writeFile(join(fixtureRoot, "src/xrpc/types.ts"), typesText, "utf-8");
-    await writeFile(join(fixtureRoot, "src/xrpc/client.ts"), clientText, "utf-8");
-    await writeFile(join(fixtureRoot, "src/xrpc/server.ts"), serverText, "utf-8");
+    await writeFile(
+      join(fixtureRoot, "src/xrpc/client.ts"),
+      clientText,
+      "utf-8",
+    );
+    await writeFile(
+      join(fixtureRoot, "src/xrpc/server.ts"),
+      serverText,
+      "utf-8",
+    );
     await writeFile(appPath, appText, "utf-8");
     await writeFile(serverAppPath, serverAppText, "utf-8");
     await writeFile(join(fixtureRoot, "tsconfig.json"), tsconfigText, "utf-8");
@@ -432,7 +440,9 @@ void handlers;
       expect(Array.isArray(callBody)).toBe(true);
       expect(callBody.length).toBeGreaterThan(0);
 
-      const contractCallSpan = callBody.find((span) => span.file === contractPath);
+      const contractCallSpan = callBody.find(
+        (span) => span.file === contractPath,
+      );
       expect(contractCallSpan).toBeDefined();
 
       const callStart = lineOffsetToIndex(
@@ -461,7 +471,9 @@ void handlers;
       expect(Array.isArray(keyBody)).toBe(true);
       expect(keyBody.length).toBeGreaterThan(0);
 
-      const contractKeySpan = keyBody.find((span) => span.file === contractPath);
+      const contractKeySpan = keyBody.find(
+        (span) => span.file === contractPath,
+      );
       expect(contractKeySpan).toBeDefined();
 
       const keyStart = lineOffsetToIndex(

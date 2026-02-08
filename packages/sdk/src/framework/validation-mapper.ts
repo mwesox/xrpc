@@ -9,10 +9,10 @@ import type {
 } from "./types";
 import {
   ARRAY_VALIDATIONS,
+  isValidationKind,
   NUMBER_VALIDATIONS,
   STRING_VALIDATIONS,
   VALIDATION_KINDS,
-  isValidationKind,
 } from "./types";
 import { UtilityCollector } from "./utility-collector";
 

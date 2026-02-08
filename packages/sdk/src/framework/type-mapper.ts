@@ -7,7 +7,7 @@ import type {
   TypeMapping,
   TypeResult,
 } from "./types";
-import { TYPE_KINDS, isTypeKind } from "./types";
+import { isTypeKind, TYPE_KINDS } from "./types";
 import { UtilityCollector } from "./utility-collector";
 
 /**

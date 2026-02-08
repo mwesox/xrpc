@@ -7,19 +7,22 @@ import {
   parseContract,
 } from "@xrpckit/sdk";
 import {
-  type ModuleConfig,
-  type XrpcConfig,
   extractModules,
   extractTargets,
   isMultiModule,
   loadConfig,
+  type ModuleConfig,
+  type XrpcConfig,
 } from "../config";
 import { getGenerator, listTargets } from "../registry";
+import {
+  generateTomlTemplate,
+  type TargetConfig as TomlTargetConfig,
+} from "../utils/templates";
 import {
   createSeparator,
   formatBoxFooter,
   formatBoxHeader,
-  formatBoxLine,
   formatError,
   formatInfo,
   formatPath,
@@ -28,10 +31,6 @@ import {
   formatTarget,
   formatWarning,
 } from "../utils/tui";
-import {
-  generateTomlTemplate,
-  type TargetConfig as TomlTargetConfig,
-} from "../utils/templates";
 
 // Minimal types for prompt and spinner functions
 type PromptFunction = (
@@ -122,8 +121,6 @@ async function writeTomlConfig(
 export async function generateCommand(
   options: GenerateOptions = {},
 ): Promise<void> {
-  const { prompt, spinner: createSpinner } = options;
-
   // Load config file if present
   const config = await loadConfig();
 
@@ -145,7 +142,6 @@ async function generateMultiModule(
   options: GenerateOptions,
 ): Promise<void> {
   const {
-    prompt,
     spinner: createSpinner,
     module: requestedModule,
     targets: targetFilter,

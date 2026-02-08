@@ -3,8 +3,8 @@ import {
   type Property,
   type TypeDefinition,
   type TypeReference,
-  type ValidationRules,
   toPascalCase,
+  type ValidationRules,
 } from "@xrpckit/sdk";
 import { GoBuilder } from "./go-builder";
 import type { CollectedType } from "./type-collector";
@@ -764,7 +764,7 @@ export class GoValidationGenerator {
     return false;
   }
 
-  private generateHelperFunctions(w: GoBuilder): void {
+  private generateHelperFunctions(_w: GoBuilder): void {
     // Helper functions can be added here if needed
     // For now, we use standard library functions directly
   }

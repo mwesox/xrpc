@@ -1,15 +1,15 @@
 import {
   type ContractDefinition,
   type Property,
-  TYPE_KINDS,
   type Target,
   type TargetInput,
   type TargetOutput,
   type TargetSupport,
+  TYPE_KINDS,
   type TypeDefinition,
   type TypeReference,
-  VALIDATION_KINDS,
   toPascalCase,
+  VALIDATION_KINDS,
   validateSupport,
 } from "@xrpckit/sdk";
 import { GoServerGenerator } from "./server-generator";

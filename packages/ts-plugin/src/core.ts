@@ -8,6 +8,27 @@ export interface EndpointResolution {
 
 type TsModule = typeof import("typescript/lib/tsserverlibrary");
 
+function getObjectLiteralContainerKind(
+  ts: TsModule,
+): import("typescript/lib/tsserverlibrary").ScriptElementKind {
+  const scriptElementKind =
+    ts.ScriptElementKind as typeof ts.ScriptElementKind & {
+      objectLiteralElement?: import("typescript/lib/tsserverlibrary").ScriptElementKind;
+    };
+  return (
+    scriptElementKind.objectLiteralElement ??
+    ts.ScriptElementKind.memberVariableElement
+  );
+}
+
+function hasNameNode(
+  node: import("typescript/lib/tsserverlibrary").Node,
+): node is import("typescript/lib/tsserverlibrary").Node & {
+  name?: import("typescript/lib/tsserverlibrary").Node;
+} {
+  return "name" in node;
+}
+
 export function resolveXrpcDefinitions(
   ts: TsModule,
   program: import("typescript/lib/tsserverlibrary").Program,
@@ -34,7 +55,11 @@ export function resolveXrpcDefinitions(
     return undefined;
   }
 
-  const span = findEndpointSpanInContract(ts, contractSource, resolution.endpoint);
+  const span = findEndpointSpanInContract(
+    ts,
+    contractSource,
+    resolution.endpoint,
+  );
   if (!span) {
     return undefined;
   }
@@ -45,7 +70,7 @@ export function resolveXrpcDefinitions(
       textSpan: span,
       kind: ts.ScriptElementKind.memberVariableElement,
       name: resolution.endpoint,
-      containerKind: ts.ScriptElementKind.objectLiteralElement,
+      containerKind: getObjectLiteralContainerKind(ts),
       containerName: "router",
     },
   ];
@@ -91,7 +116,11 @@ function findEndpointResolution(
   }
 
   if (ts.isStringLiteral(node) && isEndpointName(node.text)) {
-    const nodeSymbol = checker.getSymbolAtLocation(node.parent?.name ?? node);
+    const symbolTarget =
+      node.parent && hasNameNode(node.parent) && node.parent.name
+        ? node.parent.name
+        : node;
+    const nodeSymbol = checker.getSymbolAtLocation(symbolTarget);
     const fromNodeSymbol = findEndpointFromSymbol(ts, checker, nodeSymbol);
     if (fromNodeSymbol) {
       return fromNodeSymbol;
@@ -101,7 +130,8 @@ function findEndpointResolution(
       ? node.parent
       : undefined;
     const objectLiteral =
-      propertyAssignment && ts.isObjectLiteralExpression(propertyAssignment.parent)
+      propertyAssignment &&
+      ts.isObjectLiteralExpression(propertyAssignment.parent)
         ? propertyAssignment.parent
         : undefined;
     if (objectLiteral && typeof checker.getContextualType === "function") {
@@ -187,7 +217,10 @@ function findEndpointFromDeclaration(
     return undefined;
   }
 
-  const calledIdentifier = extractCalledFunctionIdentifier(ts, declaration.initializer);
+  const calledIdentifier = extractCalledFunctionIdentifier(
+    ts,
+    declaration.initializer,
+  );
   if (!calledIdentifier) {
     return undefined;
   }
@@ -269,7 +302,8 @@ function resolveContractSourceFile(
   const normalizedTypesPath = normalizePath(typesPath);
 
   const typesSource =
-    program.getSourceFile(typesPath) ?? program.getSourceFile(normalizedTypesPath);
+    program.getSourceFile(typesPath) ??
+    program.getSourceFile(normalizedTypesPath);
   if (!typesSource) {
     return undefined;
   }
@@ -279,7 +313,10 @@ function resolveContractSourceFile(
     return undefined;
   }
 
-  const contractPath = resolveModuleSpecifierPath(typesSource.fileName, contractSpecifier);
+  const contractPath = resolveModuleSpecifierPath(
+    typesSource.fileName,
+    contractSpecifier,
+  );
   if (!contractPath) {
     return undefined;
   }
@@ -374,7 +411,12 @@ function findEndpointSpanInContract(
 
   const routerDecl = findVariableDeclaration(ts, sourceFile, "router");
   const routerObject = routerDecl?.initializer
-    ? resolveCreateCallObject(ts, routerDecl.initializer, "createRouter", initializerMap)
+    ? resolveCreateCallObject(
+        ts,
+        routerDecl.initializer,
+        "createRouter",
+        initializerMap,
+      )
     : undefined;
   if (!routerObject) {
     return undefined;
@@ -442,7 +484,10 @@ function findFlatEndpointProperty(
   ts: TsModule,
   routerObject: import("typescript/lib/tsserverlibrary").ObjectLiteralExpression,
   endpointName: string,
-  initializerMap: Map<string, import("typescript/lib/tsserverlibrary").Expression>,
+  initializerMap: Map<
+    string,
+    import("typescript/lib/tsserverlibrary").Expression
+  >,
 ):
   | import("typescript/lib/tsserverlibrary").PropertyAssignment
   | import("typescript/lib/tsserverlibrary").ShorthandPropertyAssignment
@@ -457,25 +502,33 @@ function findFlatEndpointProperty(
     ? resolveExpression(ts, endpointExpr, initializerMap)
     : undefined;
 
-  return isEndpointCallExpression(ts, resolvedExpr) ? endpointProperty : undefined;
+  return isEndpointCallExpression(ts, resolvedExpr)
+    ? endpointProperty
+    : undefined;
 }
 
 function findEndpointGroupObject(
   ts: TsModule,
   routerObject: import("typescript/lib/tsserverlibrary").ObjectLiteralExpression,
   expectedGroupName: string,
-  initializerMap: Map<string, import("typescript/lib/tsserverlibrary").Expression>,
-): import("typescript/lib/tsserverlibrary").ObjectLiteralExpression | undefined {
+  initializerMap: Map<
+    string,
+    import("typescript/lib/tsserverlibrary").Expression
+  >,
+):
+  | import("typescript/lib/tsserverlibrary").ObjectLiteralExpression
+  | undefined {
   for (const property of routerObject.properties) {
-    if (!(ts.isPropertyAssignment(property) || ts.isShorthandPropertyAssignment(property))) {
+    if (
+      !(
+        ts.isPropertyAssignment(property) ||
+        ts.isShorthandPropertyAssignment(property)
+      )
+    ) {
       continue;
     }
 
-    const groupResolution = resolveGroupProperty(
-      ts,
-      property,
-      initializerMap,
-    );
+    const groupResolution = resolveGroupProperty(ts, property, initializerMap);
     if (!groupResolution || groupResolution.groupName !== expectedGroupName) {
       continue;
     }
@@ -491,11 +544,16 @@ function resolveGroupProperty(
   property:
     | import("typescript/lib/tsserverlibrary").PropertyAssignment
     | import("typescript/lib/tsserverlibrary").ShorthandPropertyAssignment,
-  initializerMap: Map<string, import("typescript/lib/tsserverlibrary").Expression>,
-): {
-  groupName: string;
-  groupObject: import("typescript/lib/tsserverlibrary").ObjectLiteralExpression;
-} | undefined {
+  initializerMap: Map<
+    string,
+    import("typescript/lib/tsserverlibrary").Expression
+  >,
+):
+  | {
+      groupName: string;
+      groupObject: import("typescript/lib/tsserverlibrary").ObjectLiteralExpression;
+    }
+  | undefined {
   const routerKey = readPropertyName(ts, property.name);
   if (!routerKey) {
     return undefined;
@@ -572,7 +630,9 @@ function resolveCallArgObject(
   ts: TsModule,
   callExpr: import("typescript/lib/tsserverlibrary").CallExpression,
   argIndex: number,
-): import("typescript/lib/tsserverlibrary").ObjectLiteralExpression | undefined {
+):
+  | import("typescript/lib/tsserverlibrary").ObjectLiteralExpression
+  | undefined {
   const argExpr = callExpr.arguments[argIndex];
   if (!argExpr) {
     return undefined;
@@ -586,7 +646,10 @@ function resolveCallArgString(
   ts: TsModule,
   callExpr: import("typescript/lib/tsserverlibrary").CallExpression,
   argIndex: number,
-  initializerMap: Map<string, import("typescript/lib/tsserverlibrary").Expression>,
+  initializerMap: Map<
+    string,
+    import("typescript/lib/tsserverlibrary").Expression
+  >,
 ): string | undefined {
   const argExpr = callExpr.arguments[argIndex];
   if (!argExpr) {
@@ -599,7 +662,10 @@ function resolveCallArgString(
   }
 
   const unwrapped = unwrapExpression(ts, resolvedExpr);
-  if (ts.isStringLiteral(unwrapped) || ts.isNoSubstitutionTemplateLiteral(unwrapped)) {
+  if (
+    ts.isStringLiteral(unwrapped) ||
+    ts.isNoSubstitutionTemplateLiteral(unwrapped)
+  ) {
     return unwrapped.text;
   }
 
@@ -630,7 +696,10 @@ function buildInitializerMap(
   ts: TsModule,
   sourceFile: import("typescript/lib/tsserverlibrary").SourceFile,
 ): Map<string, import("typescript/lib/tsserverlibrary").Expression> {
-  const map = new Map<string, import("typescript/lib/tsserverlibrary").Expression>();
+  const map = new Map<
+    string,
+    import("typescript/lib/tsserverlibrary").Expression
+  >();
 
   for (const statement of sourceFile.statements) {
     if (!ts.isVariableStatement(statement)) {
@@ -672,9 +741,14 @@ function resolveCreateCallObject(
   ts: TsModule,
   expression: import("typescript/lib/tsserverlibrary").Expression,
   callName: string,
-  initializerMap: Map<string, import("typescript/lib/tsserverlibrary").Expression>,
+  initializerMap: Map<
+    string,
+    import("typescript/lib/tsserverlibrary").Expression
+  >,
   depth = 0,
-): import("typescript/lib/tsserverlibrary").ObjectLiteralExpression | undefined {
+):
+  | import("typescript/lib/tsserverlibrary").ObjectLiteralExpression
+  | undefined {
   if (depth > 10) {
     return undefined;
   }
@@ -705,7 +779,10 @@ function resolveCreateCallObject(
 function resolveExpression(
   ts: TsModule,
   expression: import("typescript/lib/tsserverlibrary").Expression,
-  initializerMap: Map<string, import("typescript/lib/tsserverlibrary").Expression>,
+  initializerMap: Map<
+    string,
+    import("typescript/lib/tsserverlibrary").Expression
+  >,
   depth = 0,
 ): import("typescript/lib/tsserverlibrary").Expression | undefined {
   if (depth > 10) {
@@ -722,14 +799,19 @@ function resolveExpression(
     return unwrapped;
   }
 
-  return resolveExpression(ts, initializer, initializerMap, depth + 1) ?? initializer;
+  return (
+    resolveExpression(ts, initializer, initializerMap, depth + 1) ?? initializer
+  );
 }
 
 function findPropertyByName(
   ts: TsModule,
   objectLiteral: import("typescript/lib/tsserverlibrary").ObjectLiteralExpression,
   propertyName: string,
-): import("typescript/lib/tsserverlibrary").PropertyAssignment | import("typescript/lib/tsserverlibrary").ShorthandPropertyAssignment | undefined {
+):
+  | import("typescript/lib/tsserverlibrary").PropertyAssignment
+  | import("typescript/lib/tsserverlibrary").ShorthandPropertyAssignment
+  | undefined {
   for (const property of objectLiteral.properties) {
     if (
       ts.isShorthandPropertyAssignment(property) &&

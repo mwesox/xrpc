@@ -1,10 +1,6 @@
 import { existsSync } from "node:fs";
-import { resolve } from "node:path";
-import { dirname, join } from "node:path";
-import type {
-  EndpointDefinition,
-  RouterDefinition,
-} from "xrpckit";
+import { dirname, join, resolve } from "node:path";
+import type { EndpointDefinition, RouterDefinition } from "xrpckit";
 import { GROUP_NAME, getRouterMiddleware } from "xrpckit";
 import type {
   ContractDefinition,
@@ -18,14 +14,14 @@ import { extractTypeInfo, generateTypeName } from "./zod-extractor";
 // Re-export types for convenience
 export type {
   ContractDefinition,
-  Router,
-  EndpointGroup,
   Endpoint,
-  TypeDefinition,
-  Property,
-  ValidationRules,
-  TypeReference,
+  EndpointGroup,
   MiddlewareDefinition,
+  Property,
+  Router,
+  TypeDefinition,
+  TypeReference,
+  ValidationRules,
 } from "./contract";
 
 /**
@@ -44,7 +40,7 @@ async function importWithTimeout(path: string, timeout = 5000): Promise<any> {
 /**
  * Checks if a package.json exists near the file
  */
-function hasPackageJson(filePath: string): boolean {
+function _hasPackageJson(filePath: string): boolean {
   const dir = dirname(resolve(filePath));
   let currentDir = dir;
 
@@ -309,7 +305,7 @@ function buildContractDefinition(
 
   if (endpoints.length === 0) {
     throw new Error(
-      "Router has no endpoints. Add grouped endpoints with group(\"name\", { ... }) or flat endpoints with createRouter({ hello: query({ ... }) }).",
+      'Router has no endpoints. Add grouped endpoints with group("name", { ... }) or flat endpoints with createRouter({ hello: query({ ... }) }).',
     );
   }
 

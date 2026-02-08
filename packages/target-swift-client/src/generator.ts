@@ -1,14 +1,14 @@
 import {
-  TYPE_KINDS,
+  type Property,
   type Target,
   type TargetInput,
   type TargetOutput,
   type TargetSupport,
+  TYPE_KINDS,
   type TypeDefinition,
   type TypeReference,
-  type Property,
-  VALIDATION_KINDS,
   toPascalCase,
+  VALIDATION_KINDS,
   validateSupport,
 } from "@xrpckit/sdk";
 import { SwiftClientGenerator } from "./client-generator";
@@ -39,7 +39,8 @@ function isNullableType(typeRef: TypeReference): boolean {
 
   if (typeRef.kind === "union" && typeRef.unionTypes) {
     const nonNullVariants = typeRef.unionTypes.filter(
-      (variant) => !(variant.kind === "literal" && variant.literalValue === null),
+      (variant) =>
+        !(variant.kind === "literal" && variant.literalValue === null),
     );
     return nonNullVariants.length === 1;
   }

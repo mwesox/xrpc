@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -51,7 +51,7 @@ describe("init command", () => {
     let promptIndex = 0;
 
     const mockPrompt = async (
-      message: string,
+      _message: string,
       options?: { default?: string },
     ): Promise<string> => {
       // Return default values or 'Y' for confirmations
