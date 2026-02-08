@@ -14,6 +14,9 @@ function getGeneratedFile(
 }
 
 function canTypecheckSwift(): boolean {
+  if (process.platform !== "darwin") {
+    return false;
+  }
   const result = Bun.spawnSync(["swiftc", "--version"]);
   return result.exitCode === 0;
 }
