@@ -64,6 +64,12 @@ jobs:
           printf "//registry.npmjs.org/:_authToken=%s\n" "${NODE_AUTH_TOKEN}" > ~/.npmrc
           printf "always-auth=true\n" >> ~/.npmrc
 
+      - name: Configure git identity
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
       - name: Check (build + typecheck + lint + test)
         run: bun run check
 
@@ -78,12 +84,6 @@ jobs:
         run: bun run release:publish
         env:
           NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
-
-      - name: Configure git identity
-        if: ${{ inputs.dry_run == false }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Create run tag
         if: ${{ inputs.dry_run == false }}

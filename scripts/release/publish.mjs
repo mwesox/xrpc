@@ -109,18 +109,22 @@ function npmViewLatestVersion(name) {
 }
 
 function ensureTagDoesNotExist(tag) {
+  if (doesTagExist(tag)) {
+    fail(`Tag already exists locally or on origin: ${tag}`);
+  }
+}
+
+function doesTagExist(tag) {
   const local = execSync(`git tag --list "${tag}"`, { encoding: "utf8" }).trim();
   if (local.length > 0) {
-    fail(`Tag already exists locally: ${tag}`);
+    return true;
   }
 
   const remote = execSync(`git ls-remote --tags origin "refs/tags/${tag}"`, {
     encoding: "utf8",
   }).trim();
 
-  if (remote.length > 0) {
-    fail(`Tag already exists on origin: ${tag}`);
-  }
+  return remote.length > 0;
 }
 
 function inspectPackedManifest(packageDir) {
@@ -242,6 +246,14 @@ function main() {
     if (decision === "skip") {
       summary.totals.skipped += 1;
       result.status = "skipped";
+      const tag = packageToTagName(pkg.name, pkg.version);
+
+      if (!dryRun && !doesTagExist(tag)) {
+        result.tag = createTag(pkg);
+        result.status = "tagged-existing-version";
+        log(`tagged ${pkg.name}@${pkg.version} (already published) with ${result.tag}`);
+      }
+
       summary.packages.push(result);
       log(`skip ${pkg.name}@${pkg.version} (${reason})`);
       continue;
