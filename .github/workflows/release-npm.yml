@@ -58,6 +58,12 @@ jobs:
             exit 1
           fi
 
+      - name: Configure npm authentication
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          printf "//registry.npmjs.org/:_authToken=%s\n" "${NODE_AUTH_TOKEN}" > ~/.npmrc
+          printf "always-auth=true\n" >> ~/.npmrc
+
       - name: Check (build + typecheck + lint + test)
         run: bun run check
 
