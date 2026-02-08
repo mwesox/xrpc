@@ -17,14 +17,6 @@ export interface TomlConfig {
   targets: TargetConfig[];
 }
 
-export interface MultiModuleTomlConfig {
-  modules: {
-    name: string;
-    contractPath: string;
-    targets: TargetConfig[];
-  }[];
-}
-
 export interface PackageJsonConfig {
   name: string;
   isPrivate?: boolean;
@@ -101,49 +93,6 @@ export function generateTomlTemplate(config: TomlConfig): string {
 
   for (const target of config.targets) {
     lines.push(`${target.name} = "${target.outputPath}"`);
-  }
-
-  lines.push("");
-  return lines.join("\n");
-}
-
-/**
- * Generates an xrpc.toml configuration file with multiple modules.
- *
- * Format:
- * ```toml
- * [users]
- * contract = "packages/users-api/contract.ts"
- * go-server = "apps/backend/users"
- *
- * [orders]
- * contract = "packages/orders-api/contract.ts"
- * go-server = "apps/backend/orders"
- * ```
- */
-export function generateMultiModuleTomlTemplate(
-  config: MultiModuleTomlConfig,
-): string {
-  const lines: string[] = [
-    "# xRPC Configuration",
-    '# Run "xrpc generate" to generate all modules',
-    '# Run "xrpc generate <module>" to generate a specific module',
-    "",
-  ];
-
-  for (let i = 0; i < config.modules.length; i++) {
-    const module = config.modules[i];
-
-    if (i > 0) {
-      lines.push(""); // Blank line between modules
-    }
-
-    lines.push(`[${module.name}]`);
-    lines.push(`contract = "${module.contractPath}"`);
-
-    for (const target of module.targets) {
-      lines.push(`${target.name} = "${target.outputPath}"`);
-    }
   }
 
   lines.push("");

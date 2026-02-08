@@ -59,10 +59,6 @@ export function isSwiftKeyword(name: string): boolean {
   return SWIFT_KEYWORDS.has(name);
 }
 
-export function isValidSwiftIdentifier(name: string): boolean {
-  return /^[A-Za-z_][A-Za-z0-9_]*$/.test(name) && !isSwiftKeyword(name);
-}
-
 export function sanitizeSwiftIdentifier(name: string): string {
   let sanitized = name.replace(/[^A-Za-z0-9_]/g, "_");
   if (/^[0-9]/.test(sanitized)) {

@@ -5,5 +5,8 @@
     "examples/**/*",
     "**/*.test.ts"
   ],
+  "ignoreDependencies": [
+    "sass"
+  ],
   "ignoreExportsUsedInFile": true
 }
