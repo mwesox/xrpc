@@ -68,7 +68,7 @@ export function getPublishablePackageDirs() {
   return new Set(getPublishablePackages().map((pkg) => `${pkg.dir}/`));
 }
 
-export function getPublishablePackageNames() {
+function getPublishablePackageNames() {
   return new Set(getPublishablePackages().map((pkg) => pkg.name));
 }
 
@@ -94,7 +94,7 @@ export function getWorkspaceDependencyViolations(manifest) {
   return violations;
 }
 
-export function formatPackageSummary(packages) {
+function formatPackageSummary(packages) {
   return packages
     .map((pkg) => `- ${pkg.name}@${pkg.version} (${pkg.dir})`)
     .join("\n");

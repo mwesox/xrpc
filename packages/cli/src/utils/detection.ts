@@ -489,46 +489,6 @@ async function getSubdirectories(dirPath: string): Promise<string[]> {
 }
 
 /**
- * Maps app type to suggested target name.
- */
-export function getTargetForAppType(appType: AppType): string | null {
-  switch (appType) {
-    case "react":
-    case "next":
-    case "vite":
-      return "ts-client";
-    case "go":
-      return "go-server";
-    case "spring":
-      return "kotlin-spring-boot-server";
-    default:
-      return null;
-  }
-}
-
-/**
- * Returns a human-readable label for monorepo type.
- */
-export function getMonorepoLabel(type: MonorepoType): string {
-  switch (type) {
-    case "nx":
-      return "Nx";
-    case "turbo":
-      return "Turborepo";
-    case "bun":
-      return "Bun workspaces";
-    case "pnpm":
-      return "pnpm workspaces";
-    case "npm":
-      return "npm workspaces";
-    case "yarn":
-      return "Yarn workspaces";
-    case "none":
-      return "Single project";
-  }
-}
-
-/**
  * Returns a human-readable label for app type.
  */
 export function getAppTypeLabel(type: AppType): string {

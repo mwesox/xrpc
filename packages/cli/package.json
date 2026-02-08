@@ -44,7 +44,6 @@
     "typescript": "^5.0.0"
   },
   "devDependencies": {
-    "@types/figlet": "^1.5.8",
     "@types/node": "^22.0.0",
     "tsup": "^8.0.0"
   },

@@ -1,8 +1,15 @@
 // Parser exports
 
 // Codegen exports
-export { CodeWriter } from "./codegen/code-writer";
-export { toCamelCase, toPascalCase, toSnakeCase } from "./codegen/utils";
+export {
+  BaseCodeGenerator,
+  CodeWriter,
+  type GeneratedFiles,
+  type GeneratorConfig,
+  toCamelCase,
+  toPascalCase,
+  toSnakeCase,
+} from "./codegen";
 // Framework types
 export type {
   ContractIssue,
@@ -22,6 +29,7 @@ export type {
 // Framework exports - for building target generators
 export {
   ARRAY_VALIDATIONS,
+  createCapabilities,
   createNoOpValidationHandler,
   // Helpers
   createUnsupportedTypeHandler,
@@ -32,9 +40,10 @@ export {
   isValidationKind,
   NUMBER_VALIDATIONS,
   STRING_VALIDATIONS,
+  // Base classes
+  TargetGeneratorBase,
   // Constants
   TYPE_KINDS,
-  // Base classes
   TypeMapperBase,
   UtilityCollector,
   VALIDATION_KINDS,

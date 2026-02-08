@@ -1,5 +1,7 @@
 // Types and constants
 
+// Target generator framework
+export { createCapabilities, TargetGeneratorBase } from "./target-generator";
 // Type mapping
 export {
   createUnsupportedTypeHandler,

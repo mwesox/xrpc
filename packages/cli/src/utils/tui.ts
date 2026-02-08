@@ -126,10 +126,6 @@ export function formatDescription(description: string): string {
   return chalk.gray(description);
 }
 
-export function formatHeader(text: string): string {
-  return chalk.bold.underline(text);
-}
-
 export function formatCode(code: string): string {
   return chalk.gray(code);
 }
@@ -137,14 +133,6 @@ export function formatCode(code: string): string {
 export function createSeparator(maxWidth = 50): string {
   const width = Math.min(process.stdout.columns || 80, maxWidth);
   return chalk.dim(BOX.horizontal.repeat(width));
-}
-
-export function formatDetected(item: string): string {
-  return chalk.cyan(`  ${item}`);
-}
-
-export function formatFileToCreate(path: string): string {
-  return chalk.green(`  ${ICONS.plus} ${path}`);
 }
 
 export function formatMonorepoBadge(type: string): string {
@@ -271,13 +259,6 @@ export function formatTreeItem(text: string, isLast: boolean): string {
   return `${chalk.dim(prefix)} ${text}`;
 }
 
-/**
- * Creates a status dot (filled or empty)
- */
-export function formatStatusDot(active: boolean): string {
-  return active ? chalk.cyan(ICONS.dot) : chalk.dim(ICONS.dotEmpty);
-}
-
 // =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
@@ -288,34 +269,6 @@ export function formatStatusDot(active: boolean): string {
 function stripAnsi(str: string): string {
   // eslint-disable-next-line no-control-regex
   return str.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "");
-}
-
-// =============================================================================
-// VISUAL HIERARCHY UTILITIES (Phase 2)
-// =============================================================================
-
-/**
- * Primary text - for important information (bold white/cyan)
- */
-export function formatPrimary(text: string): string {
-  return chalk.bold(text);
-}
-
-/**
- * Accent color for highlights (cyan)
- */
-export function formatAccent(text: string): string {
-  return chalk.cyan(text);
-}
-
-/**
- * Format a selection choice with icon
- * @param text - The choice text
- * @param isAction - If true, uses action icon (✨), otherwise uses dim dot (○)
- */
-export function formatChoice(text: string, isAction = false): string {
-  const icon = isAction ? chalk.yellow("✨") : chalk.dim("○");
-  return `${icon} ${text}`;
 }
 
 /**
