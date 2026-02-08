@@ -141,7 +141,11 @@ async function generateMultiModule(
   config: XrpcConfig,
   options: GenerateOptions,
 ): Promise<void> {
-  const { module: requestedModule, targets: targetFilter } = options;
+  const {
+    spinner: createSpinner,
+    module: requestedModule,
+    targets: targetFilter,
+  } = options;
 
   const modules = extractModules(config);
   const moduleNames = Object.keys(modules);
