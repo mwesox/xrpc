@@ -134,3 +134,13 @@ Targets follow the pattern `{language}-{client|server}`:
 - Generated Go code uses only standard library
 - Validation extraction has limitation: `.int()` with custom min/max may not extract bounds correctly (Zod v4 behavior)
 - Documentation site lives in-repo at `apps/docs` (main branch) - keep in sync with API changes
+
+## Changesets (Agent Rule)
+
+- If a PR changes publishable package behavior under `packages/*`, it must include a `.changeset/*.md` file.
+- Changes only to `package.json`, `README.md`, or `CHANGELOG.md` do not require a new changeset.
+- As a coding agent, auto-create a draft changeset when needed:
+  - `node scripts/release/generate-changeset-draft.mjs --apply`
+- After generation, review the file and adjust bump levels (`patch`/`minor`/`major`) and summary text.
+- Validate before push with the same CI check:
+  - `node scripts/release/check-changeset-required.mjs --base "$(git merge-base HEAD origin/main)" --head "$(git rev-parse HEAD)"`
