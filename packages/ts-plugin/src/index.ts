@@ -90,4 +90,9 @@ function init(modules: { typescript: typeof tsModule }) {
   return { create };
 }
 
-export = init;
+export default init;
+
+// TS Server loads plugins with `require(...)` and expects the module value to be the factory function.
+if (typeof module !== "undefined") {
+  module.exports = init;
+}

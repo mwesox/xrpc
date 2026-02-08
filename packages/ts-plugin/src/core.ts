@@ -8,6 +8,27 @@ export interface EndpointResolution {
 
 type TsModule = typeof import("typescript/lib/tsserverlibrary");
 
+function getObjectLiteralContainerKind(
+  ts: TsModule,
+): import("typescript/lib/tsserverlibrary").ScriptElementKind {
+  const scriptElementKind =
+    ts.ScriptElementKind as typeof ts.ScriptElementKind & {
+      objectLiteralElement?: import("typescript/lib/tsserverlibrary").ScriptElementKind;
+    };
+  return (
+    scriptElementKind.objectLiteralElement ??
+    ts.ScriptElementKind.memberVariableElement
+  );
+}
+
+function hasNameNode(
+  node: import("typescript/lib/tsserverlibrary").Node,
+): node is import("typescript/lib/tsserverlibrary").Node & {
+  name?: import("typescript/lib/tsserverlibrary").Node;
+} {
+  return "name" in node;
+}
+
 export function resolveXrpcDefinitions(
   ts: TsModule,
   program: import("typescript/lib/tsserverlibrary").Program,
@@ -49,7 +70,7 @@ export function resolveXrpcDefinitions(
       textSpan: span,
       kind: ts.ScriptElementKind.memberVariableElement,
       name: resolution.endpoint,
-      containerKind: ts.ScriptElementKind.objectLiteralElement,
+      containerKind: getObjectLiteralContainerKind(ts),
       containerName: "router",
     },
   ];
@@ -95,7 +116,11 @@ function findEndpointResolution(
   }
 
   if (ts.isStringLiteral(node) && isEndpointName(node.text)) {
-    const nodeSymbol = checker.getSymbolAtLocation(node.parent?.name ?? node);
+    const symbolTarget =
+      node.parent && hasNameNode(node.parent) && node.parent.name
+        ? node.parent.name
+        : node;
+    const nodeSymbol = checker.getSymbolAtLocation(symbolTarget);
     const fromNodeSymbol = findEndpointFromSymbol(ts, checker, nodeSymbol);
     if (fromNodeSymbol) {
       return fromNodeSymbol;
