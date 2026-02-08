@@ -1,0 +1,58 @@
+---
+const basePath = import.meta.env.BASE_URL;
+const withBase = (path) => {
+  const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+  return `${normalizedBase}${path.replace(/^\//, "")}`;
+};
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand-name">xRPC</div>
+        <p class="brand-description">
+          Type-safe, cross-platform RPC framework. Define once with Zod schemas, generate servers and clients for any language.
+        </p>
+      </div>
+
+      <div class="footer-section">
+        <h4>Guides</h4>
+        <ul>
+          <li><a href={withBase("/docs/usage/api-contract/")}>API Contract</a></li>
+          <li><a href={withBase("/docs/usage/typescript-server/")}>TS Server</a></li>
+          <li><a href={withBase("/docs/usage/go-server/")}>Go Server</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>More Guides</h4>
+        <ul>
+          <li><a href={withBase("/docs/usage/typescript-client/")}>TypeScript Client</a></li>
+          <li><a href={withBase("/docs/usage/go-client/")}>Go Client (Planned)</a></li>
+          <li><a href={withBase("/docs/usage/kotlin-spring-boot-server/")}>Kotlin Server</a></li>
+          <li><a href={withBase("/docs/usage/swift-client/")}>Swift Client</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="https://github.com/mwesox/xrpc" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="https://github.com/mwesox/xrpc/issues" target="_blank" rel="noopener">Issues</a></li>
+          <li><a href="https://github.com/mwesox/xrpc/releases" target="_blank" rel="noopener">Releases</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="copyright">
+        &copy; {new Date().getFullYear()} xRPC. Released under the MIT License.
+      </p>
+      <div class="footer-links">
+        <a href="https://github.com/mwesox/xrpc/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+        <a href={withBase("/impressum/")}>Impressum</a>
+      </div>
+    </div>
+  </div>
+</footer>

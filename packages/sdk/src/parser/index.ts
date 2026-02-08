@@ -2,11 +2,10 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { dirname, join } from "node:path";
 import type {
-  EndpointGroup as CoreEndpointGroup,
   EndpointDefinition,
   RouterDefinition,
 } from "xrpckit";
-import { getRouterMiddleware } from "xrpckit";
+import { GROUP_NAME, getRouterMiddleware } from "xrpckit";
 import type {
   ContractDefinition,
   Endpoint,
@@ -197,13 +196,64 @@ function buildContractDefinition(
       middlewareDefinitions.length > 0 ? middlewareDefinitions : undefined,
   };
 
-  for (const [groupName, groupDef] of Object.entries(routerDef)) {
-    if (!groupDef || typeof groupDef !== "object") {
+  const groupedEntries: Array<{
+    routerKey: string;
+    groupName: string;
+    groupDef: Record<string, unknown>;
+  }> = [];
+  const groupedNames = new Set<string>();
+  const flatEndpointNames = new Set<string>();
+  const flatEntries: Array<{
+    endpointName: string;
+    endpointDef: EndpointDefinition;
+  }> = [];
+
+  for (const [routerKey, routerEntry] of Object.entries(routerDef)) {
+    if (isEndpointDefinition(routerEntry)) {
+      if (groupedNames.has(routerKey)) {
+        throw new Error(
+          `Name collision in router: flat endpoint "${routerKey}" conflicts with an endpoint group named "${routerKey}".`,
+        );
+      }
+
+      flatEndpointNames.add(routerKey);
+      flatEntries.push({
+        endpointName: routerKey,
+        endpointDef: routerEntry,
+      });
+      continue;
+    }
+
+    if (!routerEntry || typeof routerEntry !== "object") {
       throw new Error(
-        `Invalid endpoint group "${groupName}". Endpoint groups must be created with createEndpoint({ ... }).`,
+        `Invalid router entry "${routerKey}". Use group("name", { ... }) or a flat endpoint like createRouter({ hello: query({ ... }) }).`,
       );
     }
 
+    const groupDef = routerEntry as Record<string, unknown>;
+    const groupName = resolveGroupName(routerKey, groupDef);
+
+    if (groupedNames.has(groupName)) {
+      throw new Error(
+        `Duplicate endpoint group name "${groupName}". Group names must be unique.`,
+      );
+    }
+
+    if (flatEndpointNames.has(groupName)) {
+      throw new Error(
+        `Name collision in router: endpoint group "${groupName}" conflicts with a flat endpoint named "${groupName}".`,
+      );
+    }
+
+    groupedNames.add(groupName);
+    groupedEntries.push({
+      routerKey,
+      groupName,
+      groupDef,
+    });
+  }
+
+  for (const { routerKey, groupName, groupDef } of groupedEntries) {
     const endpointGroup: EndpointGroup = {
       name: groupName,
       endpoints: [],
@@ -211,83 +261,55 @@ function buildContractDefinition(
 
     for (const [endpointName, endpointDef] of Object.entries(groupDef)) {
       const fullName = `${groupName}.${endpointName}`;
-      const epDef = endpointDef as EndpointDefinition;
-
-      // Validate endpoint definition
-      if (!epDef || typeof epDef !== "object") {
+      if (!isEndpointDefinition(endpointDef)) {
         throw new Error(
           `Invalid endpoint "${fullName}". Endpoints must be created with query({ ... }) or mutation({ ... }).`,
         );
       }
 
-      if (
-        !epDef.type ||
-        (epDef.type !== "query" && epDef.type !== "mutation")
-      ) {
-        throw new Error(
-          `Invalid endpoint type for "${fullName}". ` +
-            `Type must be "query" or "mutation", got: ${epDef.type}`,
-        );
-      }
+      const endpoint = buildEndpoint({
+        endpointDef,
+        endpointName,
+        fullName,
+        groupName,
+        sourcePath: `${routerKey}.${endpointName}`,
+        typeMap,
+      });
 
-      if (!epDef.input) {
-        throw new Error(
-          `Endpoint "${fullName}" is missing input schema. ` +
-            `Use: ${epDef.type}({ input: z.object({ ... }), output: z.object({ ... }) })`,
-        );
-      }
-
-      if (!epDef.output) {
-        throw new Error(
-          `Endpoint "${fullName}" is missing output schema. ` +
-            `Use: ${epDef.type}({ input: z.object({ ... }), output: z.object({ ... }) })`,
-        );
-      }
-
-      try {
-        // Extract input type from actual Zod schema
-        const inputType = extractTypeInfo(epDef.input);
-        const inputTypeName = `${generateTypeName(groupName, endpointName)}Input`;
-        addTypeDefinition(typeMap, inputTypeName, inputType);
-
-        // Extract output type from actual Zod schema
-        const outputType = extractTypeInfo(epDef.output);
-        const outputTypeName = `${generateTypeName(groupName, endpointName)}Output`;
-        addTypeDefinition(typeMap, outputTypeName, outputType);
-
-        const endpoint: Endpoint = {
-          name: endpointName,
-          type: epDef.type,
-          input: { name: inputTypeName, ...inputType },
-          output: { name: outputTypeName, ...outputType },
-          fullName,
-        };
-
-        endpointGroup.endpoints.push(endpoint);
-        endpoints.push(endpoint);
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new Error(
-            `Failed to extract type information for endpoint "${fullName}": ${error.message}`,
-          );
-        }
-        throw error;
-      }
+      endpointGroup.endpoints.push(endpoint);
+      endpoints.push(endpoint);
     }
 
     if (endpointGroup.endpoints.length === 0) {
       throw new Error(
-        `Endpoint group "${groupName}" has no endpoints. Add endpoints using: createEndpoint({ endpointName: query({ ... }) })`,
+        `Endpoint group "${groupName}" has no endpoints. Add endpoints using group("${groupName}", { endpointName: query({ ... }) }).`,
       );
     }
 
     router.endpointGroups.push(endpointGroup);
   }
 
-  if (router.endpointGroups.length === 0) {
+  for (const { endpointName, endpointDef } of flatEntries) {
+    if (groupedNames.has(endpointName)) {
+      throw new Error(
+        `Name collision in router: flat endpoint "${endpointName}" conflicts with an endpoint group named "${endpointName}".`,
+      );
+    }
+
+    const endpoint = buildEndpoint({
+      endpointDef,
+      endpointName,
+      fullName: endpointName,
+      sourcePath: endpointName,
+      typeMap,
+    });
+
+    endpoints.push(endpoint);
+  }
+
+  if (endpoints.length === 0) {
     throw new Error(
-      "Router has no endpoint groups. " +
-        "Add endpoint groups using: createRouter({ groupName: createEndpoint({ ... }) })",
+      "Router has no endpoints. Add grouped endpoints with group(\"name\", { ... }) or flat endpoints with createRouter({ hello: query({ ... }) }).",
     );
   }
 
@@ -300,6 +322,115 @@ function buildContractDefinition(
     middleware:
       middlewareDefinitions.length > 0 ? middlewareDefinitions : undefined,
   };
+}
+
+function resolveGroupName(
+  routerKey: string,
+  groupDef: Record<string, unknown>,
+): string {
+  const explicitGroupName = (groupDef as Record<PropertyKey, unknown>)[
+    GROUP_NAME
+  ];
+
+  if (explicitGroupName === undefined) {
+    return routerKey;
+  }
+
+  if (typeof explicitGroupName !== "string") {
+    throw new Error(
+      `Invalid explicit group name for "${routerKey}". group(name, endpoints) requires a string "name".`,
+    );
+  }
+
+  const normalizedName = explicitGroupName.trim();
+  if (!normalizedName) {
+    throw new Error(
+      `Invalid explicit group name for "${routerKey}". group(name, endpoints) requires a non-empty "name".`,
+    );
+  }
+
+  return normalizedName;
+}
+
+function isEndpointDefinition(value: unknown): value is EndpointDefinition {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const endpoint = value as Record<string, unknown>;
+  return (
+    (endpoint.type === "query" || endpoint.type === "mutation") &&
+    "input" in endpoint &&
+    "output" in endpoint
+  );
+}
+
+function buildEndpoint({
+  endpointDef,
+  endpointName,
+  fullName,
+  groupName,
+  sourcePath,
+  typeMap,
+}: {
+  endpointDef: EndpointDefinition;
+  endpointName: string;
+  fullName: string;
+  groupName?: string;
+  sourcePath: string;
+  typeMap: Map<string, TypeDefinition>;
+}): Endpoint {
+  if (
+    !endpointDef.type ||
+    (endpointDef.type !== "query" && endpointDef.type !== "mutation")
+  ) {
+    throw new Error(
+      `Invalid endpoint type for "${fullName}". Type must be "query" or "mutation", got: ${endpointDef.type}`,
+    );
+  }
+
+  if (!endpointDef.input) {
+    throw new Error(
+      `Endpoint "${fullName}" is missing input schema. Use: ${endpointDef.type}({ input: z.object({ ... }), output: z.object({ ... }) })`,
+    );
+  }
+
+  if (!endpointDef.output) {
+    throw new Error(
+      `Endpoint "${fullName}" is missing output schema. Use: ${endpointDef.type}({ input: z.object({ ... }), output: z.object({ ... }) })`,
+    );
+  }
+
+  try {
+    const inputType = extractTypeInfo(endpointDef.input);
+    const outputType = extractTypeInfo(endpointDef.output);
+    const typeNameBase = groupName
+      ? generateTypeName(groupName, endpointName)
+      : generateTypeName(endpointName, "");
+
+    const inputTypeName = `${typeNameBase}Input`;
+    const outputTypeName = `${typeNameBase}Output`;
+
+    addTypeDefinition(typeMap, inputTypeName, inputType);
+    addTypeDefinition(typeMap, outputTypeName, outputType);
+
+    return {
+      name: endpointName,
+      type: endpointDef.type,
+      input: { name: inputTypeName, ...inputType },
+      output: { name: outputTypeName, ...outputType },
+      fullName,
+      groupName,
+      sourcePath,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(
+        `Failed to extract type information for endpoint "${fullName}": ${error.message}`,
+      );
+    }
+    throw error;
+  }
 }
 
 function addTypeDefinition(

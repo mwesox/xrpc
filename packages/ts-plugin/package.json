@@ -1,0 +1,53 @@
+{
+  "name": "@xrpckit/ts-plugin",
+  "version": "0.0.1",
+  "description": "TypeScript language service plugin for xRPC go-to-definition",
+  "type": "commonjs",
+  "license": "MIT",
+  "author": "mwesox",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mwesox/xrpc.git",
+    "directory": "packages/ts-plugin"
+  },
+  "bugs": {
+    "url": "https://github.com/mwesox/xrpc/issues"
+  },
+  "homepage": "https://github.com/mwesox/xrpc#readme",
+  "keywords": [
+    "xrpc",
+    "typescript",
+    "tsserver",
+    "plugin",
+    "go-to-definition"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts --clean",
+    "test": "bun test src"
+  },
+  "dependencies": {
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

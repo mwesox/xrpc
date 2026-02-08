@@ -9,7 +9,7 @@ Type-safe, cross-platform RPC framework that generates clients and servers from 
 ## Architecture
 
 **Schema-First Flow**:
-1. Define API with Zod schemas using `createRouter`, `createEndpoint`, `query`, `mutation`
+1. Define API with Zod schemas using `createRouter`, `group`, `query`, `mutation`
 2. Parser extracts contract from TypeScript files
 3. Generators produce idiomatic code for target languages
 4. Generated code is self-contained (no runtime dependencies)
@@ -45,9 +45,9 @@ bun run build
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
+import { createRouter, group, query, mutation } from 'xrpckit';
 
-const greeting = createEndpoint({
+const greeting = group("greeting", {
   greet: query({
     input: z.object({ name: z.string().min(1).max(100) }),
     output: z.object({ message: z.string() }),
@@ -133,4 +133,4 @@ Targets follow the pattern `{language}-{client|server}`:
 - Zod v4 is used for schema definition
 - Generated Go code uses only standard library
 - Validation extraction has limitation: `.int()` with custom min/max may not extract bounds correctly (Zod v4 behavior)
-- Documentation site at `../xrpc-ghpages` (gh-pages branch) - keep in sync with API changes
+- Documentation site lives in-repo at `apps/docs` (main branch) - keep in sync with API changes

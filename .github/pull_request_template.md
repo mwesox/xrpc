@@ -57,6 +57,7 @@ Closes #
 - [ ] My changes generate no new warnings
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass locally with my changes
+- [ ] I added a `.changeset/*.md` file for publishable package changes (or this PR only updates version/changelog/readme)
 - [ ] Any dependent changes have been merged and published
 
 ## Screenshots (if applicable)

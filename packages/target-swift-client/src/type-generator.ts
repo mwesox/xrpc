@@ -3,11 +3,7 @@ import { toPascalCase } from "@xrpckit/sdk";
 import { SwiftBuilder } from "./swift-builder";
 import { SwiftTypeCollector } from "./type-collector";
 import { SwiftTypeMapper, isNullLiteral } from "./type-mapper";
-import {
-  sanitizeSwiftIdentifier,
-  toLowerCamelCase,
-  uniqueName,
-} from "./utils";
+import { sanitizeSwiftIdentifier, toLowerCamelCase, uniqueName } from "./utils";
 
 export class SwiftTypeGenerator {
   private w: SwiftBuilder;
@@ -27,15 +23,16 @@ export class SwiftTypeGenerator {
     this.generatedTypes.clear();
 
     const collectedTypes = this.collector.collectTypes(contract);
+    for (const type of collectedTypes) {
+      this.typeMapper.registerTypeName(type.typeRef, type.name);
+    }
 
     w.import("Foundation").n();
 
     this.generateSupportTypes();
     w.n();
 
-    const sorted = collectedTypes.sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
+    const sorted = collectedTypes.sort((a, b) => a.name.localeCompare(b.name));
 
     for (const type of sorted) {
       this.generateTypeDefinition(type.name, type.typeRef);
@@ -50,31 +47,29 @@ export class SwiftTypeGenerator {
 
     w.mark("Support Types");
 
-    w
-      .struct("XRPCNull", ["Codable", "Equatable"], (b) => {
-        b.l("public init() {}");
-        b.n();
-        b.l("public init(from decoder: Decoder) throws {");
-        b.i()
-          .l("let container = try decoder.singleValueContainer()")
-          .l("if !container.decodeNil() {")
-          .i()
-          .l(
-            'throw DecodingError.typeMismatch(XRPCNull.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Expected null"))',
-          )
-          .u()
-          .l("}")
-          .u()
-          .l("}");
-        b.n();
-        b.l("public func encode(to encoder: Encoder) throws {");
-        b.i()
-          .l("var container = encoder.singleValueContainer()")
-          .l("try container.encodeNil()")
-          .u()
-          .l("}");
-      })
-      .n();
+    w.struct("XRPCNull", ["Codable", "Equatable"], (b) => {
+      b.l("public init() {}");
+      b.n();
+      b.l("public init(from decoder: Decoder) throws {");
+      b.i()
+        .l("let container = try decoder.singleValueContainer()")
+        .l("if !container.decodeNil() {")
+        .i()
+        .l(
+          'throw DecodingError.typeMismatch(XRPCNull.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Expected null"))',
+        )
+        .u()
+        .l("}")
+        .u()
+        .l("}");
+      b.n();
+      b.l("public func encode(to encoder: Encoder) throws {");
+      b.i()
+        .l("var container = encoder.singleValueContainer()")
+        .l("try container.encodeNil()")
+        .u()
+        .l("}");
+    }).n();
 
     w.enum("XRPCAny", ["Codable", "Equatable"], (b) => {
       b.l("case string(String)")
@@ -88,12 +83,24 @@ export class SwiftTypeGenerator {
       b.i();
       b.l("let container = try decoder.singleValueContainer()");
       b.l("if container.decodeNil() { self = .null; return }");
-      b.l("if let value = try? container.decode(Bool.self) { self = .bool(value); return }");
-      b.l("if let value = try? container.decode(Int.self) { self = .number(Double(value)); return }");
-      b.l("if let value = try? container.decode(Double.self) { self = .number(value); return }");
-      b.l("if let value = try? container.decode(String.self) { self = .string(value); return }");
-      b.l("if let value = try? container.decode([String: XRPCAny].self) { self = .object(value); return }");
-      b.l("if let value = try? container.decode([XRPCAny].self) { self = .array(value); return }");
+      b.l(
+        "if let value = try? container.decode(Bool.self) { self = .bool(value); return }",
+      );
+      b.l(
+        "if let value = try? container.decode(Int.self) { self = .number(Double(value)); return }",
+      );
+      b.l(
+        "if let value = try? container.decode(Double.self) { self = .number(value); return }",
+      );
+      b.l(
+        "if let value = try? container.decode(String.self) { self = .string(value); return }",
+      );
+      b.l(
+        "if let value = try? container.decode([String: XRPCAny].self) { self = .object(value); return }",
+      );
+      b.l(
+        "if let value = try? container.decode([XRPCAny].self) { self = .array(value); return }",
+      );
       b.l(
         'throw DecodingError.typeMismatch(XRPCAny.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unsupported JSON value"))',
       );
@@ -199,7 +206,9 @@ export class SwiftTypeGenerator {
       b.u();
       b.l("}");
 
-      const codingKeys = propInfos.filter((prop) => prop.name !== prop.original);
+      const codingKeys = propInfos.filter(
+        (prop) => prop.name !== prop.original,
+      );
       if (codingKeys.length > 0) {
         b.n();
         b.l("enum CodingKeys: String, CodingKey {");
@@ -226,8 +235,7 @@ export class SwiftTypeGenerator {
     const numberOnly = values.every((v) => typeof v === "number");
     const used = new Set<string>();
     const caseInfos = values.map((value, index) => {
-      const base =
-        typeof value === "string" ? value : `number${index}`;
+      const base = typeof value === "string" ? value : `number${index}`;
       const caseName = this.enumCaseName(base, used);
       return {
         value,
@@ -276,7 +284,9 @@ export class SwiftTypeGenerator {
           if (typeof info.value !== "string") return;
           b.l(`case \"${info.value}\": self = .${info.caseName}`);
         });
-        b.l("default: break");
+        b.l(
+          `default: throw DecodingError.typeMismatch(${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: \"Invalid enum value\"))`,
+        );
         b.u();
         b.l("}");
         b.l("return");
@@ -293,7 +303,9 @@ export class SwiftTypeGenerator {
           if (typeof info.value !== "number") return;
           b.l(`case ${info.value}: self = .${info.caseName}`);
         });
-        b.l("default: break");
+        b.l(
+          `default: throw DecodingError.typeMismatch(${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: \"Invalid enum value\"))`,
+        );
         b.u();
         b.l("}");
         b.l("return");
@@ -302,7 +314,7 @@ export class SwiftTypeGenerator {
       }
 
       b.l(
-        'throw DecodingError.typeMismatch(' +
+        "throw DecodingError.typeMismatch(" +
           `${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: \"Invalid enum value\"))`,
       );
       b.u();
@@ -381,7 +393,7 @@ export class SwiftTypeGenerator {
         );
       }
       b.l(
-        'throw DecodingError.typeMismatch(' +
+        "throw DecodingError.typeMismatch(" +
           `${name}.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: \"Invalid union value\"))`,
       );
       b.u();
@@ -410,9 +422,15 @@ export class SwiftTypeGenerator {
     let base = "variant";
     if (typeRef.name) {
       base = toLowerCamelCase(typeRef.name);
-    } else if (typeRef.kind === "primitive" && typeof typeRef.baseType === "string") {
+    } else if (
+      typeRef.kind === "primitive" &&
+      typeof typeRef.baseType === "string"
+    ) {
       base = typeRef.baseType;
-    } else if (typeRef.kind === "literal" && typeof typeRef.literalValue === "string") {
+    } else if (
+      typeRef.kind === "literal" &&
+      typeof typeRef.literalValue === "string"
+    ) {
       base = typeRef.literalValue;
     }
     base = sanitizeSwiftIdentifier(base);

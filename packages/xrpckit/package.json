@@ -33,8 +33,7 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean",
-    "prepublishOnly": "npm run build",
-    "release": "npm publish --//registry.npmjs.org/:_authToken=$NPM_XRPC_APIKEY"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "zod": "^4.0.0"

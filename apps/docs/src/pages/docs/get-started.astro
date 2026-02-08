@@ -1,0 +1,118 @@
+---
+import SiteLayout from "../../layouts/SiteLayout.astro";
+
+const basePath = import.meta.env.BASE_URL;
+const withBase = (path) => {
+  const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+  return `${normalizedBase}${path.replace(/^\//, "")}`;
+};
+---
+
+<SiteLayout title="Get Started" description="Install xRPC CLI and generate your first code" showSidebar={true}>
+  <h1>Get Started</h1>
+  <p>
+    Three commands to go from zero to generated, type-safe code.
+  </p>
+
+  <h2>1. Install the CLI</h2>
+  <pre><code>npm install -g @xrpckit/cli</code></pre>
+  <p>
+    Requires Node.js <code>&gt;= 18</code>. Also works with <code>npx @xrpckit/cli</code>,
+    <code>pnpm dlx @xrpckit/cli</code>, or <code>bunx xrpc</code>.
+  </p>
+
+  <h2>2. Initialize your project</h2>
+  <pre><code>xrpc init</code></pre>
+  <p>
+    The <code>init</code> wizard handles the entire setup for you:
+  </p>
+  <ul>
+    <li>Detects your project structure — monorepo, single app, framework</li>
+    <li>Creates a contract file with a working starter template</li>
+    <li>Lets you pick targets — Go server, TypeScript client, Kotlin Spring Boot, Swift, and more</li>
+    <li>Writes <code>xrpc.toml</code> so every future run is just <code>xrpc generate</code></li>
+    <li>Optionally sets up the TypeScript language-service plugin for go-to-definition on generated code</li>
+  </ul>
+
+  <h2>3. Generate code</h2>
+  <pre><code>xrpc generate</code></pre>
+  <p>
+    That's it. The CLI reads your <code>xrpc.toml</code>, parses the contract, and writes
+    type-safe code into each target's output directory.
+  </p>
+  <p>
+    From here on, the workflow is: edit your contract → run <code>xrpc generate</code> → ship.
+  </p>
+
+  <h2>What <code>init</code> creates</h2>
+  <p>
+    After running <code>init</code>, your project will have two new things: a <strong>contract file</strong>
+    that defines your API, and an <strong>xrpc.toml</strong> that tells the CLI what to generate and where.
+  </p>
+
+  <h3>Contract file</h3>
+  <p>
+    The contract is a regular TypeScript file that serves as the single source of truth for your API.
+    You use xRPC's own DSL — <code>createRouter</code>, <code>group</code>, <code>query</code>,
+    and <code>mutation</code> — to define the structure of your API.
+    <a href="https://zod.dev" target="_blank" rel="noopener">Zod</a> is used for the data layer:
+    describing the shape and validation rules of each endpoint's input and output.
+    xRPC reads both to generate type-safe, validated code for every target language.
+  </p>
+  <pre><code>{`import { z } from "zod";
+import { createRouter, group, query, mutation } from "xrpckit";
+
+const user = group("user", {
+  getUser: query({
+    input: z.object({ id: z.string().uuid() }),
+    output: z.object({ id: z.string(), name: z.string(), email: z.string().email() })
+  }),
+  createUser: mutation({
+    input: z.object({ name: z.string().min(1).max(100), email: z.string().email() }),
+    output: z.object({ id: z.string().uuid() })
+  })
+});
+
+export const router = createRouter({ user });`}</code></pre>
+  <p>
+    A contract is structured as <strong>Router → Endpoint Groups → Endpoints</strong>.
+    Each endpoint is either a <code>query</code> (read) or a <code>mutation</code> (write),
+    with typed <code>input</code> and <code>output</code> schemas.
+    Zod constraints like <code>.min()</code>, <code>.max()</code>, <code>.email()</code>, and <code>.uuid()</code>
+    carry over into the generated code as runtime validation — in every language.
+  </p>
+  <p>
+    For the full contract API, see <a href={withBase("/docs/usage/api-contract/")}>API Contract</a>.
+  </p>
+
+  <h3>xrpc.toml</h3>
+  <p>
+    The config file maps your contract to the targets you want to generate.
+    Each key is a target name, and the value is the output directory where generated code will be written.
+  </p>
+  <pre><code>{`# xRPC Configuration
+# Run "xrpc generate" to generate type-safe code for your targets
+
+contract = "./src/contract.ts"
+go-server = "./apps/backend"
+ts-client = "./apps/web"
+swift-client = "./apps/ios"`}</code></pre>
+  <p>
+    With this config in place, <code>xrpc generate</code> is all you need — no flags, no arguments.
+    The generated code is self-contained with zero runtime dependencies, using each language's standard library.
+  </p>
+  <p>
+    For monorepos with multiple APIs, you can define separate modules. See <a href={withBase("/docs/usage/configuration/")}>Configuration</a>
+    for multi-module setups and advanced options.
+  </p>
+
+  <h2>Where next?</h2>
+  <ul>
+    <li><a href={withBase("/docs/usage/api-contract/")}>API Contract</a> — full guide to endpoints, queries, mutations, and Zod schemas</li>
+    <li><a href={withBase("/docs/usage/go-server/")}>Go Server</a> — generated handlers, validation, and routing</li>
+    <li><a href={withBase("/docs/usage/typescript-client/")}>TypeScript Client</a> — fetch-based client with full type inference</li>
+    <li><a href={withBase("/docs/usage/kotlin-spring-boot-server/")}>Kotlin Spring Boot</a> — controllers, DTOs, and validation annotations</li>
+    <li><a href={withBase("/docs/usage/swift-client/")}>Swift Client</a> — async URLSession client for iOS and macOS</li>
+    <li><a href={withBase("/docs/usage/configuration/")}>Configuration</a> — single-module vs multi-module, target options</li>
+  </ul>
+</SiteLayout>

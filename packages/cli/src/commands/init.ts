@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, join, relative } from "node:path";
 import { listTargets } from "../registry";
 import {
@@ -38,6 +38,7 @@ import {
   formatSuccess,
   formatTarget,
   formatTreeItem,
+  formatWarning,
   sectionBreak,
   subtleDivider,
 } from "../utils/tui";
@@ -79,6 +80,20 @@ interface WizardState {
   selectedTargets: TargetConfig[];
   filesToCreate: FileToCreate[];
 }
+
+interface TsPluginSetupResult {
+  patchedTsconfigFiles: string[];
+  patchedPackageFiles: string[];
+  manualActions: string[];
+}
+
+interface JsonPatchResult {
+  status: "patched" | "already" | "missing" | "manual";
+  reason?: string;
+}
+
+const TS_PLUGIN_NAME = "@xrpckit/ts-plugin";
+const TS_PLUGIN_VERSION = "^0.0.1";
 
 // =============================================================================
 // MAIN INIT COMMAND
@@ -220,6 +235,41 @@ export async function initCommand(options: InitOptions): Promise<void> {
     throw error;
   }
 
+  let tsPluginSetup: TsPluginSetupResult | null = null;
+  if (needsTsPlugin(selectedTargets)) {
+    const pluginSpinner = spinner(`Configuring ${TS_PLUGIN_NAME}...`);
+    pluginSpinner.start();
+    try {
+      tsPluginSetup = await setupTsPlugin(
+        project,
+        apps,
+        selectedTargets,
+        cwd,
+      );
+      const updateCount =
+        tsPluginSetup.patchedTsconfigFiles.length +
+        tsPluginSetup.patchedPackageFiles.length;
+      if (updateCount > 0) {
+        pluginSpinner.succeed(
+          `Updated ${updateCount} file${updateCount === 1 ? "" : "s"} for ${TS_PLUGIN_NAME}`,
+        );
+      } else {
+        pluginSpinner.succeed(
+          `No safe auto-edits found for ${TS_PLUGIN_NAME} (manual setup required)`,
+        );
+      }
+    } catch (error) {
+      pluginSpinner.fail(`Could not auto-configure ${TS_PLUGIN_NAME}`);
+      tsPluginSetup = {
+        patchedPackageFiles: [],
+        patchedTsconfigFiles: [],
+        manualActions: [
+          `Install ${TS_PLUGIN_NAME} as a dev dependency and add it to your tsconfig plugins list.`,
+        ],
+      };
+    }
+  }
+
   // ==========================================================================
   // PHASE 7: NEXT STEPS
   // ==========================================================================
@@ -238,8 +288,25 @@ export async function initCommand(options: InitOptions): Promise<void> {
     formatBoxLine(`2. Run ${formatPath("xrpc generate")} to generate code`),
   );
   console.log(formatBoxLine("3. Import generated code in your apps"));
+  if (tsPluginSetup) {
+    console.log(
+      formatBoxLine(
+        tsPluginSetup.manualActions.length > 0
+          ? "4. Complete TypeScript plugin setup (see manual steps below)"
+          : `4. Restart TypeScript server to enable ${TS_PLUGIN_NAME}`,
+      ),
+    );
+  }
   console.log(formatBoxLine(""));
   console.log(formatBoxFooter());
+
+  if (tsPluginSetup?.manualActions.length) {
+    console.log();
+    console.log(formatWarning(`${TS_PLUGIN_NAME} manual setup:`));
+    for (const action of tsPluginSetup.manualActions) {
+      console.log(formatSecondary(`  - ${action}`));
+    }
+  }
   console.log();
 }
 
@@ -526,4 +593,220 @@ function generateFileList(state: WizardState): FileToCreate[] {
   }
 
   return generateSingleProjectFiles(contractPath, tomlConfig);
+}
+
+function needsTsPlugin(selectedTargets: TargetConfig[]): boolean {
+  return selectedTargets.some(
+    (target) => target.name === "ts-client" || target.name === "ts-server",
+  );
+}
+
+async function setupTsPlugin(
+  project: DetectedProject,
+  apps: DetectedApp[],
+  selectedTargets: TargetConfig[],
+  cwd: string,
+): Promise<TsPluginSetupResult> {
+  const result: TsPluginSetupResult = {
+    patchedPackageFiles: [],
+    patchedTsconfigFiles: [],
+    manualActions: [],
+  };
+  const installCommand = getDevDependencyInstallCommand(project);
+
+  const targetNames = new Set(selectedTargets.map((target) => target.name));
+  const candidateDirs = collectTsPluginCandidateDirs(project, apps, targetNames);
+
+  for (const dir of candidateDirs) {
+    const packagePath = join(dir, "package.json");
+    const packagePatch = await patchPackageJson(packagePath);
+    if (packagePatch.status === "patched") {
+      result.patchedPackageFiles.push(relative(cwd, packagePath) || "package.json");
+    } else if (packagePatch.status === "missing") {
+      result.manualActions.push(
+        `(${relative(cwd, dir) || "."}) Add dev dependency: ${installCommand} ${TS_PLUGIN_NAME}`,
+      );
+    } else if (packagePatch.status === "manual") {
+      result.manualActions.push(
+        `(${relative(cwd, packagePath) || packagePath}) Could not patch package.json safely${packagePatch.reason ? `: ${packagePatch.reason}` : ""}. Add dev dependency manually.`,
+      );
+    }
+
+    const tsconfigPath = join(dir, "tsconfig.json");
+    const tsconfigPatch = await patchTsconfig(tsconfigPath);
+    if (tsconfigPatch.status === "patched") {
+      result.patchedTsconfigFiles.push(relative(cwd, tsconfigPath) || "tsconfig.json");
+    } else if (tsconfigPatch.status === "missing") {
+      result.manualActions.push(
+        `(${relative(cwd, dir) || "."}) Add to tsconfig: \"compilerOptions.plugins\": [{ \"name\": \"${TS_PLUGIN_NAME}\" }]`,
+      );
+    } else if (tsconfigPatch.status === "manual") {
+      result.manualActions.push(
+        `(${relative(cwd, tsconfigPath) || tsconfigPath}) Could not patch tsconfig safely${tsconfigPatch.reason ? `: ${tsconfigPatch.reason}` : ""}. Add plugin entry manually.`,
+      );
+    }
+  }
+
+  // Remove duplicate manual actions while preserving order.
+  result.manualActions = result.manualActions.filter(
+    (action, index, items) => items.indexOf(action) === index,
+  );
+
+  return result;
+}
+
+function collectTsPluginCandidateDirs(
+  project: DetectedProject,
+  apps: DetectedApp[],
+  targetNames: Set<string>,
+): string[] {
+  const wantsClient = targetNames.has("ts-client");
+  const wantsServer = targetNames.has("ts-server");
+  const dirs = new Set<string>();
+
+  for (const app of apps) {
+    const supportsTsPlugin =
+      app.type === "react" ||
+      app.type === "next" ||
+      app.type === "vite" ||
+      app.type === "node";
+    if (!supportsTsPlugin) {
+      continue;
+    }
+
+    if (wantsClient && app.isClient) {
+      dirs.add(app.path);
+    }
+
+    if (wantsServer && app.isServer) {
+      dirs.add(app.path);
+    }
+  }
+
+  if (dirs.size === 0) {
+    dirs.add(project.workspaceRoot);
+  }
+
+  return Array.from(dirs);
+}
+
+async function patchPackageJson(filePath: string): Promise<JsonPatchResult> {
+  if (!existsSync(filePath)) {
+    return { status: "missing" };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(await readFile(filePath, "utf-8"));
+  } catch {
+    return {
+      status: "manual",
+      reason: "File is not valid JSON",
+    };
+  }
+
+  if (!isJsonObject(parsed)) {
+    return {
+      status: "manual",
+      reason: "Root value is not an object",
+    };
+  }
+
+  let devDependencies = parsed.devDependencies;
+  if (devDependencies === undefined) {
+    devDependencies = {};
+    parsed.devDependencies = devDependencies;
+  }
+
+  if (!isJsonObject(devDependencies)) {
+    return {
+      status: "manual",
+      reason: "devDependencies is not an object",
+    };
+  }
+
+  if (typeof devDependencies[TS_PLUGIN_NAME] === "string") {
+    return { status: "already" };
+  }
+
+  devDependencies[TS_PLUGIN_NAME] = TS_PLUGIN_VERSION;
+  await writeFile(filePath, `${JSON.stringify(parsed, null, 2)}\n`, "utf-8");
+  return { status: "patched" };
+}
+
+async function patchTsconfig(filePath: string): Promise<JsonPatchResult> {
+  if (!existsSync(filePath)) {
+    return { status: "missing" };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(await readFile(filePath, "utf-8"));
+  } catch {
+    return {
+      status: "manual",
+      reason: "File is not valid JSON",
+    };
+  }
+
+  if (!isJsonObject(parsed)) {
+    return {
+      status: "manual",
+      reason: "Root value is not an object",
+    };
+  }
+
+  let compilerOptions = parsed.compilerOptions;
+  if (compilerOptions === undefined) {
+    compilerOptions = {};
+    parsed.compilerOptions = compilerOptions;
+  }
+
+  if (!isJsonObject(compilerOptions)) {
+    return {
+      status: "manual",
+      reason: "compilerOptions is not an object",
+    };
+  }
+
+  let plugins = compilerOptions.plugins;
+  if (plugins === undefined) {
+    plugins = [];
+    compilerOptions.plugins = plugins;
+  }
+
+  if (!Array.isArray(plugins)) {
+    return {
+      status: "manual",
+      reason: "compilerOptions.plugins is not an array",
+    };
+  }
+
+  const alreadyConfigured = plugins.some(
+    (entry) => isJsonObject(entry) && entry.name === TS_PLUGIN_NAME,
+  );
+  if (alreadyConfigured) {
+    return { status: "already" };
+  }
+
+  plugins.push({ name: TS_PLUGIN_NAME });
+  await writeFile(filePath, `${JSON.stringify(parsed, null, 2)}\n`, "utf-8");
+  return { status: "patched" };
+}
+
+function isJsonObject(value: unknown): value is Record<string, any> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function getDevDependencyInstallCommand(project: DetectedProject): string {
+  switch (project.monorepoType) {
+    case "pnpm":
+      return "pnpm add -D";
+    case "yarn":
+      return "yarn add -D";
+    case "npm":
+      return "npm install -D";
+    default:
+      return "bun add -d";
+  }
 }

@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { createRouter, createEndpoint, query } from 'xrpckit';
+import { createRouter, group, query } from 'xrpckit';
 
-const demo = createEndpoint({
+const demo = group("demo", {
   unionInput: query({
     input: z.union([z.string(), z.number()]),
     output: z.object({ ok: z.boolean() }),

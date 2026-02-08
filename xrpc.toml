@@ -1,0 +1,5 @@
+# xRPC Configuration
+# Run "xrpc generate" to generate type-safe code for your targets
+
+contract = "./examples/x-rpc-todo-app/packages/api/src/contract.ts"
+swift-client = "./tmp-swift-linuxcheck.C7UBLo"

@@ -1,7 +1,7 @@
 import type { ContractDefinition, Endpoint } from "@xrpckit/sdk";
 import { toPascalCase } from "@xrpckit/sdk";
 import { SwiftBuilder } from "./swift-builder";
-import { toLowerCamelCase } from "./utils";
+import { sanitizeSwiftIdentifier, toLowerCamelCase } from "./utils";
 
 export class SwiftClientGenerator {
   private w: SwiftBuilder;
@@ -36,7 +36,9 @@ export class SwiftClientGenerator {
       b.l("private static let iso8601WithFractional: ISO8601DateFormatter = {");
       b.i()
         .l("let formatter = ISO8601DateFormatter()")
-        .l("formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]")
+        .l(
+          "formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]",
+        )
         .l("return formatter")
         .u()
         .l("}()")
@@ -57,9 +59,7 @@ export class SwiftClientGenerator {
         .l("encoder.dateEncodingStrategy = .custom { date, encoder in")
         .i()
         .l("var container = encoder.singleValueContainer()")
-        .l(
-          "try container.encode(iso8601WithFractional.string(from: date))",
-        )
+        .l("try container.encode(iso8601WithFractional.string(from: date))")
         .u()
         .l("}")
         .l("return encoder")
@@ -82,7 +82,7 @@ export class SwiftClientGenerator {
         .u()
         .l("}")
         .l(
-          "throw DecodingError.dataCorruptedError(in: container, debugDescription: \"Invalid ISO8601 date\")",
+          'throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid ISO8601 date")',
         )
         .u()
         .l("}")
@@ -162,15 +162,13 @@ export class SwiftClientGenerator {
         .l("}")
         .l("if let object = try? container.decode(XRPCErrorObject.self) {")
         .i()
-        .l(
-          "self.message = object.message ?? object.error ?? \"Unknown error\"",
-        )
+        .l('self.message = object.message ?? object.error ?? "Unknown error"')
         .l("self.details = object.errors ?? object.data")
         .l("return")
         .u()
         .l("}")
         .l(
-          "throw DecodingError.typeMismatch(XRPCErrorPayload.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: \"Invalid error payload\"))",
+          'throw DecodingError.typeMismatch(XRPCErrorPayload.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Invalid error payload"))',
         )
         .u()
         .l("}");
@@ -208,7 +206,9 @@ export class SwiftClientGenerator {
       b.l("public let result: Result?")
         .l("public let error: XRPCErrorPayload?")
         .n()
-        .l("public init(result: Result? = nil, error: XRPCErrorPayload? = nil) {")
+        .l(
+          "public init(result: Result? = nil, error: XRPCErrorPayload? = nil) {",
+        )
         .i()
         .l("self.result = result")
         .l("self.error = error")
@@ -234,11 +234,13 @@ export class SwiftClientGenerator {
       );
       b.i();
       b.l("var request = URLRequest(url: config.baseURL)")
-        .l("request.httpMethod = \"POST\"")
+        .l('request.httpMethod = "POST"')
         .l(
-          "request.setValue(\"application/json\", forHTTPHeaderField: \"Content-Type\")",
+          'request.setValue("application/json", forHTTPHeaderField: "Content-Type")',
         )
-        .l("for (key, value) in config.headers { request.setValue(value, forHTTPHeaderField: key) }")
+        .l(
+          "for (key, value) in config.headers { request.setValue(value, forHTTPHeaderField: key) }",
+        )
         .n();
 
       b.l("let payload = XRPCRequest(method: method, params: params)")
@@ -260,7 +262,7 @@ export class SwiftClientGenerator {
 
       b.l("guard let httpResponse = response as? HTTPURLResponse else {")
         .i()
-        .l("throw XRPCClientError.invalidResponse(\"No HTTP response\")")
+        .l('throw XRPCClientError.invalidResponse("No HTTP response")')
         .u()
         .l("}")
         .n();
@@ -280,7 +282,9 @@ export class SwiftClientGenerator {
         .l(
           "let message = String(data: data, encoding: .utf8) ?? HTTPURLResponse.localizedString(forStatusCode: statusCode)",
         )
-        .l("throw XRPCClientError.server(statusCode: statusCode, message: message)")
+        .l(
+          "throw XRPCClientError.server(statusCode: statusCode, message: message)",
+        )
         .u()
         .l("}")
         .l("throw XRPCClientError.decoding(error.localizedDescription)")
@@ -300,7 +304,9 @@ export class SwiftClientGenerator {
         .l(
           "let message = String(data: data, encoding: .utf8) ?? HTTPURLResponse.localizedString(forStatusCode: statusCode)",
         )
-        .l("throw XRPCClientError.server(statusCode: statusCode, message: message)")
+        .l(
+          "throw XRPCClientError.server(statusCode: statusCode, message: message)",
+        )
         .u()
         .l("}")
         .n();
@@ -319,17 +325,20 @@ export class SwiftClientGenerator {
         .l("}")
         .n();
 
-      b.l("throw XRPCClientError.invalidResponse(\"Missing result\")");
+      b.l('throw XRPCClientError.invalidResponse("Missing result")');
 
       b.u();
       b.l("}");
     });
   }
 
-  private generateApiClient(contract: ContractDefinition, w: SwiftBuilder): void {
+  private generateApiClient(
+    contract: ContractDefinition,
+    w: SwiftBuilder,
+  ): void {
     w.mark("API Client");
 
-    const groups = this.groupEndpointsByGroup(contract);
+    const { flat, groups } = this.bucketEndpoints(contract);
     const groupNames = Object.keys(groups);
 
     w.struct("ApiClient", [], (b) => {
@@ -342,9 +351,29 @@ export class SwiftClientGenerator {
         .l("}")
         .n();
 
+      flat.forEach((endpoint) => {
+        const methodName = sanitizeSwiftIdentifier(
+          toLowerCamelCase(endpoint.name),
+        );
+        const inputType = this.getTypeName(endpoint.input.name);
+        const outputType = this.getTypeName(endpoint.output.name);
+        b.l(
+          `public func ${methodName}(_ input: ${inputType}) async throws -> ${outputType} {`,
+        );
+        b.i();
+        b.l(`try await client.call(\"${endpoint.fullName}\", params: input)`);
+        b.u();
+        b.l("}");
+        b.n();
+      });
+
       groupNames.forEach((groupName) => {
-        const groupStructName = toPascalCase(groupName);
-        const propertyName = toLowerCamelCase(groupName);
+        const groupStructName = sanitizeSwiftIdentifier(
+          toPascalCase(groupName),
+        );
+        const propertyName = sanitizeSwiftIdentifier(
+          toLowerCamelCase(groupName),
+        );
         b.l(`public var ${propertyName}: ${groupStructName}Client {`);
         b.i();
         b.l(`${groupStructName}Client(client: client)`);
@@ -354,7 +383,9 @@ export class SwiftClientGenerator {
       });
 
       groupNames.forEach((groupName, idx) => {
-        const groupStructName = toPascalCase(groupName);
+        const groupStructName = sanitizeSwiftIdentifier(
+          toPascalCase(groupName),
+        );
         const endpoints = groups[groupName];
         b.l(`public struct ${groupStructName}Client {`);
         b.i();
@@ -368,16 +399,16 @@ export class SwiftClientGenerator {
           .n();
 
         endpoints.forEach((endpoint) => {
-          const methodName = toLowerCamelCase(endpoint.name);
+          const methodName = sanitizeSwiftIdentifier(
+            toLowerCamelCase(endpoint.name),
+          );
           const inputType = this.getTypeName(endpoint.input.name);
           const outputType = this.getTypeName(endpoint.output.name);
           b.l(
             `public func ${methodName}(_ input: ${inputType}) async throws -> ${outputType} {`,
           );
           b.i();
-          b.l(
-            `try await client.call(\"${endpoint.fullName}\", params: input)`,
-          );
+          b.l(`try await client.call(\"${endpoint.fullName}\", params: input)`);
           b.u();
           b.l("}");
           b.n();
@@ -392,23 +423,52 @@ export class SwiftClientGenerator {
     });
   }
 
-  private groupEndpointsByGroup(
+  private bucketEndpoints(
     contract: ContractDefinition,
-  ): Record<string, Endpoint[]> {
+  ): { flat: Endpoint[]; groups: Record<string, Endpoint[]> } {
+    const flat: Endpoint[] = [];
     const groups: Record<string, Endpoint[]> = {};
 
     for (const endpoint of contract.endpoints) {
-      const [groupName] = endpoint.fullName.split(".");
+      const { groupName } = this.getEndpointNameParts(endpoint);
+      if (!groupName) {
+        flat.push(endpoint);
+        continue;
+      }
+
       if (!groups[groupName]) {
         groups[groupName] = [];
       }
       groups[groupName].push(endpoint);
     }
 
-    return groups;
+    return { flat, groups };
+  }
+
+  private getEndpointNameParts(endpoint: Endpoint): {
+    groupName?: string;
+    endpointName: string;
+  } {
+    if (endpoint.groupName) {
+      return { groupName: endpoint.groupName, endpointName: endpoint.name };
+    }
+
+    if (endpoint.name && endpoint.name === endpoint.fullName) {
+      return { endpointName: endpoint.name };
+    }
+
+    const separator = endpoint.fullName.indexOf(".");
+    if (separator === -1) {
+      return { endpointName: endpoint.name || endpoint.fullName };
+    }
+
+    return {
+      groupName: endpoint.fullName.slice(0, separator),
+      endpointName: endpoint.name || endpoint.fullName.slice(separator + 1),
+    };
   }
 
   private getTypeName(name?: string): string {
-    return name ? toPascalCase(name) : "XRPCAny";
+    return name ? sanitizeSwiftIdentifier(toPascalCase(name)) : "XRPCAny";
   }
 }

@@ -54,14 +54,14 @@ Let's walk through `packages/api/src/contract.ts` line by line. This is the most
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
+import { createRouter, group, query, mutation } from 'xrpckit';
 ```
 
 Two imports:
 - **`z` from Zod** - The schema library that defines your data types with runtime validation
 - **x-rpc building blocks** - Four functions that structure your API:
   - `createRouter` - Combines all endpoints into the full API
-  - `createEndpoint` - Groups related operations together
+  - `group` - Declares an endpoint group with an explicit name
   - `query` - Defines read operations (like GET requests)
   - `mutation` - Defines write operations (like POST/PUT/DELETE)
 
@@ -87,7 +87,7 @@ Change it here, and the generated code updates everywhere.
 ### Step 3: Create an Endpoint Group
 
 ```typescript
-const todo = createEndpoint({
+const todo = group("todo", {
   // operations go here
 });
 ```
@@ -96,10 +96,10 @@ An endpoint group bundles related operations. Think of it like a controller or s
 
 ### Step 4: Define Operations (Queries vs Mutations)
 
-Inside `createEndpoint`, you define your operations:
+Inside `group("todo", { ... })`, you define your operations:
 
 ```typescript
-const todo = createEndpoint({
+const todo = group("todo", {
   // QUERIES: Read data (safe, repeatable, like GET requests)
   list: query({
     input: z.object({}),           // No input needed

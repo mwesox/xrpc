@@ -1,0 +1,29 @@
+---
+import SiteLayout from "../../layouts/SiteLayout.astro";
+
+const basePath = import.meta.env.BASE_URL;
+const withBase = (path) => {
+  const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+  return `${normalizedBase}${path.replace(/^\//, "")}`;
+};
+---
+
+<SiteLayout title="Documentation" description="xRPC documentation" showSidebar={true}>
+  <h1>Documentation</h1>
+  <p>
+    Start with <a href={withBase("/docs/get-started/")}>Get Started</a> for the quickest path,
+    then choose target-specific guides once your first generation works.
+  </p>
+
+  <div class="docs-grid">
+    <a href={withBase("/docs/get-started/")}><strong>Get Started</strong><span>Install CLI and generate your first server/client.</span></a>
+    <a href={withBase("/docs/usage/api-contract/")}><strong>API Contract</strong><span>How to structure endpoints and schemas.</span></a>
+    <a href={withBase("/docs/usage/configuration/")}><strong>Configuration</strong><span>Reusable settings in `xrpc.toml`.</span></a>
+    <a href={withBase("/docs/usage/ts-plugin/")}><strong>TypeScript Plugin</strong><span>Go-to-definition from generated API calls.</span></a>
+    <a href={withBase("/docs/usage/typescript-client/")}><strong>TypeScript Client</strong><span>Generated client API and runtime notes.</span></a>
+    <a href={withBase("/docs/usage/typescript-server/")}><strong>TypeScript Server</strong><span>Generate handlers and fetch-compatible server entrypoints.</span></a>
+    <a href={withBase("/docs/usage/go-server/")}><strong>Go Server</strong><span>Generated `net/http` handlers and validators.</span></a>
+    <a href={withBase("/docs/usage/kotlin-spring-boot-server/")}><strong>Kotlin Spring Boot</strong><span>Generated dispatcher/controller + DTOs.</span></a>
+    <a href={withBase("/docs/usage/swift-client/")}><strong>Swift Client</strong><span>Generated iOS/macOS API client.</span></a>
+  </div>
+</SiteLayout>

@@ -7,6 +7,7 @@ node_modules/
 dist/
 build/
 out/
+.astro/
 *.tsbuildinfo
 
 # Generated code
@@ -84,3 +85,6 @@ temp/
 *.key
 *.cert
 examples/x-rpc-todo-app/apps/go-backend/go-backend
+
+# Local planning notes
+/plan

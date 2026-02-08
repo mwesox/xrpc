@@ -54,14 +54,18 @@ export class TsClientGenerator {
     return w.toString();
   }
 
-  private groupEndpointsByGroup(
+  private bucketEndpoints(
     contract: ContractDefinition,
-  ): Record<string, Endpoint[]> {
+  ): { flat: Endpoint[]; groups: Record<string, Endpoint[]> } {
+    const flat: Endpoint[] = [];
     const groups: Record<string, Endpoint[]> = {};
 
     for (const endpoint of contract.endpoints) {
-      const parts = endpoint.fullName.split(".");
-      const groupName = parts[0];
+      const { groupName } = this.getEndpointNameParts(endpoint);
+      if (!groupName) {
+        flat.push(endpoint);
+        continue;
+      }
 
       if (!groups[groupName]) {
         groups[groupName] = [];
@@ -69,33 +73,53 @@ export class TsClientGenerator {
       groups[groupName].push(endpoint);
     }
 
-    return groups;
+    return { flat, groups };
   }
 
   private generateClientFactory(
     contract: ContractDefinition,
     w: TsBuilder,
   ): void {
-    const groups = this.groupEndpointsByGroup(contract);
+    const { flat, groups } = this.bucketEndpoints(contract);
 
     w.l("export function createClient(config: XRpcClientConfig) {");
     w.i();
     w.l("return {");
     w.i();
-
     const groupNames = Object.keys(groups);
+    const totalProperties = flat.length + groupNames.length;
+    let propertyIndex = 0;
+
+    for (const endpoint of flat) {
+      propertyIndex += 1;
+      const isLastProperty = propertyIndex === totalProperties;
+      const methodName = this.toCamelCase(endpoint.name);
+      const functionName = this.getFunctionName(endpoint);
+      const inputType = this.getTypeName(endpoint, "Input");
+
+      w.l(
+        `${methodName}: (input: ${inputType}, options?: { signal?: AbortSignal }) =>`,
+      );
+      w.i();
+      w.l(
+        `${functionName}(config, input, options)${isLastProperty ? "" : ","}`,
+      );
+      w.u();
+    }
+
     for (let i = 0; i < groupNames.length; i++) {
       const groupName = groupNames[i];
       const endpoints = groups[groupName];
-      const isLastGroup = i === groupNames.length - 1;
+      propertyIndex += 1;
+      const isLastProperty = propertyIndex === totalProperties;
 
       w.l(`${groupName}: {`);
       w.i();
 
       for (let j = 0; j < endpoints.length; j++) {
         const endpoint = endpoints[j];
-        const parts = endpoint.fullName.split(".");
-        const methodName = this.toCamelCase(parts[1]);
+        const { endpointName } = this.getEndpointNameParts(endpoint);
+        const methodName = this.toCamelCase(endpointName);
         const functionName = this.getFunctionName(endpoint);
         const inputType = this.getTypeName(endpoint, "Input");
         const isLastEndpoint = j === endpoints.length - 1;
@@ -111,7 +135,7 @@ export class TsClientGenerator {
       }
 
       w.u();
-      w.l(`}${isLastGroup ? "" : ","}`);
+      w.l(`}${isLastProperty ? "" : ","}`);
     }
 
     w.u();
@@ -192,6 +216,7 @@ export class TsClientGenerator {
     const outputSchema = this.getSchemaName(endpoint, "output");
 
     w.comment(`Type-safe wrapper for ${endpoint.fullName}`);
+    w.l(`/** @xrpcEndpoint ${endpoint.fullName} */`);
     w.n();
     w.asyncFunction(
       `${functionName}(config: XRpcClientConfig, input: ${inputType}, options?: { signal?: AbortSignal })`,
@@ -215,27 +240,56 @@ export class TsClientGenerator {
   }
 
   private getFunctionName(endpoint: Endpoint): string {
-    const parts = endpoint.fullName.split(".");
-    const groupName = this.toCamelCase(parts[0]);
-    const endpointName = this.toCamelCase(parts[1]);
-    return `${groupName}${this.toPascalCase(endpointName)}`;
+    const { groupName, endpointName } = this.getEndpointNameParts(endpoint);
+    if (!groupName) {
+      return this.toCamelCase(endpointName);
+    }
+
+    return `${this.toCamelCase(groupName)}${this.toPascalCase(endpointName)}`;
   }
 
   private getSchemaName(
     endpoint: Endpoint,
     suffix: "input" | "output",
   ): string {
-    const parts = endpoint.fullName.split(".");
-    const groupName = this.toCamelCase(parts[0]);
-    const endpointName = this.toCamelCase(parts[1]);
-    return `${groupName}${this.toPascalCase(endpointName)}${this.toPascalCase(suffix)}Schema`;
+    const { groupName, endpointName } = this.getEndpointNameParts(endpoint);
+    if (!groupName) {
+      return `${this.toCamelCase(endpointName)}${this.toPascalCase(suffix)}Schema`;
+    }
+
+    return `${this.toCamelCase(groupName)}${this.toPascalCase(endpointName)}${this.toPascalCase(suffix)}Schema`;
   }
 
   private getTypeName(endpoint: Endpoint, suffix: "Input" | "Output"): string {
-    const parts = endpoint.fullName.split(".");
-    const groupName = this.toPascalCase(parts[0]);
-    const endpointName = this.toPascalCase(parts[1]);
-    return `${groupName}${endpointName}${suffix}`;
+    const { groupName, endpointName } = this.getEndpointNameParts(endpoint);
+    if (!groupName) {
+      return `${this.toPascalCase(endpointName)}${suffix}`;
+    }
+
+    return `${this.toPascalCase(groupName)}${this.toPascalCase(endpointName)}${suffix}`;
+  }
+
+  private getEndpointNameParts(endpoint: Endpoint): {
+    groupName?: string;
+    endpointName: string;
+  } {
+    if (endpoint.groupName) {
+      return { groupName: endpoint.groupName, endpointName: endpoint.name };
+    }
+
+    if (endpoint.name && endpoint.name === endpoint.fullName) {
+      return { endpointName: endpoint.name };
+    }
+
+    const separator = endpoint.fullName.indexOf(".");
+    if (separator === -1) {
+      return { endpointName: endpoint.name || endpoint.fullName };
+    }
+
+    return {
+      groupName: endpoint.fullName.slice(0, separator),
+      endpointName: endpoint.name || endpoint.fullName.slice(separator + 1),
+    };
   }
 
   private toPascalCase(str: string): string {

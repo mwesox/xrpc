@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parse as parseToml } from "smol-toml";
 import {
@@ -43,6 +45,33 @@ describe("detection utilities", () => {
 
     expect(contracts.length).toBeGreaterThan(0);
     expect(contracts.some((c) => c.path.includes("contract.ts"))).toBe(true);
+  });
+
+  test("detects Spring Boot app and suggests kotlin-spring-boot-server", async () => {
+    const tempRoot = await mkdtemp(join(tmpdir(), "xrpc-spring-detect-"));
+
+    try {
+      await writeFile(
+        join(tempRoot, "build.gradle.kts"),
+        [
+          "plugins {",
+          '  id("org.springframework.boot") version "3.3.0"',
+          '  id("io.spring.dependency-management") version "1.1.6"',
+          '  kotlin("jvm") version "2.0.0"',
+          "}",
+        ].join("\n"),
+      );
+
+      const project = await detectProject(tempRoot);
+      const apps = await detectApps(tempRoot, project);
+
+      expect(apps.length).toBe(1);
+      expect(apps[0]?.type).toBe("spring");
+      expect(apps[0]?.isServer).toBe(true);
+      expect(apps[0]?.suggestedTarget).toBe("kotlin-spring-boot-server");
+    } finally {
+      await rm(tempRoot, { recursive: true, force: true });
+    }
   });
 });
 

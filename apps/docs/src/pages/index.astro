@@ -1,0 +1,383 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+import Hero from "../components/Hero.astro";
+---
+
+<SiteLayout
+  title="xRPC — Type-safe APIs across every language"
+  description="Type-safe, cross-platform RPC framework with fantastic developer experience"
+  homePage={true}
+>
+        <Hero />
+
+        <!-- Problem Statement -->
+        <section class="problem-section">
+          <div class="container">
+            <div class="problem-content">
+              <h2>Type safety shouldn't stop at language boundaries</h2>
+              <p class="problem-text">
+                You've got a TypeScript backend. A Go microservice. A mobile app in Kotlin.
+                Every time you change an endpoint, you're updating types in three places.
+                One typo, and you're debugging production at 2am.
+              </p>
+              <p class="problem-solution">
+                <strong>What if you could define your API once and have type-safe code generated for every language?</strong>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section">
+          <div class="container">
+            <div class="section-header">
+              <h2>Built for teams who ship fast</h2>
+              <p>The simplicity of tRPC meets true cross-platform capability.</p>
+            </div>
+
+            <div class="features-grid">
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                </div>
+                <h3>One schema, every language</h3>
+                <p>Write your API contract in TypeScript with Zod. Generate perfectly typed clients and servers for Go, Kotlin, Python, and more.</p>
+              </div>
+
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                </div>
+                <h3>Catch bugs at compile time</h3>
+                <p>Type mismatches become compiler errors, not runtime crashes. Sleep better knowing your types are always in sync.</p>
+              </div>
+
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                </div>
+                <h3>Zero configuration</h3>
+                <p>No YAML files. No code annotations. No build plugins. Just run the CLI and get production-ready code.</p>
+              </div>
+
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"/>
+                    <polyline points="8 6 2 12 8 18"/>
+                  </svg>
+                </div>
+                <h3>Code that feels native</h3>
+                <p>Generated code follows each language's conventions. Go code looks like Go. Kotlin code looks like Kotlin. No weird wrappers.</p>
+              </div>
+
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                    <line x1="12" y1="22.08" x2="12" y2="12"/>
+                  </svg>
+                </div>
+                <h3>No runtime dependencies</h3>
+                <p>Generated code is self-contained. Standard library only. Ship it to production without adding bloat to your stack.</p>
+              </div>
+
+              <div class="glass-card feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                  </svg>
+                </div>
+                <h3>Built-in validation</h3>
+                <p>Your Zod constraints become runtime validation in every language. min, max, email, uuid - it all just works.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TypeScript + Go Story -->
+        <section class="comparison-section">
+          <div class="container">
+            <div class="section-header">
+              <h2>Any frontend. Any backend. One source of truth.</h2>
+              <p>Define your API contract once. Generate type-safe servers and clients for any platform.</p>
+            </div>
+
+            <div class="story-flow">
+              <!-- Step 1: Define -->
+              <div class="story-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                  <div class="panel-header">
+                    <span class="panel-badge badge-primary">Define</span>
+                    <span class="panel-title">Your API Contract</span>
+                  </div>
+                  <div class="code-preview">
+                    <div class="code-header">
+                      <span class="code-title">api.ts</span>
+                    </div>
+                    <pre><code><span class="k">const</span> <span class="n">user</span> = <span class="nf">group</span>(<span class="s">"user"</span>, &#123;
+  <span class="na">getUser</span>: <span class="nf">query</span>(&#123;
+    <span class="na">input</span>: z.<span class="nf">object</span>(&#123;
+      <span class="na">id</span>: z.<span class="nf">string</span>().<span class="nf">uuid</span>()
+    &#125;),
+    <span class="na">output</span>: z.<span class="nf">object</span>(&#123;
+      <span class="na">id</span>: z.<span class="nf">string</span>(),
+      <span class="na">name</span>: z.<span class="nf">string</span>().<span class="nf">min</span>(<span class="m">1</span>),
+      <span class="na">email</span>: z.<span class="nf">string</span>().<span class="nf">email</span>()
+    &#125;)
+  &#125;)
+&#125;);</code></pre>
+                  </div>
+                  <div class="comparison-callout">
+                    <div class="comparison-callout-item">
+                      <span>Like <strong>OpenAPI</strong></span>
+                      <span class="vs">but</span>
+                      <span>in TypeScript</span>
+                    </div>
+                    <div class="comparison-callout-item">
+                      <span>Like <strong>tRPC</strong></span>
+                      <span class="vs">but</span>
+                      <span>cross-platform</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="story-arrow">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <polyline points="19 12 12 19 5 12"/>
+                </svg>
+              </div>
+
+              <!-- Step 2: Generate -->
+              <div class="story-step generate-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                  <div class="panel-header">
+                    <span class="panel-badge badge-secondary">Generate</span>
+                    <span class="panel-title">Server & Client</span>
+                  </div>
+                  <div class="generate-panels">
+                    <div class="code-preview">
+                      <div class="code-header">
+                        <span class="code-title">
+                          <span class="tech-badge tech-badge-go">Go</span>
+                          Server
+                        </span>
+                      </div>
+                      <pre><code><span class="k">type</span> <span class="n">GetUserInput</span> <span class="k">struct</span> &#123;
+  <span class="n">ID</span> <span class="k">string</span> <span class="s">`json:"id"`</span>
+&#125;
+
+<span class="k">func</span> (<span class="n">h</span> *<span class="n">Handler</span>) <span class="nf">GetUser</span>(
+  <span class="n">input</span> <span class="n">GetUserInput</span>,
+) (*<span class="n">GetUserOutput</span>, <span class="k">error</span>) &#123;
+  <span class="c">// Your logic here</span>
+&#125;</code></pre>
+                    </div>
+                    <div class="code-preview">
+                      <div class="code-header">
+                        <span class="code-title">
+                          <span class="tech-badge tech-badge-typescript">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                              <rect x="2" y="2" width="20" height="20" rx="2" fill="currentColor"/>
+                              <text x="12" y="17" text-anchor="middle" fill="#12121a" font-size="12" font-weight="700">TS</text>
+                            </svg>
+                            TypeScript
+                          </span>
+                          Client
+                        </span>
+                      </div>
+                      <pre><code><span class="k">import</span> &#123; client &#125; <span class="k">from</span> <span class="s">'./client'</span>;
+
+<span class="k">async function</span> <span class="nf">getProfile</span>(<span class="n">userId</span>: <span class="n">string</span>) &#123;
+  <span class="k">const</span> <span class="n">user</span> = <span class="k">await</span> <span class="n">client</span>
+    .<span class="n">user</span>.<span class="nf">getUser</span>(&#123; <span class="na">id</span>: <span class="n">userId</span> &#125;);
+
+  <span class="k">return</span> <span class="n">user</span>.<span class="n">name</span>;
+&#125;</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="story-arrow">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <polyline points="19 12 12 19 5 12"/>
+                </svg>
+              </div>
+
+              <!-- Step 3: Ship -->
+              <div class="story-step ship-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                  <div class="panel-header">
+                    <span class="panel-badge badge-success">Ship</span>
+                    <span class="panel-title">With Confidence</span>
+                  </div>
+                  <div class="ship-benefits">
+                    <div class="benefit-item">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>Change the schema, both sides update</span>
+                    </div>
+                    <div class="benefit-item">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>TypeScript catches mismatches at build time</span>
+                    </div>
+                    <div class="benefit-item">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>Go validates requests automatically</span>
+                    </div>
+                    <div class="benefit-item">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>Zero runtime type drift. Ever.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Start Section -->
+        <section class="quickstart-section">
+          <div class="container">
+            <h2>Get started in seconds</h2>
+            <p class="quickstart-subtitle">Generate a Go server and TypeScript client from a single schema.</p>
+
+            <div class="quickstart-steps">
+              <div class="code-preview">
+                <div class="code-header">
+                  <span class="code-title">Terminal</span>
+                </div>
+                <pre><code><span class="c"># Install the CLI</span>
+npm install -g @xrpckit/cli
+
+<span class="c"># Generate Go server + TypeScript client from your schema</span>
+xrpc generate --targets go-server,ts-client --input src/contract.ts
+
+<span class="nb">Generated 5 files in 0.3s</span>
+<span class="c">#   xrpc/types.go, xrpc/router.go, xrpc/validation.go</span>
+<span class="c">#   xrpc/client.ts, xrpc/types.ts</span></code></pre>
+              </div>
+            </div>
+
+            <div class="quickstart-cta">
+              <a href="./docs/get-started/" class="btn btn-primary btn-lg">
+                Read the Guide
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Targets -->
+        <section class="targets-section">
+          <div class="container">
+            <div class="section-header">
+              <h2>Targets</h2>
+              <p>xRPC generates idiomatic code for multiple platforms from your Zod schema.<br>Each target produces self-contained code with clear runtime requirements.</p>
+            </div>
+
+            <div class="targets-grid">
+              <a href="./docs/usage/typescript-client/" class="glass-card target-card">
+                <div class="target-icon">TS</div>
+                <div class="target-content">
+                  <div class="target-header">
+                    <span class="target-name">TypeScript</span>
+                    <span class="badge badge-primary">Client & Server (Available)</span>
+                  </div>
+                  <p class="target-description">Vanilla TS client with fetch + Zod validation. Framework-agnostic server with Fetch API handlers for Bun, Deno, and more.</p>
+                </div>
+              </a>
+
+              <a href="./docs/usage/go-server/" class="glass-card target-card">
+                <div class="target-icon">Go</div>
+                <div class="target-content">
+                  <div class="target-header">
+                    <span class="target-name">Go</span>
+                    <span class="badge badge-primary">Server (Available)</span>
+                  </div>
+                  <p class="target-description">Idiomatic Go with net/http handlers, struct validation, and JSON marshaling. Go client target is planned.</p>
+                </div>
+              </a>
+
+              <a href="./docs/usage/kotlin-spring-boot-server/" class="glass-card target-card">
+                <div class="target-icon">Kt</div>
+                <div class="target-content">
+                  <div class="target-header">
+                    <span class="target-name">Kotlin</span>
+                    <span class="badge badge-primary">Server (Available)</span>
+                  </div>
+                  <p class="target-description">Spring Boot integration with data classes, validation annotations, and controller generation.</p>
+                </div>
+              </a>
+
+              <a href="./docs/usage/swift-client/" class="glass-card target-card">
+                <div class="target-icon">Sw</div>
+                <div class="target-content">
+                  <div class="target-header">
+                    <span class="target-name">Swift</span>
+                    <span class="badge badge-primary">Client (Available)</span>
+                  </div>
+                  <p class="target-description">Async URLSession-based client with Swift models for iOS and macOS.</p>
+                </div>
+              </a>
+
+              <div class="glass-card target-card coming-soon">
+                <div class="target-icon">Py</div>
+                <div class="target-content">
+                  <div class="target-header">
+                    <span class="target-name">Python</span>
+                    <span class="badge badge-coming-soon">Coming Soon</span>
+                  </div>
+                  <p class="target-description">FastAPI servers and httpx clients with Pydantic models.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+          <div class="container">
+            <div class="cta-content">
+              <h2>Ready to ditch the type mismatches?</h2>
+              <p>Join developers building type-safe APIs across languages.</p>
+              <div class="cta-buttons">
+                <a href="./docs/get-started/" class="btn btn-primary btn-lg">
+                  Start Building
+                </a>
+                <a href="https://github.com/mwesox/xrpc" class="btn btn-secondary btn-lg" target="_blank" rel="noopener">
+                  Star on GitHub
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+</SiteLayout>

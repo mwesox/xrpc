@@ -7,9 +7,9 @@ The xRPC monorepo is organized with individual packages for each component:
 ### Core Packages
 
 - **`xrpckit`** - DSL library for defining API contracts
-- **`@xrpckit/parser`** - Extracts API contracts from TypeScript/Zod files
-- **`@xrpckit/codegen`** - Code generation utilities and target registry
+- **`@xrpckit/sdk`** - Parser, framework, and shared code generation APIs
 - **`@xrpckit/cli`** - Command-line interface
+- **`@xrpckit/ts-plugin`** - TypeScript language-service plugin for xRPC go-to-definition
 
 ### Target Generator Packages
 

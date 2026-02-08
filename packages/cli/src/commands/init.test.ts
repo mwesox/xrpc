@@ -123,6 +123,18 @@ describe("init command", () => {
       join(testDir, "src/App.tsx"),
       "export default function App() { return <div>Hello</div>; }",
     );
+    await writeFile(
+      join(testDir, "tsconfig.json"),
+      JSON.stringify(
+        {
+          compilerOptions: {
+            target: "ES2022",
+          },
+        },
+        null,
+        2,
+      ),
+    );
 
     // Mock: Select ts-client target
     const { mockPrompt, mockSpinner } = createMocks([
@@ -156,6 +168,20 @@ describe("init command", () => {
     // Verify flat structure: contract + target-name = output-path
     expect(parsed.contract).toBeDefined();
     expect(parsed["ts-client"]).toBeDefined();
+
+    const packageJson = JSON.parse(
+      await readFile(join(testDir, "package.json"), "utf-8"),
+    );
+    expect(packageJson.devDependencies?.["@xrpckit/ts-plugin"]).toBe("^0.0.1");
+
+    const tsconfig = JSON.parse(
+      await readFile(join(testDir, "tsconfig.json"), "utf-8"),
+    );
+    expect(
+      tsconfig.compilerOptions.plugins.some(
+        (entry: { name?: string }) => entry.name === "@xrpckit/ts-plugin",
+      ),
+    ).toBe(true);
   });
 
   test("creates xrpc.toml with go-server for detected Go backend", async () => {
@@ -200,6 +226,102 @@ describe("init command", () => {
     expect(parsed["go-server"]).toBeDefined();
   });
 
+  test("creates xrpc.toml with kotlin-spring-boot-server for detected Spring backend", async () => {
+    await mkdir(join(testDir, "src"), { recursive: true });
+    await writeFile(
+      join(testDir, "build.gradle.kts"),
+      [
+        "plugins {",
+        '  id("org.springframework.boot") version "3.3.0"',
+        '  id("io.spring.dependency-management") version "1.1.6"',
+        '  kotlin("jvm") version "2.0.0"',
+        "}",
+      ].join("\n"),
+    );
+
+    const { mockPrompt, mockSpinner } = createMocks([
+      ["kotlin-spring-boot-server"],
+    ]);
+
+    const originalLog = console.log;
+    console.log = () => {};
+
+    const originalCwd = process.cwd();
+    process.chdir(testDir);
+
+    try {
+      await initCommand({
+        prompt: mockPrompt,
+        spinner: mockSpinner,
+      } as InitOptions);
+    } finally {
+      process.chdir(originalCwd);
+      console.log = originalLog;
+    }
+
+    const tomlPath = join(testDir, "xrpc.toml");
+    expect(existsSync(tomlPath)).toBe(true);
+
+    const tomlContent = await readFile(tomlPath, "utf-8");
+    const parsed = parseToml(tomlContent);
+
+    expect(parsed.contract).toBeDefined();
+    expect(parsed["kotlin-spring-boot-server"]).toBeDefined();
+  });
+
+  test("skips unsafe tsconfig edits and continues setup", async () => {
+    await mkdir(join(testDir, "src"), { recursive: true });
+    await writeFile(
+      join(testDir, "package.json"),
+      JSON.stringify({
+        name: "test-react-app",
+        dependencies: {
+          react: "^18.0.0",
+          "react-dom": "^18.0.0",
+        },
+      }),
+    );
+    await writeFile(
+      join(testDir, "src/App.tsx"),
+      "export default function App() { return <div>Hello</div>; }",
+    );
+    await writeFile(
+      join(testDir, "tsconfig.json"),
+      JSON.stringify(
+        {
+          compilerOptions: {
+            plugins: {},
+          },
+        },
+        null,
+        2,
+      ),
+    );
+
+    const { mockPrompt, mockSpinner } = createMocks([["ts-client"]]);
+
+    const originalLog = console.log;
+    console.log = () => {};
+
+    const originalCwd = process.cwd();
+    process.chdir(testDir);
+
+    try {
+      await initCommand({
+        prompt: mockPrompt,
+        spinner: mockSpinner,
+      } as InitOptions);
+    } finally {
+      process.chdir(originalCwd);
+      console.log = originalLog;
+    }
+
+    const tsconfig = JSON.parse(
+      await readFile(join(testDir, "tsconfig.json"), "utf-8"),
+    );
+    expect(Array.isArray(tsconfig.compilerOptions.plugins)).toBe(false);
+  });
+
   test("creates contract file when none exists", async () => {
     // Setup: Create empty project
     await mkdir(testDir, { recursive: true });
@@ -231,5 +353,6 @@ describe("init command", () => {
     const contractContent = await readFile(contractPath, "utf-8");
     expect(contractContent).toContain("xrpckit");
     expect(contractContent).toContain("createRouter");
+    expect(contractContent).toContain("group(");
   });
 });

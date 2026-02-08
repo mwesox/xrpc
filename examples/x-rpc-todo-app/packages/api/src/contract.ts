@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
+import { createRouter, group, query, mutation } from 'xrpckit';
 
 // =============================================================================
 // ENUMS
@@ -62,7 +62,7 @@ const TaskSummary = z.object({
 // TASK ENDPOINTS
 // =============================================================================
 
-const task = createEndpoint({
+const task = group("task", {
   // List tasks with optional filtering
   list: query({
     input: z.object({
@@ -125,7 +125,7 @@ const task = createEndpoint({
 // SUBTASK ENDPOINTS
 // =============================================================================
 
-const subtask = createEndpoint({
+const subtask = group("subtask", {
   // Add a subtask to a task
   add: mutation({
     input: z.object({

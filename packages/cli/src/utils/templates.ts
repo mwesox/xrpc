@@ -39,13 +39,13 @@ export interface PackageJsonConfig {
  */
 export function generateContractTemplate(): string {
   return `import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
+import { createRouter, group, query, mutation } from 'xrpckit';
 
 // =============================================================================
 // SAMPLE ENDPOINT
 // =============================================================================
 
-const example = createEndpoint({
+const example = group("example", {
   // Get a greeting message
   hello: query({
     input: z.object({

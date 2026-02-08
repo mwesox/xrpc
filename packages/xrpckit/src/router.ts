@@ -5,9 +5,14 @@ export interface EndpointGroup {
   [endpointName: string]: EndpointDefinition<z.ZodTypeAny, z.ZodTypeAny>;
 }
 
+export type EndpointEntry = EndpointDefinition<z.ZodTypeAny, z.ZodTypeAny>;
+export type RouterEntry = EndpointGroup | EndpointEntry;
+
 export interface RouterDefinition {
-  [groupName: string]: EndpointGroup;
+  [entryName: string]: RouterEntry;
 }
+
+export const GROUP_NAME = Symbol.for("xrpc.groupName");
 
 // WeakMap to store middleware separately from router definition
 const routerMiddleware = new WeakMap<RouterDefinition, Middleware[]>();
@@ -38,7 +43,7 @@ export type Middleware<TContext = Record<string, unknown>> = (
  */
 export interface RouterConfig {
   middleware?: Middleware[];
-  [groupName: string]: EndpointGroup | Middleware[] | undefined;
+  [entryName: string]: RouterEntry | Middleware[] | undefined;
 }
 
 /**
@@ -56,20 +61,36 @@ function isRouterConfig(
 }
 
 /**
- * Creates an endpoint group containing one or more endpoints.
+ * Creates an endpoint group with an explicit, canonical group name.
+ * The explicit group name is used for API method names during parsing/generation.
  *
- * @param endpoints - An object mapping endpoint names to their definitions (query or mutation)
- * @returns The endpoint group with preserved types
- *
- * @example
- * ```typescript
- * const greeting = createEndpoint({
- *   greet: query({
- *     input: z.object({ name: z.string() }),
- *     output: z.object({ message: z.string() }),
- *   }),
- * });
- * ```
+ * @param name - Explicit group name (source of truth)
+ * @param endpoints - Group endpoints (query/mutation definitions)
+ * @returns Endpoint group with attached group metadata
+ */
+export function group<T extends EndpointGroup>(
+  name: string,
+  endpoints: T,
+): T & { [GROUP_NAME]: string } {
+  const groupName = name.trim();
+  if (!groupName) {
+    throw new Error(
+      'group(name, endpoints) requires a non-empty "name" argument.',
+    );
+  }
+
+  Object.defineProperty(endpoints, GROUP_NAME, {
+    value: groupName,
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
+
+  return endpoints as T & { [GROUP_NAME]: string };
+}
+
+/**
+ * @deprecated Use `group("name", { ... })` for explicit endpoint groups.
  */
 export function createEndpoint<T extends EndpointGroup>(endpoints: T): T {
   return endpoints;
@@ -81,7 +102,13 @@ export function createEndpoint<T extends EndpointGroup>(endpoints: T): T {
  * @example
  * // Without middleware
  * const router = createRouter({
- *   greeting: createEndpoint({ ... })
+ *   greeting: group("greeting", { ... })
+ * });
+ *
+ * @example
+ * // Flat endpoints (no groups)
+ * const router = createRouter({
+ *   ping: query({ ... })
  * });
  *
  * @example
@@ -90,7 +117,7 @@ export function createEndpoint<T extends EndpointGroup>(endpoints: T): T {
  *   middleware: [
  *     async (req, ctx) => ({ ...ctx, userId: extractUserId(req) })
  *   ],
- *   greeting: createEndpoint({ ... })
+ *   greeting: group("greeting", { ... })
  * });
  */
 export function createRouter<T extends RouterConfig | RouterDefinition>(

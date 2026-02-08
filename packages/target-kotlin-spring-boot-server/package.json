@@ -1,0 +1,57 @@
+{
+  "name": "@xrpckit/target-kotlin-spring-boot-server",
+  "version": "0.0.1",
+  "description": "Kotlin Spring Boot server code generator for xRPC",
+  "type": "module",
+  "license": "MIT",
+  "author": "mwesox",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mwesox/xrpc.git",
+    "directory": "packages/target-kotlin-spring-boot-server"
+  },
+  "bugs": {
+    "url": "https://github.com/mwesox/xrpc/issues"
+  },
+  "homepage": "https://github.com/mwesox/xrpc#readme",
+  "keywords": [
+    "xrpc",
+    "rpc",
+    "kotlin",
+    "spring-boot",
+    "server",
+    "codegen",
+    "api",
+    "type-safe"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "bun": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean"
+  },
+  "dependencies": {
+    "@xrpckit/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

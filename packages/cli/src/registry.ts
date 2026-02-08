@@ -1,11 +1,13 @@
 import type { Target } from "@xrpckit/sdk";
 import { goTarget } from "@xrpckit/target-go-server";
+import { kotlinSpringBootServerTarget } from "@xrpckit/target-kotlin-spring-boot-server";
 import { swiftClientTarget } from "@xrpckit/target-swift-client";
 import { tsClientTarget } from "@xrpckit/target-ts-client";
 import { tsServerTarget } from "@xrpckit/target-ts-server";
 
 const generators: Record<string, Target> = {
   "go-server": goTarget,
+  "kotlin-spring-boot-server": kotlinSpringBootServerTarget,
   "swift-client": swiftClientTarget,
   "ts-client": tsClientTarget,
   "ts-server": tsServerTarget,

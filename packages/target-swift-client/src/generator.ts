@@ -136,10 +136,9 @@ function collectRequiredNullableFields(
 }
 
 function generateSwiftClient(input: TargetInput): TargetOutput {
-  const { contract } = input;
-  const diagnostics = validateSupport(contract, support, "swift-client");
+  const diagnostics = validateSupport(input.contract, support, "swift-client");
 
-  const requiredNullableFields = collectRequiredNullableFields(contract);
+  const requiredNullableFields = collectRequiredNullableFields(input.contract);
   for (const field of requiredNullableFields) {
     diagnostics.push({
       severity: "warning",
@@ -151,6 +150,10 @@ function generateSwiftClient(input: TargetInput): TargetOutput {
   if (hasErrors) {
     return { files: [], diagnostics };
   }
+
+  const contract = JSON.parse(
+    JSON.stringify(input.contract),
+  ) as TargetInput["contract"];
 
   const typeGenerator = new SwiftTypeGenerator();
   const clientGenerator = new SwiftClientGenerator();

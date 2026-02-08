@@ -1,0 +1,119 @@
+name: Release NPM
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run validation only without publishing"
+        required: true
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-npm-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Ensure workflow runs from main
+        run: |
+          if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+            echo "Release workflow must run from main. Current ref: ${GITHUB_REF}" >&2
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.8"
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Resolve npm auth token
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          if [ -n "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "NODE_AUTH_TOKEN=${{ secrets.NPM_TOKEN }}" >> "$GITHUB_ENV"
+          elif [ -n "${{ secrets.NPM_XRPC_APIKEY }}" ]; then
+            echo "NODE_AUTH_TOKEN=${{ secrets.NPM_XRPC_APIKEY }}" >> "$GITHUB_ENV"
+          else
+            echo "Missing npm token. Set NPM_TOKEN or NPM_XRPC_APIKEY in repository secrets." >&2
+            exit 1
+          fi
+
+      - name: Check (build + typecheck + lint + test)
+        run: bun run check
+
+      - name: Release preflight
+        run: bun run release:preflight
+
+      - name: Dry-run release planning
+        run: bun run release:publish:dry
+
+      - name: Publish release
+        if: ${{ inputs.dry_run == false }}
+        run: bun run release:publish
+        env:
+          NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
+
+      - name: Configure git identity
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create run tag
+        if: ${{ inputs.dry_run == false }}
+        id: run_tag
+        run: |
+          RUN_TAG="npm/run/$(date -u +%Y%m%d)-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${GITHUB_SHA::7}"
+          git tag -a "$RUN_TAG" -m "release run ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}"
+          echo "run_tag=$RUN_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Push tags
+        if: ${{ inputs.dry_run == false }}
+        run: git push origin --tags
+
+      - name: Build release notes
+        if: ${{ inputs.dry_run == false }}
+        run: >
+          node scripts/release/write-release-notes.mjs
+          --input tmp/release-summary.json
+          --output tmp/release-notes.md
+          --run-tag "${{ steps.run_tag.outputs.run_tag }}"
+          --commit "${{ github.sha }}"
+
+      - name: Create GitHub Release
+        if: ${{ inputs.dry_run == false }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.run_tag.outputs.run_tag }}
+          name: npm release ${{ steps.run_tag.outputs.run_tag }}
+          body_path: tmp/release-notes.md
+
+      - name: Upload release summary artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-summary
+          path: |
+            tmp/release-summary.json
+            tmp/release-notes.md
+          if-no-files-found: ignore

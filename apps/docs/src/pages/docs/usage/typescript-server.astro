@@ -1,0 +1,200 @@
+---
+import SiteLayout from "../../../layouts/SiteLayout.astro";
+import { Code } from "astro:components";
+import CodeTabs from "../../../components/CodeTabs.astro";
+
+const basePath = import.meta.env.BASE_URL;
+const withBase = (path: string) => {
+  const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+  return `${normalizedBase}${path.replace(/^\//, "")}`;
+};
+
+const contractCode = `// contract.ts
+import { z } from 'zod';
+import { createRouter, group, query, mutation } from 'xrpckit';
+
+const example = group("example", {
+  hello: query({
+    input: z.object({ name: z.string().min(1).max(100) }),
+    output: z.object({ message: z.string() }),
+  }),
+  echo: mutation({
+    input: z.object({ text: z.string().max(1000) }),
+    output: z.object({ echoed: z.string() }),
+  }),
+});
+
+export const router = createRouter({ example });`;
+
+const handlersCode = `// server.ts
+import { createFetchHandler, type Handlers } from './xrpc/server';
+
+const handlers: Handlers = {
+  "example.hello": async (params) => ({
+    message: \`Hello, \${params.name}!\`,
+  }),
+  "example.echo": async (params) => ({
+    echoed: params.text,
+  }),
+};
+
+const handler = createFetchHandler(handlers);`;
+
+const serveTabs = [
+  {
+    id: "bun",
+    label: "Bun",
+    code: `Bun.serve({
+  port: 3000,
+  fetch: handler,
+});`,
+  },
+  {
+    id: "express",
+    label: "Express",
+    code: `import express from 'express';
+
+const app = express();
+app.use(express.json());
+
+app.post('/api', async (req, res) => {
+  const request = new Request(\`http://localhost\${req.url}\`, {
+    method: req.method,
+    headers: req.headers as HeadersInit,
+    body: JSON.stringify(req.body),
+  });
+  const response = await handler(request);
+  res.status(response.status).json(await response.json());
+});
+
+app.listen(3000);`,
+  },
+  {
+    id: "deno",
+    label: "Deno",
+    code: `Deno.serve({ port: 3000 }, handler);`,
+  },
+];
+
+const fetchHandlerCode = `const handler = createFetchHandler(handlers, {
+  validateInputs: true,   // Validate inputs with Zod (default: true)
+  validateOutputs: true,  // Validate outputs with Zod (default: true)
+  getContext: async (request) => ({ /* ... */ }),
+  formatError: ({ code, message, error }) => ({ code, message }),
+});`;
+
+const jsonRpcPayload = `{ "method": "example.hello", "params": { "name": "World" } }`;
+
+const contextCode = `type AppContext = { userId: string; role: string };
+
+const handlers: Handlers<AppContext> = {
+  "example.hello": async (params, ctx) => ({
+    message: \`Hello, \${params.name}! (user: \${ctx.userId})\`,
+  }),
+  // ...
+};
+
+const handler = createFetchHandler(handlers, {
+  getContext: async (request) => {
+    const token = request.headers.get('authorization');
+    return { userId: extractUserId(token), role: 'user' };
+  },
+});`;
+
+const formatErrorCode = `const handler = createFetchHandler(handlers, {
+  formatError: ({ code, message, error }) => ({
+    code,
+    message,
+    data: error instanceof ZodError ? error.flatten() : undefined,
+  }),
+});`;
+
+const typeSafetyCode = `const handlers: Handlers = {
+  "example.hello": async (params) => ({
+    // Error: Property 'message' is missing
+  }),
+  // Error: Property 'example.echo' is missing
+};`;
+---
+
+<SiteLayout title="TypeScript Server" description="How to implement an xRPC server using TypeScript" showSidebar={true}>
+  <h1>TypeScript Server</h1>
+  <p>
+    The <code>ts-server</code> target generates a framework-agnostic server using the Web Standard Fetch API
+    (<code>Request</code>/<code>Response</code>). It works with <strong>Bun</strong>, <strong>Deno</strong>,
+    <strong>Express</strong>, <strong>Cloudflare Workers</strong>, and any runtime that supports the Fetch API.
+  </p>
+
+  <h2>Quick Start</h2>
+
+  <h3>1. Define your contract</h3>
+  <p>
+    If you ran <code>xrpc init</code>, you already have this. Otherwise, create a contract file
+    (see <a href={withBase("docs/api-contract/")}>API Contract</a>):
+  </p>
+  <Code code={contractCode} lang="typescript" />
+
+  <h3>2. Generate</h3>
+  <Code code="xrpc generate --targets ts-server" lang="bash" />
+  <p>
+    This produces two files in <code>&lt;output&gt;/xrpc/</code>:
+  </p>
+  <ul>
+    <li><strong><code>types.ts</code></strong> — Zod schemas and inferred TypeScript types</li>
+    <li><strong><code>server.ts</code></strong> — a typed <code>Handlers</code> interface, <code>createFetchHandler</code>, validation, and dispatch logic</li>
+  </ul>
+
+  <h3>3. Implement handlers</h3>
+  <p>
+    Import the generated <code>Handlers</code> type and provide your business logic.
+    The input/output types are already wired — you just fill in the functions:
+  </p>
+  <Code code={handlersCode} lang="typescript" />
+
+  <h3>4. Serve it</h3>
+  <p>Pick your runtime — the handler plugs in directly:</p>
+  <CodeTabs tabs={serveTabs} />
+
+  <h2>API Reference</h2>
+
+  <h3><code>createFetchHandler(handlers, options?)</code></h3>
+  <p>Creates a Fetch API handler (<code>Request → Response</code>). This is the primary entry point:</p>
+  <Code code={fetchHandlerCode} lang="typescript" />
+  <p>The handler accepts <code>POST</code> requests with a JSON-RPC-like payload:</p>
+  <Code code={jsonRpcPayload} lang="json" />
+
+  <h3><code>createRpcHandler(handlers, options?)</code></h3>
+  <p>Lower-level handler that processes <code>RpcRequest</code> objects directly, without HTTP concerns. Useful for testing or custom transport layers.</p>
+
+  <h2>Context</h2>
+  <p>Use <code>getContext</code> to extract request context (authentication, logging, etc.) and pass it to all handlers:</p>
+  <Code code={contextCode} lang="typescript" />
+
+  <h2>Error Handling</h2>
+  <p>The generated server uses JSON-RPC error codes mapped to HTTP status codes:</p>
+  <table>
+    <thead>
+      <tr><th>Error Code</th><th>HTTP Status</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>INVALID_REQUEST</code></td><td>400</td><td>Malformed request</td></tr>
+      <tr><td><code>INVALID_PARAMS</code></td><td>400</td><td>Input validation failed</td></tr>
+      <tr><td><code>METHOD_NOT_FOUND</code></td><td>404</td><td>Unknown method</td></tr>
+      <tr><td><code>METHOD_NOT_ALLOWED</code></td><td>405</td><td>Non-POST request</td></tr>
+      <tr><td><code>INVALID_RESPONSE</code></td><td>500</td><td>Output validation failed</td></tr>
+      <tr><td><code>INTERNAL_ERROR</code></td><td>500</td><td>Handler threw an error</td></tr>
+    </tbody>
+  </table>
+  <p>Customize error formatting with <code>formatError</code>:</p>
+  <Code code={formatErrorCode} lang="typescript" />
+
+  <h2>Type Safety</h2>
+  <p>TypeScript will catch errors if your handlers don't match the contract:</p>
+  <Code code={typeSafetyCode} lang="typescript" />
+
+  <h2>Related Target</h2>
+  <p>
+    The TypeScript client is generated separately via the <strong>ts-client</strong> target
+    (see <a href={withBase("docs/usage/typescript-client/")}>TypeScript Client</a>).
+  </p>
+</SiteLayout>

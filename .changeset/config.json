@@ -1,0 +1,20 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
+  "changelog": false,
+  "commit": false,
+  "fixed": [],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "@xrpckit/docs",
+    "go-backend",
+    "web",
+    "x-rpc-todo-app",
+    "@repo/api",
+    "@repo/eslint-config",
+    "@repo/typescript-config",
+    "xrpc-test-fixtures"
+  ]
+}

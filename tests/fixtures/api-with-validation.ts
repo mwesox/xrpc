@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
+import { createRouter, group, query, mutation } from 'xrpckit';
 
-const greeting = createEndpoint({
+const greeting = group("greeting", {
   greet: query({
     input: z.object({ 
       name: z.string().min(1).max(100),

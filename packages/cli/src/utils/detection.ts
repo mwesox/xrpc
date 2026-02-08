@@ -19,6 +19,7 @@ export type AppType =
   | "next"
   | "vite"
   | "go"
+  | "spring"
   | "python"
   | "node"
   | "unknown";
@@ -203,6 +204,18 @@ async function detectAppType(
     };
   }
 
+  // Check for Spring Boot (Gradle/Maven)
+  if (await isSpringBootProject(dirPath)) {
+    return {
+      name,
+      path: dirPath,
+      type: "spring",
+      isClient: false,
+      isServer: true,
+      suggestedTarget: "kotlin-spring-boot-server",
+    };
+  }
+
   // Check package.json for JS/TS apps
   const packageJson = await readPackageJson(dirPath);
   if (!packageJson) {
@@ -373,7 +386,8 @@ async function isContractFile(filePath: string): Promise<boolean> {
     return (
       content.includes("xrpckit") ||
       content.includes("createRouter") ||
-      content.includes("createEndpoint")
+      content.includes("createEndpoint") ||
+      content.includes("group(")
     );
   } catch {
     return false;
@@ -401,6 +415,36 @@ async function readPackageJson(
   } catch {
     return null;
   }
+}
+
+/**
+ * Detect whether a directory is a Spring Boot project by checking
+ * standard build files and Spring Boot markers.
+ */
+async function isSpringBootProject(dirPath: string): Promise<boolean> {
+  const buildFiles = ["build.gradle.kts", "build.gradle", "pom.xml"];
+
+  for (const file of buildFiles) {
+    const fullPath = join(dirPath, file);
+    if (!existsSync(fullPath)) {
+      continue;
+    }
+
+    try {
+      const content = (await readFile(fullPath, "utf-8")).toLowerCase();
+      if (
+        content.includes("spring-boot") ||
+        content.includes("org.springframework.boot") ||
+        content.includes("springframework.boot")
+      ) {
+        return true;
+      }
+    } catch {
+      // Ignore unreadable files and continue detection
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -455,6 +499,8 @@ export function getTargetForAppType(appType: AppType): string | null {
       return "ts-client";
     case "go":
       return "go-server";
+    case "spring":
+      return "kotlin-spring-boot-server";
     default:
       return null;
   }
@@ -495,6 +541,8 @@ export function getAppTypeLabel(type: AppType): string {
       return "Vite + React";
     case "go":
       return "Go";
+    case "spring":
+      return "Spring Boot";
     case "python":
       return "Python";
     case "node":

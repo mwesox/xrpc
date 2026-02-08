@@ -8,6 +8,8 @@ import {
 } from "@xrpckit/sdk";
 
 export class SwiftTypeMapper extends TypeMapperBase<string> {
+  private inlineTypeNames = new WeakMap<TypeReference, string>();
+
   readonly typeMapping: TypeMapping<string> = {
     object: (ctx) => this.handleObject(ctx),
     array: (ctx) => this.handleArray(ctx),
@@ -38,11 +40,21 @@ export class SwiftTypeMapper extends TypeMapperBase<string> {
     return mapping[type] ?? "XRPCAny";
   }
 
+  override reset(): void {
+    super.reset();
+    this.inlineTypeNames = new WeakMap<TypeReference, string>();
+  }
+
+  registerTypeName(typeRef: TypeReference, typeName: string): void {
+    this.inlineTypeNames.set(typeRef, toPascalCase(typeName));
+  }
+
   private handleObject(ctx: TypeContext): TypeResult<string> {
     const { typeRef, name } = ctx;
+    const inlineName = this.inlineTypeNames.get(typeRef);
 
-    if (name || typeRef.name) {
-      return { type: toPascalCase(name || typeRef.name!) };
+    if (name || typeRef.name || inlineName) {
+      return { type: toPascalCase(name || typeRef.name || inlineName!) };
     }
 
     return { type: "[String: XRPCAny]" };
@@ -104,7 +116,8 @@ export class SwiftTypeMapper extends TypeMapperBase<string> {
       }
 
       const nonNullVariants = typeRef.unionTypes.filter(
-        (variant) => !(variant.kind === "literal" && variant.literalValue === null),
+        (variant) =>
+          !(variant.kind === "literal" && variant.literalValue === null),
       );
       if (nonNullVariants.length === 1) {
         const base = this.mapType(nonNullVariants[0]);
@@ -172,7 +185,9 @@ export class SwiftTypeMapper extends TypeMapperBase<string> {
 
     if (typeRef.tupleElements && typeRef.tupleElements.length > 0) {
       const elementTypes = typeRef.tupleElements.map((e) => this.mapType(e));
-      const allSame = elementTypes.every((t) => t.type === elementTypes[0].type);
+      const allSame = elementTypes.every(
+        (t) => t.type === elementTypes[0].type,
+      );
       if (allSame) {
         return { type: `[${elementTypes[0].type}]` };
       }

@@ -32,6 +32,8 @@ export interface Endpoint {
   input: TypeReference;
   output: TypeReference;
   fullName: string; // e.g., "greeting.greet"
+  groupName?: string; // Canonical group name for grouped endpoints
+  sourcePath?: string; // Path to endpoint in exported router object (for schema access)
 }
 
 export interface TypeDefinition {

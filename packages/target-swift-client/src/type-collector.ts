@@ -82,13 +82,16 @@ export class SwiftTypeCollector {
     }
 
     if (typeRef.kind === "object" && typeRef.properties) {
+      let contextName = typeRef.name ? toPascalCase(typeRef.name) : undefined;
       if (!typeRef.name) {
         const assignedName = this.assignUniqueName(suggestedName);
-        typeRef.name = assignedName;
         this.addCollectedType(assignedName, typeRef, source);
+        contextName = assignedName;
       }
 
-      const contextName = toPascalCase(typeRef.name);
+      if (!contextName) {
+        return;
+      }
       for (const prop of typeRef.properties) {
         this.processProperty(prop, contextName);
       }

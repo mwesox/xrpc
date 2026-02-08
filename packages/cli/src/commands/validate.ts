@@ -180,10 +180,7 @@ async function validateStructure(filePath: string): Promise<string[]> {
 
     // Validate endpoint groups
     for (const router of contract.routers) {
-      if (!router.endpointGroups || router.endpointGroups.length === 0) {
-        errors.push("Router has no endpoint groups.");
-      }
-      for (const group of router.endpointGroups) {
+      for (const group of router.endpointGroups ?? []) {
         if (!group.name) {
           errors.push("Endpoint group missing name.");
         }

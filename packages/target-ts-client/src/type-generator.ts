@@ -40,11 +40,7 @@ export class TsTypeGenerator {
     const outputSchemaName = this.getSchemaName(endpoint, "output");
     const inputTypeName = this.getTypeName(endpoint, "Input");
     const outputTypeName = this.getTypeName(endpoint, "Output");
-
-    // Extract group and endpoint names from fullName (e.g., "greeting.greet")
-    const [groupName, endpointName] = endpoint.fullName.split(".");
-
-    const routerPath = `router.${groupName}.${endpointName}`;
+    const routerPath = this.getRouterPath(endpoint);
 
     // Export schemas and types for this endpoint (grouped together)
     w.const(inputSchemaName, `${routerPath}.input`, true);
@@ -58,17 +54,65 @@ export class TsTypeGenerator {
     endpoint: Endpoint,
     suffix: "input" | "output",
   ): string {
-    const parts = endpoint.fullName.split(".");
-    const groupName = this.toCamelCase(parts[0]);
-    const endpointName = this.toCamelCase(parts[1]);
-    return `${groupName}${this.toPascalCase(endpointName)}${this.toPascalCase(suffix)}Schema`;
+    const { groupName, endpointName } = this.getEndpointNameParts(endpoint);
+    if (!groupName) {
+      return `${this.toCamelCase(endpointName)}${this.toPascalCase(suffix)}Schema`;
+    }
+
+    return `${this.toCamelCase(groupName)}${this.toPascalCase(endpointName)}${this.toPascalCase(suffix)}Schema`;
   }
 
   private getTypeName(endpoint: Endpoint, suffix: "Input" | "Output"): string {
-    const parts = endpoint.fullName.split(".");
-    const groupName = this.toPascalCase(parts[0]);
-    const endpointName = this.toPascalCase(parts[1]);
-    return `${groupName}${endpointName}${suffix}`;
+    const { groupName, endpointName } = this.getEndpointNameParts(endpoint);
+    if (!groupName) {
+      return `${this.toPascalCase(endpointName)}${suffix}`;
+    }
+
+    return `${this.toPascalCase(groupName)}${this.toPascalCase(endpointName)}${suffix}`;
+  }
+
+  private getRouterPath(endpoint: Endpoint): string {
+    const sourcePath = endpoint.sourcePath ?? endpoint.fullName;
+    return `router${this.toPropertyAccess(sourcePath)}`;
+  }
+
+  private getEndpointNameParts(endpoint: Endpoint): {
+    groupName?: string;
+    endpointName: string;
+  } {
+    if (endpoint.groupName) {
+      return { groupName: endpoint.groupName, endpointName: endpoint.name };
+    }
+
+    if (endpoint.name && endpoint.name === endpoint.fullName) {
+      return { endpointName: endpoint.name };
+    }
+
+    const separator = endpoint.fullName.indexOf(".");
+    if (separator === -1) {
+      return { endpointName: endpoint.name || endpoint.fullName };
+    }
+
+    return {
+      groupName: endpoint.fullName.slice(0, separator),
+      endpointName: endpoint.name || endpoint.fullName.slice(separator + 1),
+    };
+  }
+
+  private toPropertyAccess(path: string): string {
+    return path
+      .split(".")
+      .filter((segment) => segment.length > 0)
+      .map((segment) =>
+        this.isValidIdentifier(segment)
+          ? `.${segment}`
+          : `[${JSON.stringify(segment)}]`,
+      )
+      .join("");
+  }
+
+  private isValidIdentifier(value: string): boolean {
+    return /^[A-Za-z_$][\w$]*$/.test(value);
   }
 
   private calculateRelativePath(

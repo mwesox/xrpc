@@ -32,9 +32,9 @@ Define your API with the xRPC DSL:
 
 ```typescript
 import { z } from 'zod';
-import { createRouter, createEndpoint, query, mutation } from 'xrpckit';
+import { createRouter, group, query, mutation } from 'xrpckit';
 
-const users = createEndpoint({
+const users = group("users", {
   get: query({
     input: z.object({ id: z.string().uuid() }),
     output: z.object({
@@ -55,6 +55,14 @@ const users = createEndpoint({
 export const router = createRouter({ users });
 ```
 
+For small APIs, flat endpoints are also supported:
+
+```typescript
+export const router = createRouter({
+  ping: query({ input: z.object({}), output: z.object({ ok: z.boolean() }) }),
+});
+```
+
 Generate code for your targets:
 
 ```bash
@@ -62,6 +70,30 @@ xrpc generate --input src/api.ts --targets go-server,ts-client,swift-client
 ```
 
 That's it. You now have type-safe clients and servers with full validation logic, zero runtime dependencies, and idiomatic code that feels native to each language.
+
+## TypeScript Go-to-Definition (Optional)
+
+For TypeScript projects, you can enable contract-aware go-to-definition from generated `api.group.method(...)` calls.
+
+Install the plugin:
+
+```bash
+bun add -d @xrpckit/ts-plugin
+```
+
+Enable it in your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "plugins": [
+      { "name": "@xrpckit/ts-plugin" }
+    ]
+  }
+}
+```
+
+This plugin is optional and only improves editor navigation. Generation/runtime behavior is unchanged.
 
 ## Generated Code
 
@@ -100,7 +132,29 @@ All generated code includes:
 
 Check out the [full documentation](https://mwesox.github.io/xrpc/) for detailed guides.
 
+Run docs locally:
+
+```bash
+bun install
+bun run docs:dev
+```
+
+Build/preview docs exactly like CI:
+
+```bash
+bun run docs:build
+bun run docs:preview
+```
+
 **Hands-on tutorial:** See the [x-rpc TODO App](./examples/x-rpc-todo-app/) for a complete walkthrough building a fullstack app with a Go backend and React frontend from a single contract.
+
+## Releases
+
+xRPC packages are released manually from `main` via GitHub Actions.
+
+- Workflow: `.github/workflows/release-npm.yml`
+- Versioning: manual Changesets (`bunx changeset`, then `bun run release:version`)
+- Tags: one per released package in `npm/<pkg-slug>/vX.Y.Z` format
 
 ## Contributing
 

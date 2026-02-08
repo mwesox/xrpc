@@ -3,7 +3,7 @@ import type { ContractDefinition, TypeReference } from "@xrpckit/sdk";
 import { tsServerTarget } from "./generator";
 
 describe("ts-server target", () => {
-  it("generates server handler utilities and types", () => {
+  it("generates server handler utilities and types for grouped and flat endpoints", () => {
     const greetingInput: TypeReference = {
       kind: "object",
       name: "GreetingInput",
@@ -36,6 +36,24 @@ describe("ts-server target", () => {
       ],
     };
 
+    const pingInput: TypeReference = {
+      kind: "object",
+      name: "PingInput",
+      properties: [],
+    };
+
+    const pingOutput: TypeReference = {
+      kind: "object",
+      name: "PingOutput",
+      properties: [
+        {
+          name: "ok",
+          required: true,
+          type: { kind: "primitive", baseType: "boolean" },
+        },
+      ],
+    };
+
     const contract: ContractDefinition = {
       routers: [],
       types: [
@@ -49,6 +67,16 @@ describe("ts-server target", () => {
           kind: "object",
           properties: greetingOutput.properties,
         },
+        {
+          name: "PingInput",
+          kind: "object",
+          properties: pingInput.properties,
+        },
+        {
+          name: "PingOutput",
+          kind: "object",
+          properties: pingOutput.properties,
+        },
       ],
       endpoints: [
         {
@@ -57,6 +85,16 @@ describe("ts-server target", () => {
           input: greetingInput,
           output: greetingOutput,
           fullName: "greeting.hello",
+          groupName: "greeting",
+          sourcePath: "internalGreeting.hello",
+        },
+        {
+          name: "ping",
+          type: "query",
+          input: pingInput,
+          output: pingOutput,
+          fullName: "ping",
+          sourcePath: "ping",
         },
       ],
     };
@@ -79,10 +117,17 @@ describe("ts-server target", () => {
     expect(typesContent).toContain("greetingHelloInputSchema");
     expect(typesContent).toContain("export type GreetingHelloInput");
     expect(typesContent).toContain("export type GreetingHelloOutput");
+    expect(typesContent).toContain("router.internalGreeting.hello");
+    expect(typesContent).toContain("export type PingInput");
+    expect(typesContent).toContain("export type PingOutput");
+    expect(typesContent).toContain("router.ping");
 
     const serverContent = serverFile?.content ?? "";
     expect(serverContent).toContain("export interface Handlers");
     expect(serverContent).toContain('"greeting.hello"');
+    expect(serverContent).toContain('"ping"');
+    expect(serverContent).toContain("/** @xrpcEndpoint greeting.hello */");
+    expect(serverContent).toContain("/** @xrpcEndpoint ping */");
     expect(serverContent).toContain("createRpcHandler");
     expect(serverContent).toContain("createFetchHandler");
     expect(serverContent).toContain("schemaMap");

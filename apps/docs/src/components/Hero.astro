@@ -1,0 +1,387 @@
+---
+const basePath = import.meta.env.BASE_URL;
+const withBase = (path) => {
+  const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+  return `${normalizedBase}${path.replace(/^\//, "")}`;
+};
+---
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      <span>Schema-first RPC for the polyglot era</span>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="gradient-text">Define once.</span><br />
+      Generate everywhere.
+    </h1>
+
+    <p class="hero-subtitle">
+      Define your API in TypeScript with Zod. Generate type-safe servers and clients
+      for Go, Kotlin, Swift, and more — with zero runtime dependencies.
+    </p>
+
+    <div class="hero-cta">
+      <a href={withBase("/docs/get-started/")} class="btn btn-primary btn-lg">
+        Get Started
+      </a>
+      <a href="https://github.com/mwesox/xrpc" class="btn btn-secondary btn-lg" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+        View on GitHub
+      </a>
+    </div>
+
+    <div class="hero-cli">
+      <div class="hero-cli-title">Try it now</div>
+      <div class="cli-install">
+        <div class="cli-line">
+          <span class="cli-prompt">$</span>
+          <span class="cli-command">npm install -g @xrpckit/cli</span>
+        </div>
+        <div class="cli-line">
+          <span class="cli-prompt">$</span>
+          <span class="cli-command">xrpc init</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-diagram">
+    <div class="hero-api-diagram">
+      <svg class="hero-api-diagram-svg" viewBox="0 0 1100 590" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="hero-gradient-center" x1="350" y1="175" x2="550" y2="325" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#00d4ff" />
+            <stop offset="1" stop-color="#7c3aed" />
+          </linearGradient>
+          <linearGradient id="kotlin-gradient" x1="-12" y1="-12" x2="12" y2="12" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#7f52ff" />
+            <stop offset="0.5" stop-color="#c757bc" />
+            <stop offset="1" stop-color="#f88a36" />
+          </linearGradient>
+          <filter id="glow-white" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2" result="blur1" />
+            <feGaussianBlur stdDeviation="5" result="blur2" />
+            <feMerge>
+              <feMergeNode in="blur2" />
+              <feMergeNode in="blur1" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Connection lines -->
+        <g filter="url(#glow-white)">
+          <!-- Up to TS Client -->
+          <path class="connection-line connection-line-typescript" d="M550 182 L550 136" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2" />
+          <polygon class="connection-line connection-line-typescript arrow-head" points="543,144 550,128 557,144" fill="#ffffff" />
+          <!-- Left to Go Server -->
+          <path class="connection-line connection-line-go" d="M370 260 L290 260" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2" />
+          <polygon class="connection-line connection-line-go arrow-head" points="298,252 282,260 298,268" fill="#ffffff" />
+          <!-- Right to TS Server -->
+          <path class="connection-line connection-line-ts" d="M730 260 L810 260" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2" />
+          <polygon class="connection-line connection-line-ts arrow-head" points="802,252 818,260 802,268" fill="#ffffff" />
+          <!-- Trunk down from contract.ts -->
+          <path class="connection-line connection-line-kotlin" d="M550 338 L550 400" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2" />
+          <!-- Branch left to Kotlin -->
+          <path class="connection-line connection-line-kotlin" d="M548 400 L197 400" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2" />
+          <path class="connection-line connection-line-kotlin" d="M195 398 L195 448" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2" />
+          <polygon class="connection-line connection-line-kotlin arrow-head" points="188,440 195,456 202,440" fill="#ffffff" />
+          <!-- Branch right to Swift -->
+          <path class="connection-line connection-line-swift" d="M552 400 L893 400" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2" />
+          <path class="connection-line connection-line-swift" d="M895 398 L895 448" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2" />
+          <polygon class="connection-line connection-line-swift arrow-head" points="888,440 895,456 902,440" fill="#ffffff" />
+        </g>
+
+        <!-- TypeScript Client (top) -->
+        <g class="tech-box tech-box-typescript">
+          <rect x="400" y="0" width="300" height="128" rx="14" fill="#12121a" stroke="#3178c6" stroke-width="2.5" />
+          <g transform="translate(550, 34)">
+            <rect x="-16" y="-16" width="32" height="32" rx="4" fill="#3178c6" />
+            <text x="0" y="7" text-anchor="middle" fill="#ffffff" font-family="var(--font-mono)" font-size="18" font-weight="700">TS</text>
+          </g>
+          <text x="550" y="74" text-anchor="middle" fill="#3178c6" font-family="var(--font-mono)" font-size="24" font-weight="700">TypeScript Client</text>
+          <text x="550" y="102" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="13">Runtime: Fetch API</text>
+        </g>
+
+        <!-- Go Server (left) -->
+        <g class="tech-box tech-box-go">
+          <rect x="10" y="198" width="270" height="124" rx="14" fill="#12121a" stroke="#00add8" stroke-width="2.5" />
+          <g transform="translate(145, 228)">
+            <ellipse rx="14" ry="12" fill="#00add8" />
+            <circle cx="-5" cy="-3" r="3" fill="#12121a" />
+            <circle cx="5" cy="-3" r="3" fill="#12121a" />
+            <circle cx="-5" cy="-3" r="1.5" fill="#ffffff" />
+            <circle cx="5" cy="-3" r="1.5" fill="#ffffff" />
+            <ellipse cx="0" cy="4" rx="4" ry="2" fill="#12121a" />
+          </g>
+          <text x="145" y="270" text-anchor="middle" fill="#00add8" font-family="var(--font-mono)" font-size="34" font-weight="700">Go Server</text>
+          <text x="145" y="296" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="13">Runtime: net/http (stdlib)</text>
+        </g>
+
+        <!-- contract.ts (center) -->
+        <g class="api-box">
+          <rect x="370" y="182" width="360" height="156" rx="16" fill="#12121a" stroke="url(#hero-gradient-center)" stroke-width="3" />
+          <text x="550" y="244" text-anchor="middle" fill="#00d4ff" font-family="var(--font-mono)" font-size="36" font-weight="700">contract.ts</text>
+          <text x="550" y="276" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="16">xRPC DSL (Zod-based)</text>
+          <text x="550" y="308" text-anchor="middle" fill="#5a5a70" font-family="var(--font-sans)" font-size="13">Single source of truth</text>
+        </g>
+
+        <!-- TypeScript Server (right) -->
+        <g class="tech-box tech-box-ts">
+          <rect x="820" y="198" width="270" height="124" rx="14" fill="#12121a" stroke="#3178c6" stroke-width="2.5" />
+          <g transform="translate(955, 228)">
+            <rect x="-14" y="-14" width="28" height="28" rx="4" fill="#3178c6" />
+            <text x="0" y="6" text-anchor="middle" fill="#ffffff" font-family="var(--font-mono)" font-size="14" font-weight="700">TS</text>
+          </g>
+          <text x="955" y="268" text-anchor="middle" fill="#3178c6" font-family="var(--font-mono)" font-size="22" font-weight="700">TypeScript Server</text>
+          <text x="955" y="296" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="13">Runtime: Fetch handler</text>
+        </g>
+
+        <!-- Kotlin Server (bottom-left) -->
+        <g class="tech-box tech-box-kotlin">
+          <rect x="50" y="454" width="290" height="116" rx="14" fill="#12121a" stroke="#7f52ff" stroke-width="2.5" />
+          <g transform="translate(195, 486)">
+            <polygon points="-12,-12 12,-12 0,0 12,12 -12,12 0,0" fill="url(#kotlin-gradient)" />
+          </g>
+          <text x="195" y="528" text-anchor="middle" fill="#7f52ff" font-family="var(--font-mono)" font-size="26" font-weight="700">Kotlin Server</text>
+          <text x="195" y="554" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="13">Runtime: Spring Boot</text>
+        </g>
+
+        <!-- Swift Client (bottom-right) -->
+        <g class="tech-box tech-box-swift">
+          <rect x="750" y="454" width="290" height="116" rx="14" fill="#12121a" stroke="#f05138" stroke-width="2.5" />
+          <g transform="translate(895, 486)">
+            <path d="M-10,-8 C-2,-2 4,-6 10,-12 C8,-4 10,4 10,12 C4,8 -2,10 -10,6 C-4,4 -6,-2 -10,-8Z" fill="#f05138" />
+          </g>
+          <text x="895" y="528" text-anchor="middle" fill="#f05138" font-family="var(--font-mono)" font-size="26" font-weight="700">Swift Client</text>
+          <text x="895" y="554" text-anchor="middle" fill="#8888a0" font-family="var(--font-sans)" font-size="13">Runtime: URLSession</text>
+        </g>
+      </svg>
+    </div>
+    <p class="diagram-caption">One schema. Every platform.</p>
+  </div>
+</section>
+
+<style>
+.hero-diagram {
+  max-width: 1100px;
+  margin: var(--space-2xl) auto 0;
+  padding: 0 var(--space-xl);
+  animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+.hero-cli {
+  margin-top: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.hero-cli-title {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.hero-diagram .hero-api-diagram {
+  background: rgba(18, 18, 26, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  backdrop-filter: blur(10px);
+}
+
+.hero-diagram .hero-api-diagram-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hero-diagram .diagram-caption {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: var(--space-lg);
+  margin-bottom: 0;
+}
+
+.hero-diagram .tech-box,
+.hero-diagram .api-box {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.hero-diagram .api-box {
+  animation-delay: 0.3s;
+}
+
+.hero-diagram .tech-box-typescript {
+  animation-delay: 0.6s;
+}
+
+.hero-diagram .tech-box-go {
+  animation-delay: 0.8s;
+}
+
+.hero-diagram .tech-box-ts {
+  animation-delay: 1s;
+}
+
+.hero-diagram .tech-box-kotlin {
+  animation-delay: 1.2s;
+}
+
+.hero-diagram .tech-box-swift {
+  animation-delay: 1.4s;
+}
+
+.hero-diagram .connection-line {
+  opacity: 0;
+}
+
+.hero-diagram .connection-line-typescript {
+  animation: heroDrawLine 0.4s ease-out 0.5s forwards;
+}
+
+.hero-diagram .connection-line-go {
+  animation: heroDrawLine 0.4s ease-out 0.7s forwards;
+}
+
+.hero-diagram .connection-line-ts {
+  animation: heroDrawLine 0.4s ease-out 0.9s forwards;
+}
+
+.hero-diagram .connection-line-kotlin {
+  animation: heroDrawLine 0.4s ease-out 1.1s forwards;
+}
+
+.hero-diagram .connection-line-swift {
+  animation: heroDrawLine 0.4s ease-out 1.3s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes heroDrawLine {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes flowDash {
+  from {
+    stroke-dashoffset: 12;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulseArrow {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.hero-diagram .connection-line[stroke-dasharray] {
+  animation: heroDrawLine 0.4s ease-out forwards, flowDash 0.8s linear infinite;
+}
+
+.hero-diagram .connection-line-typescript[stroke-dasharray] {
+  animation-delay: 0.5s, 0.9s;
+}
+
+.hero-diagram .connection-line-go[stroke-dasharray] {
+  animation-delay: 0.7s, 1.1s;
+}
+
+.hero-diagram .connection-line-ts[stroke-dasharray] {
+  animation-delay: 0.9s, 1.3s;
+}
+
+.hero-diagram .connection-line-kotlin[stroke-dasharray] {
+  animation-delay: 1.1s, 1.5s;
+}
+
+.hero-diagram .connection-line-swift[stroke-dasharray] {
+  animation-delay: 1.3s, 1.7s;
+}
+
+.hero-diagram .arrow-head {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: heroDrawLine 0.4s ease-out forwards, pulseArrow 2s ease-in-out infinite;
+}
+
+.hero-diagram .connection-line-typescript.arrow-head {
+  animation-delay: 0.5s, 1.5s;
+}
+
+.hero-diagram .connection-line-go.arrow-head {
+  animation-delay: 0.7s, 1.7s;
+}
+
+.hero-diagram .connection-line-ts.arrow-head {
+  animation-delay: 0.9s, 1.9s;
+}
+
+.hero-diagram .connection-line-kotlin.arrow-head {
+  animation-delay: 1.1s, 2.1s;
+}
+
+.hero-diagram .connection-line-swift.arrow-head {
+  animation-delay: 1.3s, 2.3s;
+}
+
+@media (max-width: 600px) {
+  .hero-diagram {
+    padding: 0 var(--space-sm);
+  }
+
+  .hero-diagram .hero-api-diagram {
+    padding: var(--space-md);
+  }
+
+  .hero-diagram .hero-api-diagram-svg {
+    min-height: 300px;
+  }
+}
+</style>

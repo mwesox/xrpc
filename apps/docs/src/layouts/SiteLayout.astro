@@ -1,0 +1,101 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import Sidebar from "../components/Sidebar.astro";
+import "../styles/global.scss";
+
+const frontmatter = Astro.props.frontmatter ?? {};
+const showSidebar = Astro.props.showSidebar ?? frontmatter.showSidebar ?? false;
+const homePage = Astro.props.homePage ?? frontmatter.homePage ?? false;
+const title = Astro.props.title;
+const description = Astro.props.description;
+
+const basePath = import.meta.env.BASE_URL;
+const withBase = (path) => {
+  const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+  return `${normalizedBase}${path.replace(/^\//, "")}`;
+};
+
+const pageTitle = frontmatter?.title
+  ? `${frontmatter.title} | xRPC`
+  : title
+    ? `${title} | xRPC`
+    : "xRPC";
+
+const pageDescription = frontmatter?.description || description || "Type-safe RPC across every boundary.";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0a0c13" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content={pageDescription} />
+    <title>{pageTitle}</title>
+    <link rel="icon" type="image/x-icon" href={withBase("/favicon.ico")} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="wrapper">
+      <Header />
+
+      <main
+        id="main-content"
+        class:list={[
+          "page-content",
+          {
+            "home-page": homePage,
+            "docs-page": showSidebar
+          }
+        ]}
+        aria-label="Content"
+      >
+        {showSidebar ? (
+          <div class="content-wrapper">
+            <aside class="sidebar" aria-label="Navigation">
+              <Sidebar />
+            </aside>
+            <article class="content">
+              <slot />
+            </article>
+          </div>
+        ) : (
+          <slot />
+        )}
+      </main>
+
+      <Footer />
+    </div>
+
+    <script is:inline>
+      (() => {
+        const toggle = document.querySelector(".mobile-menu-toggle");
+        const nav = document.querySelector(".mobile-nav");
+
+        if (toggle && nav) {
+          toggle.addEventListener("click", () => {
+            nav.classList.toggle("open");
+            toggle.setAttribute("aria-expanded", nav.classList.contains("open") ? "true" : "false");
+          });
+        }
+      })();
+
+      // Code tabs — activates only if .code-tabs elements exist on the page
+      document.querySelectorAll('.code-tabs').forEach(tabs => {
+        tabs.querySelectorAll('.code-tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const target = btn.dataset.tab;
+            tabs.querySelectorAll('.code-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === target));
+            tabs.querySelectorAll('.code-tab-panel').forEach(p => p.classList.toggle('active', p.dataset.tab === target));
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
