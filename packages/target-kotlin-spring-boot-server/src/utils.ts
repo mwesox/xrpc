@@ -77,7 +77,7 @@ export function endpointFunctionName(fullName: string): string {
 }
 
 export function escapeKotlinString(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/\"/g, '\\"');
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 export function uniqueName(base: string, used: Set<string>): string {

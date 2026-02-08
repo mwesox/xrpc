@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { basename, dirname, join, relative } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { listTargets } from "../registry";
 import {
   type DetectedApp,
@@ -10,14 +10,13 @@ import {
   detectExistingContracts,
   detectProject,
   getAppTypeLabel,
-  getMonorepoLabel,
 } from "../utils/detection";
 import {
   type FileToCreate,
-  type TargetConfig,
   generateMonorepoApiPackageFiles,
   generateSingleProjectFiles,
   generateTomlTemplate,
+  type TargetConfig,
 } from "../utils/templates";
 import {
   createSeparator,
@@ -26,10 +25,7 @@ import {
   formatBoxHeader,
   formatBoxLine,
   formatDescription,
-  formatDetected,
   formatError,
-  formatFileToCreate,
-  formatHeader,
   formatInfo,
   formatMonorepoBadge,
   formatPath,
@@ -240,12 +236,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
     const pluginSpinner = spinner(`Configuring ${TS_PLUGIN_NAME}...`);
     pluginSpinner.start();
     try {
-      tsPluginSetup = await setupTsPlugin(
-        project,
-        apps,
-        selectedTargets,
-        cwd,
-      );
+      tsPluginSetup = await setupTsPlugin(project, apps, selectedTargets, cwd);
       const updateCount =
         tsPluginSetup.patchedTsconfigFiles.length +
         tsPluginSetup.patchedPackageFiles.length;
@@ -258,7 +249,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
           `No safe auto-edits found for ${TS_PLUGIN_NAME} (manual setup required)`,
         );
       }
-    } catch (error) {
+    } catch (_error) {
       pluginSpinner.fail(`Could not auto-configure ${TS_PLUGIN_NAME}`);
       tsPluginSetup = {
         patchedPackageFiles: [],
@@ -488,7 +479,7 @@ async function selectTargets(
   prompt: PromptFunction & PromptSelectFunction,
   apps: DetectedApp[],
   project: DetectedProject,
-  packageLocation: string,
+  _packageLocation: string,
 ): Promise<TargetConfig[]> {
   console.log(formatStep(2, 3, "Target Selection"));
   subtleDivider();
@@ -615,13 +606,19 @@ async function setupTsPlugin(
   const installCommand = getDevDependencyInstallCommand(project);
 
   const targetNames = new Set(selectedTargets.map((target) => target.name));
-  const candidateDirs = collectTsPluginCandidateDirs(project, apps, targetNames);
+  const candidateDirs = collectTsPluginCandidateDirs(
+    project,
+    apps,
+    targetNames,
+  );
 
   for (const dir of candidateDirs) {
     const packagePath = join(dir, "package.json");
     const packagePatch = await patchPackageJson(packagePath);
     if (packagePatch.status === "patched") {
-      result.patchedPackageFiles.push(relative(cwd, packagePath) || "package.json");
+      result.patchedPackageFiles.push(
+        relative(cwd, packagePath) || "package.json",
+      );
     } else if (packagePatch.status === "missing") {
       result.manualActions.push(
         `(${relative(cwd, dir) || "."}) Add dev dependency: ${installCommand} ${TS_PLUGIN_NAME}`,
@@ -635,10 +632,12 @@ async function setupTsPlugin(
     const tsconfigPath = join(dir, "tsconfig.json");
     const tsconfigPatch = await patchTsconfig(tsconfigPath);
     if (tsconfigPatch.status === "patched") {
-      result.patchedTsconfigFiles.push(relative(cwd, tsconfigPath) || "tsconfig.json");
+      result.patchedTsconfigFiles.push(
+        relative(cwd, tsconfigPath) || "tsconfig.json",
+      );
     } else if (tsconfigPatch.status === "missing") {
       result.manualActions.push(
-        `(${relative(cwd, dir) || "."}) Add to tsconfig: \"compilerOptions.plugins\": [{ \"name\": \"${TS_PLUGIN_NAME}\" }]`,
+        `(${relative(cwd, dir) || "."}) Add to tsconfig: "compilerOptions.plugins": [{ "name": "${TS_PLUGIN_NAME}" }]`,
       );
     } else if (tsconfigPatch.status === "manual") {
       result.manualActions.push(

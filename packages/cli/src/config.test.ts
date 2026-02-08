@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import {
-  type ModuleConfig,
-  type XrpcConfig,
   extractModules,
   extractTargets,
   isMultiModule,
+  type ModuleConfig,
+  type XrpcConfig,
 } from "./config";
 
 describe("config", () => {

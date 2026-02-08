@@ -1,9 +1,9 @@
 import {
-  TYPE_KINDS,
   type Target,
   type TargetInput,
   type TargetOutput,
   type TargetSupport,
+  TYPE_KINDS,
   VALIDATION_KINDS,
   validateSupport,
 } from "@xrpckit/sdk";

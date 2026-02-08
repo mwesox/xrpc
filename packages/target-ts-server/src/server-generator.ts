@@ -51,9 +51,7 @@ export class TsServerGenerator {
     w.n();
 
     w.interface("RpcErrorPayload", (b) => {
-      b.l("message: string;")
-        .l("code?: RpcErrorCode;")
-        .l("data?: unknown;");
+      b.l("message: string;").l("code?: RpcErrorCode;").l("data?: unknown;");
     });
 
     w.interface("RpcRequest", (b) => {
@@ -64,15 +62,11 @@ export class TsServerGenerator {
     });
 
     w.interface("RpcResponse", (b) => {
-      b.l("id?: RpcId;")
-        .l("result?: unknown;")
-        .l("error?: RpcErrorPayload;");
+      b.l("id?: RpcId;").l("result?: unknown;").l("error?: RpcErrorPayload;");
     });
 
     w.interface("RpcErrorFormatInput", (b) => {
-      b.l("code: RpcErrorCode;")
-        .l("message: string;")
-        .l("error: unknown;");
+      b.l("code: RpcErrorCode;").l("message: string;").l("error: unknown;");
     });
 
     w.interface("RpcHandlerOptions", (b) => {
@@ -81,7 +75,9 @@ export class TsServerGenerator {
         .l("formatError?: (input: RpcErrorFormatInput) => RpcErrorPayload;");
     });
 
-    w.l("export interface FetchHandlerOptions<TContext = unknown> extends RpcHandlerOptions {")
+    w.l(
+      "export interface FetchHandlerOptions<TContext = unknown> extends RpcHandlerOptions {",
+    )
       .i()
       .l("getContext?: (request: Request) => Promise<TContext> | TContext;")
       .u()
@@ -96,8 +92,7 @@ export class TsServerGenerator {
   }
 
   private generateHandlers(contract: ContractDefinition, w: TsBuilder): void {
-    w.l("export interface Handlers<TContext = unknown> {")
-      .i();
+    w.l("export interface Handlers<TContext = unknown> {").i();
 
     for (const endpoint of contract.endpoints) {
       const inputType = this.getTypeName(endpoint, "Input");
@@ -207,7 +202,9 @@ export class TsServerGenerator {
       .l("const validateOutputs = options.validateOutputs !== false;")
       .l("const formatError = options.formatError;")
       .n()
-      .l("return async (request: RpcRequest, context: TContext): Promise<RpcResponse> => {")
+      .l(
+        "return async (request: RpcRequest, context: TContext): Promise<RpcResponse> => {",
+      )
       .i()
       .l("const id = request?.id ?? null;")
       .l("if (!request || typeof request !== 'object') {")
@@ -325,16 +322,19 @@ export class TsServerGenerator {
       .u()
       .l("}")
       .n()
-      .l("const context = getContext ? await getContext(request) : (undefined as TContext);")
+      .l(
+        "const context = getContext ? await getContext(request) : (undefined as TContext);",
+      )
       .l("const response = await handle(payload, context);")
-      .l("const status = response.error ? mapErrorCodeToStatus(response.error.code) : 200;")
+      .l(
+        "const status = response.error ? mapErrorCodeToStatus(response.error.code) : 200;",
+      )
       .l("return Response.json(response, { status });")
       .u()
       .l("};")
       .u()
       .l("}")
       .n();
-
   }
 
   private getSchemaName(

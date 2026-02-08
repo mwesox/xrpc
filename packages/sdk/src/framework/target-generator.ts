@@ -1,7 +1,3 @@
-import type {
-  GeneratedFiles,
-  GeneratorConfig,
-} from "../codegen/base-generator";
 import { BaseCodeGenerator } from "../codegen/base-generator";
 import type { ContractDefinition, TypeReference } from "../parser/contract";
 import type { TypeMapperBase } from "./type-mapper";

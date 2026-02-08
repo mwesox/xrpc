@@ -78,17 +78,19 @@ export function sanitizeSwiftIdentifier(name: string): string {
 }
 
 export function toLowerCamelCase(input: string): string {
-  const cleaned = input
-    .replace(/[^A-Za-z0-9]+/g, " ")
-    .trim();
+  const cleaned = input.replace(/[^A-Za-z0-9]+/g, " ").trim();
 
   if (!cleaned) return "value";
 
   const parts = cleaned.split(/\s+/);
   const first = parts[0].toLowerCase();
-  const rest = parts.slice(1).map((part) =>
-    part.length > 0 ? part[0].toUpperCase() + part.slice(1).toLowerCase() : "",
-  );
+  const rest = parts
+    .slice(1)
+    .map((part) =>
+      part.length > 0
+        ? part[0].toUpperCase() + part.slice(1).toLowerCase()
+        : "",
+    );
   return [first, ...rest].join("");
 }
 

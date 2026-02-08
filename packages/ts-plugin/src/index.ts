@@ -1,8 +1,5 @@
 import type tsModule from "typescript/lib/tsserverlibrary";
-import {
-  findDeepestNodeAtPosition,
-  resolveXrpcDefinitions,
-} from "./core";
+import { findDeepestNodeAtPosition, resolveXrpcDefinitions } from "./core";
 
 function init(modules: { typescript: typeof tsModule }) {
   const ts = modules.typescript;

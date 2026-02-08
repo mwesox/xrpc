@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { z } from "zod";
-import type { ValidationRules } from "./contract";
 import { extractTypeInfo, extractValidationRules } from "./zod-extractor";
 
 describe("extractValidationRules", () => {

@@ -54,9 +54,10 @@ export class TsClientGenerator {
     return w.toString();
   }
 
-  private bucketEndpoints(
-    contract: ContractDefinition,
-  ): { flat: Endpoint[]; groups: Record<string, Endpoint[]> } {
+  private bucketEndpoints(contract: ContractDefinition): {
+    flat: Endpoint[];
+    groups: Record<string, Endpoint[]>;
+  } {
     const flat: Endpoint[] = [];
     const groups: Record<string, Endpoint[]> = {};
 

@@ -1,8 +1,8 @@
 import {
-  type TypeKind,
-  type ValidationKind,
   isTypeKind,
   isValidationKind,
+  type TypeKind,
+  type ValidationKind,
 } from "./framework/types";
 import type {
   ContractDefinition,

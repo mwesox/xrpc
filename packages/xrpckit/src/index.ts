@@ -1,15 +1,15 @@
+export { type EndpointDefinition, mutation, query } from "./endpoint";
 export {
-  createRouter,
-  group,
   createEndpoint,
+  createRouter,
+  type EndpointEntry,
+  type EndpointGroup,
   GROUP_NAME,
   getRouterMiddleware,
-  type RouterDefinition,
-  type EndpointGroup,
-  type EndpointEntry,
-  type RouterEntry,
+  group,
   type Middleware,
   type RouterConfig,
+  type RouterDefinition,
+  type RouterEntry,
 } from "./router";
-export { query, mutation, type EndpointDefinition } from "./endpoint";
 export type { InferInput, InferOutput } from "./types";

@@ -1,18 +1,12 @@
 import { beforeEach, describe, expect, it } from "bun:test";
-import type { TypeReference } from "../parser/contract";
 import { TypeMapperBase } from "./type-mapper";
+import type { TypeMapping, ValidationMapping } from "./types";
 import {
-  TYPE_KINDS,
-  VALIDATION_KINDS,
   getValidationsForType,
   isTypeKind,
   isValidationKind,
-} from "./types";
-import type {
-  TypeContext,
-  TypeMapping,
-  ValidationContext,
-  ValidationMapping,
+  TYPE_KINDS,
+  VALIDATION_KINDS,
 } from "./types";
 import { UtilityCollector } from "./utility-collector";
 import { ValidationMapperBase } from "./validation-mapper";
@@ -242,11 +236,11 @@ describe("TypeMapperBase", () => {
         }
         return { type: `${ctx.typeRef.baseType} | null` };
       },
-      union: (ctx) => ({ type: "union" }),
-      enum: (ctx) => ({ type: "enum" }),
+      union: (_ctx) => ({ type: "union" }),
+      enum: (_ctx) => ({ type: "enum" }),
       literal: (ctx) => ({ type: `literal(${ctx.typeRef.literalValue})` }),
-      record: (ctx) => ({ type: "Record" }),
-      tuple: (ctx) => ({ type: "tuple" }),
+      record: (_ctx) => ({ type: "Record" }),
+      tuple: (_ctx) => ({ type: "tuple" }),
       date: () => ({ type: "Date" }),
     };
   }

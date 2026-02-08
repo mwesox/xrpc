@@ -1,69 +1,66 @@
 // Parser exports
-export { parseContract } from "./parser";
-export type {
-  ContractDefinition,
-  Router,
-  EndpointGroup,
-  Endpoint,
-  TypeDefinition,
-  Property,
-  ValidationRules,
-  TypeReference,
-  MiddlewareDefinition,
-} from "./parser";
 
 // Codegen exports
 export { CodeWriter } from "./codegen/code-writer";
-export { toPascalCase, toCamelCase, toSnakeCase } from "./codegen/utils";
-
+export { toCamelCase, toPascalCase, toSnakeCase } from "./codegen/utils";
+// Framework types
+export type {
+  ContractIssue,
+  ContractValidationResult,
+  GeneratedUtility,
+  TypeContext,
+  TypeHandler,
+  TypeKind,
+  TypeMapping,
+  TypeResult,
+  ValidationContext,
+  ValidationHandler,
+  ValidationKind,
+  ValidationMapping,
+  ValidationResult,
+} from "./framework";
 // Framework exports - for building target generators
 export {
-  // Constants
-  TYPE_KINDS,
-  VALIDATION_KINDS,
-  STRING_VALIDATIONS,
-  NUMBER_VALIDATIONS,
   ARRAY_VALIDATIONS,
+  createNoOpValidationHandler,
+  // Helpers
+  createUnsupportedTypeHandler,
+  createUnsupportedValidationHandler,
+  getValidationsForType,
   // Type guards
   isTypeKind,
   isValidationKind,
-  getValidationsForType,
+  NUMBER_VALIDATIONS,
+  STRING_VALIDATIONS,
+  // Constants
+  TYPE_KINDS,
   // Base classes
   TypeMapperBase,
-  ValidationMapperBase,
   UtilityCollector,
-  // Helpers
-  createUnsupportedTypeHandler,
-  createNoOpValidationHandler,
-  createUnsupportedValidationHandler,
+  VALIDATION_KINDS,
+  ValidationMapperBase,
 } from "./framework";
-
+export type {
+  ContractDefinition,
+  Endpoint,
+  EndpointGroup,
+  MiddlewareDefinition,
+  Property,
+  Router,
+  TypeDefinition,
+  TypeReference,
+  ValidationRules,
+} from "./parser";
+export { parseContract } from "./parser";
 // Target API (simple interface for code generation)
 export {
-  type Diagnostic,
-  type GeneratedFile,
-  type TargetInput,
-  type TargetOutput,
-  type Target,
-  type TargetSupport,
   type ContractUsage,
   collectContractUsage,
+  type Diagnostic,
+  type GeneratedFile,
+  type Target,
+  type TargetInput,
+  type TargetOutput,
+  type TargetSupport,
   validateSupport,
 } from "./target";
-
-// Framework types
-export type {
-  TypeKind,
-  ValidationKind,
-  TypeContext,
-  ValidationContext,
-  GeneratedUtility,
-  TypeResult,
-  ValidationResult,
-  TypeHandler,
-  ValidationHandler,
-  TypeMapping,
-  ValidationMapping,
-  ContractIssue,
-  ContractValidationResult,
-} from "./framework";

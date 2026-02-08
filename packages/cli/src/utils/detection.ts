@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
-import { readFile, readdir, stat } from "node:fs/promises";
-import { basename, dirname, join } from "node:path";
+import { readdir, readFile, stat } from "node:fs/promises";
+import { basename, join } from "node:path";
 
 // =============================================================================
 // TYPES

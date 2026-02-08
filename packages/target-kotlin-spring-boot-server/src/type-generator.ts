@@ -5,7 +5,6 @@ import type {
   TypeReference,
   ValidationRules,
 } from "@xrpckit/sdk";
-import { toPascalCase } from "@xrpckit/sdk";
 import { KotlinBuilder } from "./kotlin-builder";
 import { KotlinTypeCollector } from "./type-collector";
 import { KotlinTypeMapper } from "./type-mapper";

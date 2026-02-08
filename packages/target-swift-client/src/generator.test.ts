@@ -1,7 +1,7 @@
+import { describe, expect, it } from "bun:test";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "bun:test";
 import type { ContractDefinition, TypeReference } from "@xrpckit/sdk";
 import { goTarget } from "../../target-go-server/src/generator";
 import { swiftClientTarget } from "./generator";
@@ -186,7 +186,9 @@ describe("swift-client target", () => {
     expect(clientContent).toContain(
       "public func ping(_ input: PingInput) async throws -> PingOutput",
     );
-    expect(clientContent).toContain('try await client.call("ping", params: input)');
+    expect(clientContent).toContain(
+      'try await client.call("ping", params: input)',
+    );
     expect(clientContent).toContain(
       "public func hello(_ input: GreetingInput) async throws -> GreetingOutput",
     );

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { readFileSync } from "node:fs";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import * as ts from "typescript";
@@ -35,7 +35,10 @@ function createProgram(rootNames: string[]): ts.Program {
   });
 }
 
-function getSpanText(program: ts.Program, definition: ts.DefinitionInfo): string {
+function getSpanText(
+  program: ts.Program,
+  definition: ts.DefinitionInfo,
+): string {
   const sourceText =
     program.getSourceFile(definition.fileName)?.text ??
     readFileSync(definition.fileName, "utf-8");

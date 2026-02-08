@@ -100,7 +100,7 @@ export class KotlinServerGenerator {
     for (const endpoint of contract.endpoints) {
       const fn = endpointFunctionName(endpoint.fullName);
       const caseFn = `handle${fn.charAt(0).toUpperCase()}${fn.slice(1)}`;
-      w.l(`\"${escapeKotlinString(endpoint.fullName)}\" -> ${caseFn}(request)`);
+      w.l(`"${escapeKotlinString(endpoint.fullName)}" -> ${caseFn}(request)`);
     }
     w.l("else -> methodNotFound(request.id, method)");
     w.u().l("}");
