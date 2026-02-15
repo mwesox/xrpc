@@ -1,6 +1,6 @@
 {
   "name": "@xrpckit/target-swift-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Swift client code generator for xRPC - generates Codable models and API clients for iOS",
   "type": "module",
   "license": "MIT",
@@ -14,7 +14,16 @@
     "url": "https://github.com/mwesox/xrpc/issues"
   },
   "homepage": "https://github.com/mwesox/xrpc#readme",
-  "keywords": ["xrpc", "rpc", "swift", "ios", "client", "codegen", "api", "type-safe"],
+  "keywords": [
+    "xrpc",
+    "rpc",
+    "swift",
+    "ios",
+    "client",
+    "codegen",
+    "api",
+    "type-safe"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -35,7 +44,7 @@
     "build": "tsup src/index.ts --format esm --dts --clean"
   },
   "dependencies": {
-    "@xrpckit/sdk": "^0.0.2"
+    "@xrpckit/sdk": "^0.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

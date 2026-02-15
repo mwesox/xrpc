@@ -1,6 +1,6 @@
 {
   "name": "@xrpckit/target-kotlin-spring-boot-server",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Kotlin Spring Boot server code generator for xRPC",
   "type": "module",
   "license": "MIT",
@@ -44,7 +44,7 @@
     "build": "tsup src/index.ts --format esm --dts --clean"
   },
   "dependencies": {
-    "@xrpckit/sdk": "^0.0.2"
+    "@xrpckit/sdk": "^0.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

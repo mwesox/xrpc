@@ -1,6 +1,6 @@
 {
   "name": "@xrpckit/sdk",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "SDK for building xRPC target generators - includes parser and codegen utilities",
   "type": "module",
   "license": "MIT",
@@ -14,7 +14,18 @@
     "url": "https://github.com/mwesox/xrpc/issues"
   },
   "homepage": "https://github.com/mwesox/xrpc#readme",
-  "keywords": ["xrpc", "rpc", "typescript", "sdk", "parser", "codegen", "code-generation", "zod", "api", "type-safe"],
+  "keywords": [
+    "xrpc",
+    "rpc",
+    "typescript",
+    "sdk",
+    "parser",
+    "codegen",
+    "code-generation",
+    "zod",
+    "api",
+    "type-safe"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -36,7 +47,7 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "xrpckit": "^0.0.2",
+    "xrpckit": "^0.0.3",
     "typescript": "^5.0.0",
     "zod": "^4.0.0"
   },

@@ -1,6 +1,6 @@
 {
   "name": "xrpckit",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Type-safe, cross-platform RPC framework - define API contracts with Zod schemas",
   "type": "module",
   "license": "MIT",
@@ -14,7 +14,16 @@
     "url": "https://github.com/mwesox/xrpc/issues"
   },
   "homepage": "https://github.com/mwesox/xrpc#readme",
-  "keywords": ["xrpc", "rpc", "typescript", "zod", "schema", "api", "type-safe", "contract"],
+  "keywords": [
+    "xrpc",
+    "rpc",
+    "typescript",
+    "zod",
+    "schema",
+    "api",
+    "type-safe",
+    "contract"
+  ],
   "publishConfig": {
     "access": "public"
   },

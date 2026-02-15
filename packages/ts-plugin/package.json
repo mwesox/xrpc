@@ -1,6 +1,6 @@
 {
   "name": "@xrpckit/ts-plugin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "TypeScript language service plugin for xRPC go-to-definition",
   "type": "commonjs",
   "license": "MIT",
