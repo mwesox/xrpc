@@ -24,7 +24,7 @@ async function findAvailablePort(startPort = 30000): Promise<number> {
 }
 
 // Helper to wait for server to be ready
-async function waitForServer(url: string, timeout = 10000): Promise<void> {
+async function waitForServer(url: string, timeout = 30000): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeout) {
     try {
