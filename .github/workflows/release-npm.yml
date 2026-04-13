@@ -108,7 +108,7 @@ jobs:
 
       - name: Create GitHub Release
         if: ${{ inputs.dry_run == false }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.run_tag.outputs.run_tag }}
           name: npm release ${{ steps.run_tag.outputs.run_tag }}
