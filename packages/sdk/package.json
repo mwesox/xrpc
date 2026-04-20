@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "xrpckit": "^0.0.3",
-    "typescript": "^5.0.0",
+    "typescript": "^6.0.3",
     "zod": "^4.0.0"
   },
   "devDependencies": {
